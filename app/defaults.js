@@ -209,6 +209,7 @@ window.CHURCH_DEFAULTS = {
     videoFile: '',          // để trống = video nhà thờ mặc định
     warmTint: 0.18,
     showGuides: false,
+    layoutLocked: false,    // khóa bố cục: không kéo thả/chỉnh vị trí, cỡ các bảng
     title: '', showTitle: false,
     geometry: {
       // vị trí mép trên lưng ghế (px, khung 1080x1920) đo từ video, hàng 0 sát bục

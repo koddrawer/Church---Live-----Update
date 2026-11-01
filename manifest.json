@@ -1,9 +1,9 @@
 {
-  "version": "1.0.7",
-  "notes": "Băng chúc phúc không che hình Chúa (1 băng/lượt ở trên cùng), chỉnh bố cục 2 bảng bằng chuột",
+  "version": "1.0.8",
+  "notes": "Thêm nút khóa bố cục",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T22:04:59.666Z",
+  "date": "2026-11-01T22:07:32.867Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32949,
-      "sha256": "02cbec0a0fdd1be6777c24f98a8933bf4ad3053094c17fe15ac46e67d56bc54e"
+      "size": 33052,
+      "sha256": "850abf8bc1f1278c3a95d787b8238e83b4a4409972fa39cd7977db735c0113fa"
     },
     {
       "path": "fonts.css",
@@ -299,13 +299,13 @@
     },
     {
       "path": "panel.html",
-      "size": 31182,
-      "sha256": "7180cdfe900db7fce579837994fb8dfaa2bce7ea4e5255950eaf579d48440f64"
+      "size": 31243,
+      "sha256": "e7d3181ab7a5ee113396c73a9ad5a778454d255367b0928f2e2cd6e92c083b73"
     },
     {
       "path": "panel.js",
-      "size": 21293,
-      "sha256": "ee36c3bcdc3e3e80e44d31965bb9279bc1e1f3709b962bec34776e4687f19927"
+      "size": 22412,
+      "sha256": "e30e5a3612045d926411d3fceefe69c4b2184702d1c0c7ccb07421f72142ea5b"
     },
     {
       "path": "slicer.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 78374,
-      "sha256": "21dad2b9c5e2c8d68650246bf0dc26e212f64f19a9a0b8a8859a8bf4427bcdad"
+      "size": 78623,
+      "sha256": "a9564cc8fc825402151debe9840af9cf23c7e02b90b9cab57cd016f53735bd90"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "5efb4932b29332cf07124c163d406f7c2fd2666151f3c1955c8ab836f6e240b7"
+      "sha256": "b67289fc5276feeb242ae61764f3fcf26cc94dcf9084b2fc684c523ba02fb6ca"
     }
   ]
 }

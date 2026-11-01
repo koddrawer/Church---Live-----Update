@@ -40,6 +40,7 @@ function fillInputs() {
   loadTexts();
   if (document.activeElement !== $('#blessList')) $('#blessList').value = (CFG.donate.blessSpeeches || (CFG.audio.sermonLang === 'en' ? BLESSINGS_EN : BLESSINGS_VI)).join('\n');
   renderTiers();
+  applyLock();
 }
 function renderTiers() {
   const box = $('#tiers'); box.innerHTML = '';
@@ -154,8 +155,19 @@ $('#btnMusicClear').onclick = async () => { await save('audio.musicFile', ''); f
 
 // ---------- scene ----------
 let editOn = false;
-$('#btnEdit').onclick = () => { editOn = !editOn; api.toStage({ type: 'edit-layout', on: editOn }); };
-api.onConfig((c) => { raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
+$('#btnEdit').onclick = () => { if (CFG.scene.layoutLocked) return; editOn = !editOn; api.toStage({ type: 'edit-layout', on: editOn }); };
+// các ô chỉnh vị trí/kích thước bị khóa cùng
+const LAYOUT_KEYS = /^(subtitles\.(x|y|w|h|scale|fontSize)|greet\.(x|y|w|h|scale|fontSize)|donate\.(bannerY|bannerScale|bannerWidth|bannerAvatarSize)|scene\.geometry\.)/;
+function applyLock() {
+  const on = !!CFG.scene.layoutLocked;
+  $('#btnLock').textContent = on ? '🔒 Đã khóa bố cục (bấm để mở)' : '🔓 Khóa bố cục';
+  $('#btnLock').classList.toggle('p', on);
+  $('#btnEdit').disabled = on; $('#btnEdit').style.opacity = on ? 0.4 : 1;
+  for (const el of $$('[data-k]')) if (LAYOUT_KEYS.test(el.dataset.k)) { el.disabled = on; el.style.opacity = on ? 0.45 : 1; }
+  if ($('#btnGeoReset')) { $('#btnGeoReset').disabled = on; $('#btnGeoReset').style.opacity = on ? 0.4 : 1; }
+}
+$('#btnLock').onclick = async () => { const on = !CFG.scene.layoutLocked; if (on && editOn) { editOn = false; api.toStage({ type: 'edit-layout', on: false }); } await save('scene.layoutLocked', on); applyLock(); log(on ? 'Đã khóa bố cục' : 'Đã mở khóa bố cục'); };
+api.onConfig((c) => { setTimeout(applyLock, 0); raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
 $('#btnVideo').onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }] }); if (f) { await save('scene.videoFile', f); fillInputs(); } };
 $('#btnVideoClear').onclick = async () => { await save('scene.videoFile', ''); fillInputs(); };
 $('#btnGeoReset').onclick = async () => { if (raw.scene) delete raw.scene.geometry; CFG = deepMerge(CHURCH_DEFAULTS, raw); await api.setConfig({ scene: raw.scene || {} }); fillInputs(); };
