@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Church Live — Màn hình 9:16</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+  html,body{margin:0;height:100%;background:#000;overflow:hidden}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{display:block;height:100%;aspect-ratio:9/16;max-width:100%;object-fit:contain}
+  #hint{position:fixed;left:8px;bottom:6px;font:12px BeVN,sans-serif;color:#fff8;pointer-events:none;transition:opacity 1s}
+  video{display:none}
+</style>
+</head>
+<body>
+<div id="wrap"><canvas id="c" width="1080" height="1920"></canvas></div>
+<div id="hint">F11: toàn màn hình</div>
+<video id="v" muted playsinline loop></video>
+<script src="defaults.js"></script>
+<script src="stage.js"></script>
+</body>
+</html>
