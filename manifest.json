@@ -1,9 +1,9 @@
 {
-  "version": "1.0.9",
-  "notes": "Thêm nút khóa toàn bộ bảng điều khiển",
+  "version": "1.0.10",
+  "notes": "Video chúc phúc phát ngẫu nhiên kiểu rút thăm, không trùng liền",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T22:12:57.904Z",
+  "date": "2026-11-01T22:43:09.007Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -299,8 +299,8 @@
     },
     {
       "path": "panel.html",
-      "size": 31822,
-      "sha256": "0814b0b69dda42b4b7d70423b30d0bf484ea89bbffdf3a36acde971565ea36f0"
+      "size": 32012,
+      "sha256": "9f10e11f560eb83f05b03b2bd4d844e76b8d8a6e9a7da1f5c44c1bc080fb3b0a"
     },
     {
       "path": "panel.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 78711,
-      "sha256": "b69d692da06f6243f0f32189eb3273b3adc71bad871467d4064bb719873e0801"
+      "size": 79371,
+      "sha256": "ed46f88c36be2bb776fde11d0c5bc465868c3df5a948c66efbfe9284f143a559"
     },
     {
       "path": "version.json",
-      "size": 23,
-      "sha256": "f570564d1705c74207224a1e3f89c8ff8e4062261a72d9cd852745c19fdcebf0"
+      "size": 24,
+      "sha256": "bc5aa1f946fa49c025b72ed7fcd050801e704dc5fa353356a1b1034784b18313"
     }
   ]
 }

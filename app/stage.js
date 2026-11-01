@@ -726,10 +726,11 @@ function tierFor(total) {
   ts.sort((a, b) => b.min - a.min);
   return ts[0] || null;
 }
-const vidEl = document.createElement('video'); vidEl.playsInline = true; vidEl.preload = 'auto';
+const vidEl = document.createElement('video'); vidEl.playsInline = true; vidEl.preload = 'auto'; window.__vidEl = vidEl;
 const vidGain = AC.createGain(); vidGain.connect(master);
 try { AC.createMediaElementSource(vidEl).connect(vidGain); } catch {}
 let vq = [], vcur = null;
+const videoBags = new Map(), lastVideo = new Map();
 const videoPlaying = () => !!vcur;
 let giftSeq = 0;
 function enqueueVideo(ev, tier, seq) {
@@ -759,7 +760,16 @@ async function stepVideo() {
   if (queue.some((q) => (q.seq ?? 0) < vq[0].seq)) return;
   const it = vq.shift();
   const files = it.tier.videos || []; if (!files.length) return;
-  const f = files[Math.floor(Math.random() * files.length)];
+  // xáo trộn kiểu "rút thăm": phát hết lượt các video rồi mới lặp lại, không phát trùng 2 lần liền
+  const key = it.tier.min + '|' + files.join('|');
+  let bag = videoBags.get(key);
+  if (!bag || !bag.length) {
+    bag = [...files]; for (let i = bag.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [bag[i], bag[j]] = [bag[j], bag[i]]; }
+    const lastF = lastVideo.get(it.tier.min);
+    if (bag.length > 1 && bag[bag.length - 1] === lastF) [bag[0], bag[bag.length - 1]] = [bag[bag.length - 1], bag[0]];
+    videoBags.set(key, bag);
+  }
+  const f = bag.pop(); lastVideo.set(it.tier.min, f);
   vq.loading = true;
   vidEl.src = absUrl(f); vidEl.currentTime = 0; vidEl.loop = false;
   vidGain.gain.value = clamp(CFG.donate.videoVolume ?? 1, 0, 2);
