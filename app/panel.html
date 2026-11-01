@@ -92,8 +92,14 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
         <button class="b" data-sim="join10">+10 người vào</button>
       </div>
       <div class="row">
-        <button class="b p" data-sim="gift">Donate (người mới)</button>
-        <button class="b p" data-sim="giftSeated">Donate (người đang ngồi)</button>
+        <button class="b p" data-sim="gift">Donate 1 xu (người mới)</button>
+        <button class="b p" data-sim="giftSeated">Donate 1 xu (người đang ngồi)</button>
+      </div>
+      <div class="row">
+        <button class="b p" data-sim="g5">Donate 5 xu</button>
+        <button class="b p" data-sim="g10">Donate 10 xu</button>
+        <button class="b p" data-sim="g30">Donate 30 xu</button>
+        <button class="b" data-sim="g1x5">5 người donate liên tiếp</button>
       </div>
       <div class="row"><button class="b d" data-sim="clear">Xoá người có tên</button><button class="b" data-sim="next">Bỏ qua câu giảng</button></div>
     </div>
@@ -152,7 +158,8 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Tốc độ bước (khung/giây)</label><input type="range" min="1" max="8" step="0.1" data-k="donate.walkFps"><span class="val"></span></div>
       <div class="row"><label>Độ to người đi</label><input type="range" min="0.6" max="1.6" step="0.02" data-k="donate.walkerScale"><span class="val"></span></div>
       <div class="row"><label>Phóng to khi gần bục</label><input type="range" min="1" max="2.5" step="0.05" data-k="donate.altarBoost"><span class="val"></span></div>
-      <div class="row"><label>Tối đa cùng lúc</label><input type="number" min="1" max="3" data-k="donate.maxConcurrent"></div>
+      <div class="row"><label>Người sau bắt đầu đi khi người trước đi được</label><input type="range" min="0.2" max="1" step="0.05" data-k="donate.nextAtFrac"><span class="val"></span></div>
+      <div class="row"><label>Tối đa cùng lúc trên màn</label><input type="number" min="1" max="10" data-k="donate.maxConcurrent"></div>
     </div>
     <div class="card">
       <h3>Chúc phúc</h3>
@@ -171,6 +178,22 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Dòng chính</label><input type="text" data-k="donate.banner" style="flex:1"></div>
       <div class="row"><label>Dòng phụ</label><input type="text" data-k="donate.bannerSub" style="flex:1"></div>
       <p class="hint">Biến: {name} tên, {gift} tên quà, {count} số lượng.</p>
+    </div>
+    <div class="card">
+      <h3>Lời chúc của cha sứ</h3>
+      <div class="row"><label>Cách chọn lời chúc</label><select data-k="donate.blessSpeechMode"><option value="random">Ngẫu nhiên trong danh sách</option><option value="fixed">Luôn dùng câu “Lời chúc” ở trên</option></select></div>
+      <textarea id="blessList" style="min-height:150px"></textarea>
+      <div class="row"><button class="b p" id="btnSaveBless">Lưu danh sách</button><button class="b" id="btnResetBless">Khôi phục mặc định</button></div>
+      <p class="hint">Mỗi dòng một lời chúc, dùng {name} cho tên người donate.</p>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Video chúc phúc theo mức xu</h3>
+      <div id="tiers"></div>
+      <div class="row"><label>Chiếu video xong mới đi lên bục</label><input type="checkbox" data-k="donate.walkAfterVideo"></div>
+      <div class="row"><label>Âm lượng video</label><input type="range" min="0" max="2" step="0.05" data-k="donate.videoVolume"><span class="val"></span></div>
+      <div class="row"><label>Khung video</label><select data-k="donate.videoFit"><option value="cover">Phủ kín màn 9:16</option><option value="contain">Giữ nguyên khung (viền đen)</option></select></div>
+      <div class="row"><label>Vị trí dòng tên (cách đáy, px)</label><input type="range" min="80" max="900" step="5" data-k="donate.videoBarBottom"><span class="val"></span></div>
+      <p class="hint">Tổng xu của 1 lần tặng (gồm cả combo) ≥ mức nào thì chiếu video mức cao nhất đạt được. Mức chưa có video thì chỉ đi lên bục như 1 xu. Nhiều video trong 1 mức sẽ chọn ngẫu nhiên. Biến: {name} {gift} {count}.</p>
     </div>
   </div>
 </section>
@@ -197,14 +220,17 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Tốc độ</label><select data-k="audio.rate"><option>-20%</option><option>-15%</option><option>-10%</option><option>-5%</option><option>+0%</option><option>+5%</option><option>+10%</option></select></div>
       <div class="row"><label>Cao độ</label><select data-k="audio.pitch"><option>-12Hz</option><option>-8Hz</option><option>-6Hz</option><option>-3Hz</option><option>+0Hz</option><option>+3Hz</option></select></div>
       <div class="row"><label>Độ vang nhà thờ</label><input type="range" min="0" max="1" step="0.02" data-k="audio.reverb"><span class="val"></span></div>
-      <div class="row"><label>Nghỉ giữa các đoạn (giây)</label><input type="range" min="0" max="30" step="0.5" data-k="audio.gapSeconds"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các câu (giây)</label><input type="range" min="0" max="3" step="0.05" data-k="audio.sentenceGap"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các đoạn (giây)</label><input type="range" min="0" max="15" step="0.1" data-k="audio.gapSeconds"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các bài (giây)</label><input type="range" min="0" max="30" step="0.5" data-k="audio.sectionGap"><span class="val"></span></div>
+      <div class="row"><label>Đọc cả tiêu đề bài</label><input type="checkbox" data-k="audio.readTitles"></div>
       <div class="row"><label>Phát ngẫu nhiên</label><input type="checkbox" data-k="audio.shuffle"></div>
       <div class="row"><button class="b" id="btnPretts">Tạo trước toàn bộ giọng đọc</button><button class="b" data-sim="next">Câu tiếp</button><button class="b" id="btnRestartSermon">Giảng lại từ đầu</button></div>
       <div class="prog"><i id="prettsBar"></i></div>
       <p class="hint">Giọng Edge TTS cần mạng; lần đầu tạo xong sẽ lưu sẵn trên máy. Nếu lỗi, app tự dùng giọng của Windows (không có vang). Chế độ “file ghi âm”: chép mp3 vào thư mục <b>sermon-audio</b> (nút ở tab Cảnh & nhân vật).</p>
     </div>
     <div class="card">
-      <h3>Bài giảng (mỗi dòng một đoạn)</h3>
+      <h3>Bài giảng (mỗi dòng một đoạn, dòng “# …” là tiêu đề bài)</h3>
       <div class="row"><select id="textLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
         <button class="b p" id="btnSaveTexts">Lưu bài giảng</button><button class="b" id="btnResetTexts">Khôi phục mặc định</button></div>
       <textarea id="sermonTexts"></textarea>
@@ -232,6 +258,18 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Tông màu ấm cho nhân vật</label><input type="range" min="0" max="0.6" step="0.01" data-k="scene.warmTint"><span class="val"></span></div>
       <div class="row"><label>Hiện đường căn hàng ghế</label><input type="checkbox" data-k="scene.showGuides"></div>
       <div class="row"><label>Tiêu đề trên màn</label><input type="checkbox" data-k="scene.showTitle"><input type="text" data-k="scene.title" style="flex:1" placeholder="VD: Thánh lễ trực tuyến"></div>
+    </div>
+    <div class="card">
+      <h3>Phụ đề bài giảng (cho người khiếm thính)</h3>
+      <div class="row"><label>Hiện phụ đề</label><input type="checkbox" data-k="subtitles.enabled"><label style="min-width:0">Hiện tên bài</label><input type="checkbox" data-k="subtitles.showTitle"></div>
+      <div class="row"><label>Cỡ chữ</label><input type="range" min="18" max="56" step="1" data-k="subtitles.fontSize"><span class="val"></span></div>
+      <div class="row"><label>Vị trí X</label><input type="range" min="0" max="900" step="2" data-k="subtitles.x"><span class="val"></span></div>
+      <div class="row"><label>Vị trí Y</label><input type="range" min="0" max="1800" step="2" data-k="subtitles.y"><span class="val"></span></div>
+      <div class="row"><label>Rộng</label><input type="range" min="200" max="1080" step="2" data-k="subtitles.w"><span class="val"></span></div>
+      <div class="row"><label>Cao</label><input type="range" min="120" max="1400" step="2" data-k="subtitles.h"><span class="val"></span></div>
+      <div class="row"><label>Độ đậm nền</label><input type="range" min="0" max="1" step="0.02" data-k="subtitles.bgAlpha"><span class="val"></span></div>
+      <div class="row"><label>Độ mờ câu chưa đọc</label><input type="range" min="0.05" max="1" step="0.01" data-k="subtitles.dimAlpha"><span class="val"></span></div>
+      <p class="hint">Khung 1080×1920. Câu đang đọc sáng vàng, câu chưa đọc mờ.</p>
     </div>
     <div class="card">
       <h3>Căn chỉnh phối cảnh</h3>

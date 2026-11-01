@@ -38,6 +38,38 @@ function fillInputs() {
   $('#musicName').textContent = CFG.audio.musicFile ? CFG.audio.musicFile.split(/[\\/]/).pop() : '(không)';
   $('#videoName').textContent = CFG.scene.videoFile ? CFG.scene.videoFile.split(/[\\/]/).pop() : 'Nhà thờ (mặc định)';
   loadTexts();
+  if (document.activeElement !== $('#blessList')) $('#blessList').value = (CFG.donate.blessSpeeches || (CFG.audio.sermonLang === 'en' ? BLESSINGS_EN : BLESSINGS_VI)).join('\n');
+  renderTiers();
+}
+function renderTiers() {
+  const box = $('#tiers'); box.innerHTML = '';
+  const tiers = CFG.donate.tiers || [];
+  tiers.forEach((t, i) => {
+    const el = document.createElement('div'); el.className = 'card'; el.style.margin = '8px 0'; el.style.background = 'var(--card2)';
+    el.innerHTML = `<div class="row"><b style="color:var(--gold2)">Mức</b><input type="number" min="1" class="tmin" style="width:80px"> xu trở lên <label style="min-width:0;margin-left:12px">Bật</label><input type="checkbox" class="ten"> <label style="min-width:0;margin-left:12px">Đi lên bục sau video</label><input type="checkbox" class="twalk"> <label style="min-width:0;margin-left:12px">Cha sứ đọc lời chúc</label><input type="checkbox" class="tspeak"> <button class="b d tdel" style="margin-left:auto">Xoá mức</button></div>
+      <div class="row"><label>Dòng chữ</label><input type="text" class="ttext" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ (để trống = không)</label><input type="text" class="tsub" style="flex:1" placeholder="vd: đã dâng {gift} ×{count}"></div>
+      <div class="row"><label>Video</label><div class="names tvids" style="flex:1"></div><button class="b tadd">+ Thêm video…</button><button class="b ttest">▶ Thử</button></div>`;
+    $('.tmin', el).value = t.min; $('.ten', el).checked = t.enabled !== false; $('.twalk', el).checked = !!t.walk; $('.tspeak', el).checked = !!t.speak;
+    $('.ttext', el).value = t.text || ''; $('.tsub', el).value = t.sub || '';
+    const vids = $('.tvids', el);
+    if (!(t.videos || []).length) vids.innerHTML = '<span style="opacity:.6">(chưa có video — mức này chỉ đi lên bục)</span>';
+    (t.videos || []).forEach((v, vi) => { const sp = document.createElement('span'); sp.textContent = v.split(/[\\/]/).pop() + '  ✕'; sp.style.cursor = 'pointer'; sp.title = 'Bấm để bỏ'; sp.onclick = () => upd((x) => x.videos.splice(vi, 1)); vids.appendChild(sp); });
+    const upd = async (fn) => { const arr = (CFG.donate.tiers || []).map((x) => ({ ...x, videos: [...(x.videos || [])] })); fn(arr[i], arr); await save('donate.tiers', arr); renderTiers(); };
+    $('.tmin', el).onchange = (e) => upd((x) => x.min = Math.max(1, +e.target.value || 1));
+    $('.ten', el).onchange = (e) => upd((x) => x.enabled = e.target.checked);
+    $('.twalk', el).onchange = (e) => upd((x) => x.walk = e.target.checked);
+    $('.tspeak', el).onchange = (e) => upd((x) => x.speak = e.target.checked);
+    $('.ttext', el).onchange = (e) => upd((x) => x.text = e.target.value);
+    $('.tsub', el).onchange = (e) => upd((x) => x.sub = e.target.value);
+    $('.tdel', el).onclick = () => upd((x, arr) => arr.splice(i, 1));
+    $('.tadd', el).onclick = async () => { const fs = await api.pickFile({ multi: true, filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov', 'mkv'] }] }); if (fs && fs.length) upd((x) => x.videos.push(...fs)); };
+    $('.ttest', el).onclick = () => api.toStage({ type: 'sim-gift', name: $('#simName').value.trim() || undefined, gift: 'Quà thử', count: 1, coins: t.min });
+    box.appendChild(el);
+  });
+  const add = document.createElement('button'); add.className = 'b'; add.textContent = '+ Thêm mức xu';
+  add.onclick = async () => { const arr = [...(CFG.donate.tiers || []), { min: 50, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true }]; await save('donate.tiers', arr); renderTiers(); };
+  box.appendChild(add);
 }
 function showVal(el) { const s = el.nextElementSibling; if (el.type === 'range' && s && s.classList.contains('val')) s.textContent = (+el.value).toFixed(el.step && el.step.includes('.') ? (el.step.split('.')[1].length) : 0); }
 for (const el of $$('[data-k]')) {
@@ -71,6 +103,10 @@ $$('[data-sim]').forEach((b) => b.onclick = () => {
   if (s === 'join10') api.toStage({ type: 'sim-join', n: 10 });
   if (s === 'gift') api.toStage({ type: 'sim-gift', name, gift: 'Hoa hồng', count: 1 });
   if (s === 'giftSeated') api.toStage({ type: 'sim-gift', seated: true, gift: 'Nhẫn', count: 1 });
+  if (s === 'g5') api.toStage({ type: 'sim-gift', name, gift: 'Kem', count: 1, coins: 5 });
+  if (s === 'g10') api.toStage({ type: 'sim-gift', name, gift: 'Nước hoa', count: 1, coins: 10 });
+  if (s === 'g30') api.toStage({ type: 'sim-gift', name, gift: 'Vương miện', count: 1, coins: 30 });
+  if (s === 'g1x5') for (let i = 0; i < 5; i++) api.toStage({ type: 'sim-gift', gift: 'Hoa hồng', count: 1, coins: 1 });
   if (s === 'clear') api.toStage({ type: 'clear' });
   if (s === 'next') api.toStage({ type: 'sermon-next' });
 });
@@ -107,6 +143,8 @@ $('#btnSaveTexts').onclick = () => {
   save($('#textLang').value === 'en' ? 'audio.sermonTextsEn' : 'audio.sermonTextsVi', lines); log('Đã lưu ' + lines.length + ' đoạn giảng');
 };
 $('#btnResetTexts').onclick = () => { save($('#textLang').value === 'en' ? 'audio.sermonTextsEn' : 'audio.sermonTextsVi', null).then(loadTexts); };
+$('#btnSaveBless').onclick = () => { const l = $('#blessList').value.split('\n').map((x) => x.trim()).filter(Boolean); save('donate.blessSpeeches', l); log('Đã lưu ' + l.length + ' lời chúc'); };
+$('#btnResetBless').onclick = () => save('donate.blessSpeeches', null).then(fillInputs);
 $('#btnPretts').onclick = () => { $('#prettsBar').style.width = '0'; api.toStage({ type: 'pretts' }); };
 $('#btnRestartSermon').onclick = () => api.toStage({ type: 'sermon-restart' });
 $('#btnSay').onclick = () => { const t = $('#sayText').value.trim(); if (t) api.toStage({ type: 'speak', text: t }); };

@@ -231,18 +231,57 @@ function speakFallback(text) {
 let ducked = false;
 const cur = { src: null };
 const sermon = { idx: 0, running: false, token: 0, line: '', state: 'idle', usingFallback: false };
+// phụ đề: mục hiện tại, câu của đoạn đang đọc
+const SUB = { title: '', sents: [], cur: -1, changed: 0, scroll: 0 };
 function sermonTexts() {
   const a = CFG.audio;
   return a.sermonLang === 'en' ? (a.sermonTextsEn && a.sermonTextsEn.length ? a.sermonTextsEn : SERMON_EN) : (a.sermonTextsVi && a.sermonTextsVi.length ? a.sermonTextsVi : SERMON_VI);
 }
+// gom đoạn thành các mục theo dòng tiêu đề "# ..."
+function sermonSections() {
+  const secs = []; let cur = null;
+  for (const raw of sermonTexts()) {
+    const t = String(raw || '').trim(); if (!t) continue;
+    if (t.startsWith('#')) { cur = { title: t.replace(/^#+\s*/, ''), paras: [] }; secs.push(cur); }
+    else { if (!cur) { cur = { title: '', paras: [] }; secs.push(cur); } cur.paras.push(t); }
+  }
+  return secs.filter((x) => x.paras.length);
+}
+function splitSentences(p) {
+  const out = String(p).match(/[^.!?…]+(?:[.!?…]+["”’)]*|$)/g) || [p];
+  // gộp mẩu quá ngắn vào câu trước (vd. "Amen.")
+  const res = [];
+  for (const x of out.map((y) => y.trim()).filter(Boolean)) { if (res.length && x.length < 14) res[res.length - 1] += ' ' + x; else res.push(x); }
+  return res;
+}
+// chuyển trích dẫn Kinh Thánh sang cách đọc tự nhiên
+function speakable(t) {
+  if (CFG.audio.sermonLang === 'en') return t.replace(/(\d+):(\d+)[–-](\d+)/g, 'chapter $1, verses $2 to $3').replace(/(\d+):(\d+)/g, 'chapter $1, verse $2');
+  return t.replace(/(\d+):(\d+)[–-](\d+)/g, 'chương $1, câu $2 đến $3').replace(/(\d+):(\d+)/g, 'chương $1, câu $2').replace(/\s[–-]\s/g, ', ').replace(/\(([^)]*)\)/g, ', $1.');
+}
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+async function waitGap(sec, my) { const end = Date.now() + sec * 1000; while (Date.now() < end && sermon.token === my) await sleep(100); }
+async function sayLine(text, my) {
+  let buf = null;
+  try { buf = await ttsBuffer(speakable(text)); if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
+    if (!sermon.usingFallback) logp('Giọng Edge TTS lỗi (' + e.message + '), dùng giọng Windows thay thế', 'warn');
+    sermon.usingFallback = true;
+  }
+  if (sermon.token !== my) return;
+  while (videoPlaying() && sermon.token === my) await sleep(250); // tạm dừng giảng khi chiếu video chúc phúc
+  if (sermon.token !== my) return;
+  sermon.state = 'playing';
+  if (buf) await playBuffer(buf, voiceBus); else await speakFallback(speakable(text));
+}
 async function sermonLoop() {
   const my = ++sermon.token;
   sermon.running = true;
+  let order = null, si = 0;
   while (sermon.token === my) {
-    if (!CFG.audio.sermonEnabled) { sermon.state = 'off'; await sleep(1000); continue; }
+    if (!CFG.audio.sermonEnabled) { sermon.state = 'off'; SUB.sents = []; await sleep(1000); continue; }
     try {
       if (CFG.audio.sermonMode === 'files') {
+        SUB.sents = [];
         const ua = await api.userAssets();
         const files = ua.sermonAudio || [];
         if (!files.length) { sermon.state = 'Chưa có file trong thư mục sermon-audio'; await sleep(3000); continue; }
@@ -250,26 +289,38 @@ async function sermonLoop() {
         sermon.idx = i + 1; sermon.line = files[i]; sermon.state = 'playing';
         const buf = await fileBuffer('church://user/sermon-audio/' + encodeURIComponent(files[i]));
         if (sermon.token !== my) break;
+        while (videoPlaying() && sermon.token === my) await sleep(250);
         await playBuffer(buf, voiceBus);
-      } else {
-        const texts = sermonTexts();
-        if (!texts.length) { await sleep(2000); continue; }
-        const i = CFG.audio.shuffle ? Math.floor(Math.random() * texts.length) : sermon.idx % texts.length;
-        sermon.idx = i + 1; sermon.line = texts[i]; sermon.state = 'loading';
-        ttsBuffer(texts[sermon.idx % texts.length]).catch(() => {}); // tải trước câu sau
-        let buf = null;
-        try { buf = await ttsBuffer(texts[i]); sermon.usingFallback = false; } catch (e) {
-          if (!sermon.usingFallback) logp('Giọng Edge TTS lỗi (' + e.message + '), dùng giọng Windows thay thế', 'warn');
-          sermon.usingFallback = true;
-        }
-        if (sermon.token !== my) break;
-        sermon.state = 'playing';
-        if (buf) await playBuffer(buf, voiceBus); else await speakFallback(texts[i]);
+        await waitGap(CFG.audio.gapSeconds, my);
+        continue;
       }
+      const secs = sermonSections();
+      if (!secs.length) { await sleep(2000); continue; }
+      if (!order || order.length !== secs.length || si >= order.length) {
+        order = secs.map((_, i) => i);
+        if (CFG.audio.shuffle) for (let i = order.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [order[i], order[j]] = [order[j], order[i]]; }
+        if (si >= order.length) si = 0;
+        if (!CFG.audio.shuffle && sermon.idx) si = sermon.idx % secs.length;
+      }
+      const sec = secs[order[si]]; sermon.idx = order[si] + 1; si++;
+      SUB.title = sec.title;
+      if (sec.title && CFG.audio.readTitles) { sermon.line = sec.title; SUB.sents = [sec.title]; SUB.cur = 0; SUB.changed = now(); await sayLine(sec.title, my); await waitGap(0.6, my); }
+      for (const para of sec.paras) {
+        if (sermon.token !== my) break;
+        const sents = splitSentences(para);
+        SUB.sents = sents; SUB.cur = -1; SUB.changed = now(); SUB.scroll = 0;
+        for (let k = 0; k < sents.length && sermon.token === my; k++) {
+          if (!CFG.audio.sermonEnabled) break;
+          ttsBuffer(speakable(sents[k + 1] || '')).catch(() => {}); // tải trước câu sau
+          SUB.cur = k; sermon.line = sents[k]; sermon.state = 'loading';
+          await sayLine(sents[k], my);
+          await waitGap(CFG.audio.sentenceGap, my);
+        }
+        SUB.cur = SUB.sents.length;
+        await waitGap(CFG.audio.gapSeconds, my);
+      }
+      await waitGap(CFG.audio.sectionGap, my);
     } catch (e) { sermon.state = 'error: ' + e.message; await sleep(3000); }
-    sermon.state = 'gap';
-    const gapEnd = Date.now() + CFG.audio.gapSeconds * 1000;
-    while (Date.now() < gapEnd && sermon.token === my) await sleep(200);
   }
 }
 function sermonSkip() { try { cur.src && cur.src.stop(); } catch {} try { speechSynthesis.cancel(); } catch {} }
@@ -279,10 +330,16 @@ let blessChain = Promise.resolve();
 function speakBlessing(text) {
   blessChain = blessChain.then(async () => {
     ducked = true; applyAudio();
-    try { const b = await ttsBuffer(text); await new Promise((res) => { const s = AC.createBufferSource(); s.buffer = b; s.connect(blessBus); s.onended = res; s.start(); }); }
+    try { const b = await ttsBuffer(speakable(text)); await new Promise((res) => { const s = AC.createBufferSource(); s.buffer = b; s.connect(blessBus); s.onended = res; s.start(); }); }
     catch { await speakFallback(text); }
-    await sleep(400); ducked = false; applyAudio();
+    await sleep(400); ducked = videoPlaying(); applyAudio();
   });
+}
+function blessingLine(o) {
+  const d = CFG.donate;
+  let list = d.blessSpeeches && d.blessSpeeches.length ? d.blessSpeeches : (CFG.audio.sermonLang === 'en' ? BLESSINGS_EN : BLESSINGS_VI);
+  const t = d.blessSpeechMode === 'fixed' || !list.length ? d.blessSpeech : list[Math.floor(Math.random() * list.length)];
+  return fmt(t, o);
 }
 
 // ================== HÌNH HỌC CẢNH ==================
@@ -487,31 +544,46 @@ function onGift(ev) {
   if (!assetsReady) return;
   const total = ev.total ?? (ev.diamonds || 0) * (ev.count || 1);
   if (total < CFG.donate.minDiamonds && !ev.sim) return;
+  const tier = tierFor(total);
+  let hold = false;
+  if (tier) { enqueueVideo(ev, tier); hold = !!tier.walk && CFG.donate.walkAfterVideo; if (!tier.walk) { const p0 = findPerson(ev.id); if (p0 && !p0.avatar && ev.avatar) { p0.avatar = ev.avatar; enrichPerson(p0); } return; } }
   // gộp nếu đang đi / đang chờ
   const ex = findPerson(ev.id);
   if (ex && !ex.avatar && ev.avatar) { ex.avatar = ev.avatar; enrichPerson(ex); }
   const w = walkers.find((x) => x.person.id === ev.id && !x.done);
   if (w) { w.gifts.push(ev); w.count += ev.count || 1; if (w.phase === 'bless') { w.blessEnd += 3; pushBanner(w, ev); } return; }
   const q = queue.find((x) => x.id === ev.id);
-  if (q) { q.count += ev.count || 1; return; }
-  queue.push({ ...ev, count: ev.count || 1, at: now() });
+  if (q) { q.count += ev.count || 1; if (hold) q.holdVideo = true; return; }
+  queue.push({ ...ev, count: ev.count || 1, at: now(), holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
 }
 function altarSpots() {
-  const g = G.g; return [g.centerX, g.centerX - g.altarSpread, g.centerX + g.altarSpread];
+  const g = G.g, s = g.altarSpread; return [g.centerX, g.centerX - s, g.centerX + s, g.centerX - 2 * s, g.centerX + 2 * s];
+}
+const APPROACH = ['wait', 'stand', 'side', 'turn', 'up'];
+function walkProgress(w) {
+  if (w.phase === 'wait') return 0;
+  if (!APPROACH.includes(w.phase)) return 1;
+  return clamp((now() - w.t0) / (w.tStand + w.tSide + w.tTurn + w.tUp), 0, 1);
 }
 function processQueue() {
   if (!queue.length) return;
-  const active = walkers.filter((w) => !w.done).length;
-  if (active >= CFG.donate.maxConcurrent) return;
-  const usedSpots = new Set(walkers.filter((w) => !w.done && w.spot != null).map((w) => w.spot));
+  const act = walkers.filter((w) => !w.done);
+  if (act.length >= CFG.donate.maxConcurrent) return;
+  // người sau bắt đầu đi khi người trước đã đi gần tới bục
+  if (act.some((w) => APPROACH.includes(w.phase) && walkProgress(w) < CFG.donate.nextAtFrac)) return;
+  // chỗ quỳ còn trống (người đã rời bục thì trả chỗ)
+  const usedSpots = new Set(act.filter((w) => w.spot != null && !['down', 'vanish'].includes(w.phase)).map((w) => w.spot));
   const spot = altarSpots().findIndex((_, i) => !usedSpots.has(i));
   if (spot < 0) return;
-  const ev = queue.shift();
+  const qi = queue.findIndex((q) => !q.holdVideo);
+  if (qi < 0) return;
+  const ev = queue.splice(qi, 1)[0];
   let p = findPerson(ev.id);
   if (p && p.state !== 'seated') { queue.push(ev); return; }
   let delay = 0.2;
   if (!p) { p = seatPerson({ id: ev.id, name: ev.name, avatar: ev.avatar }); if (!p) return; p.fadeIn = 0.5; delay = 1.0; }
   startWalker(p, ev, spot, delay);
+  const nw = walkers[walkers.length - 1]; if (nw && nw.ev === ev) nw.noSpeech = !!ev.noSpeech;
 }
 
 function startWalker(p, ev, spot, delay) {
@@ -555,6 +627,7 @@ function update(dt) {
   people = people.filter((p) => { if (p.leaving && p.alpha <= 0) { if (p.slot.occupied === p) p.slot.occupied = null; return false; } return true; });
   ensureFillers();
   processQueue();
+  stepVideo();
   for (const w of walkers) stepWalker(w, t, dt);
   walkers = walkers.filter((w) => !w.done);
   fx = fx.filter((f) => (f.life -= dt) > 0);
@@ -625,7 +698,7 @@ function finishPerson(w, reseat) {
 function startBlessing(w) {
   chime();
   const ev = w.ev;
-  if (CFG.donate.speakBlessing) speakBlessing(fmt(CFG.donate.blessSpeech, { name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
+  if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
   pushBanner(w, ev);
   for (let i = 0; i < 40; i++) spawnSparkle(w, true);
   toPanel({ type: 'blessed', name: w.person.name, gift: ev.gift, count: w.count });
@@ -641,6 +714,145 @@ function spawnSparkle(w, burst) {
   fx.push({ x: w.x + rnd(-h * 0.35, h * 0.35), y: foot - rnd(0, h * 0.9), vx: rnd(-12, 12), vy: burst ? rnd(-90, -20) : rnd(-40, -10), life: rnd(1.2, 2.6), max: 2.6, r: rnd(2, 5.5) });
 }
 function cleanName(n) { n = String(n || '').trim(); const m = CFG.seating.nameMaxChars; return [...n].length > m ? [...n].slice(0, m - 1).join('') + '…' : n; }
+
+// ================== VIDEO CHÚC PHÚC THEO MỨC XU ==================
+function tierFor(total) {
+  const ts = (CFG.donate.tiers || []).filter((t) => t && t.enabled !== false && (t.videos || []).length && total >= t.min);
+  ts.sort((a, b) => b.min - a.min);
+  return ts[0] || null;
+}
+const vidEl = document.createElement('video'); vidEl.playsInline = true; vidEl.preload = 'auto';
+const vidGain = AC.createGain(); vidGain.connect(master);
+try { AC.createMediaElementSource(vidEl).connect(vidGain); } catch {}
+let vq = [], vcur = null;
+const videoPlaying = () => !!vcur;
+function enqueueVideo(ev, tier) {
+  const it = { ev, tier, name: cleanName(ev.name), avatar: ev.avatar, count: ev.count || 1 };
+  const p = findPerson(ev.id); if (p) it.person = p;
+  loadAvatar(ev.avatar).then((img) => { it.avatarImg = img || (p && p.avatarImg) || null; });
+  vq.push(it);
+  if (vq.length > 30) vq.shift();
+  toPanel({ type: 'log', msg: `🎬 ${ev.name}: ${ev.total ?? ''} xu → video mức ${tier.min} xu` });
+}
+function absUrl(f) { return /^church:|^https?:|^data:/.test(f) ? f : 'church://abs/' + encodeURIComponent(String(f).replace(/\\/g, '/')); }
+async function stepVideo() {
+  if (vcur) {
+    const t = now();
+    const maxS = vcur.tier.maxSeconds || CFG.donate.videoMaxSeconds || 0;
+    if (!vcur.ending && (vidEl.ended || (maxS > 0 && t - vcur.start > maxS) || vcur.failed)) { vcur.ending = t; }
+    if (vcur.ending && t - vcur.ending > 0.7) {
+      try { vidEl.pause(); } catch {}
+      const done = vcur; vcur = null; ducked = false; applyAudio();
+      const q = queue.find((x) => x.id === done.ev.id); if (q && !vq.some((v) => v.ev.id === done.ev.id)) q.holdVideo = false;
+    }
+    return;
+  }
+  if (!vq.length || vq.loading) return;
+  const it = vq.shift();
+  const files = it.tier.videos || []; if (!files.length) return;
+  const f = files[Math.floor(Math.random() * files.length)];
+  vq.loading = true;
+  vidEl.src = absUrl(f); vidEl.currentTime = 0; vidEl.loop = false;
+  vidGain.gain.value = clamp(CFG.donate.videoVolume ?? 1, 0, 2);
+  try { await vidEl.play(); } catch (e) { logp('Không phát được video ' + f + ': ' + e.message, 'error'); vq.loading = false; const q = queue.find((x) => x.id === it.ev.id); if (q) q.holdVideo = false; return; }
+  vq.loading = false;
+  vcur = { ...it, start: now() };
+  if (!it.avatarImg && it.person && it.person.avatarImg) vcur.avatarImg = it.person.avatarImg;
+  ducked = true; applyAudio(); chime();
+  try { cur.src && sermon.state === 'playing' && 0; } catch {}
+  if (it.tier.speak && CFG.donate.speakBlessing) speakBlessing(blessingLine({ name: it.name, gift: it.ev.gift || '', count: it.count }));
+  toPanel({ type: 'blessed', name: it.ev.name, gift: it.ev.gift, count: it.count });
+}
+function drawVideo(t) {
+  if (!vcur) return;
+  const a = Math.min(clamp((t - vcur.start) / 0.6, 0, 1), vcur.ending ? clamp(1 - (t - vcur.ending) / 0.7, 0, 1) : 1);
+  if (a <= 0) return;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const vw = vidEl.videoWidth, vh = vidEl.videoHeight;
+  if (vw && vh) {
+    const fit = CFG.donate.videoFit === 'contain' ? Math.min(W / vw, H / vh) : Math.max(W / vw, H / vh);
+    const dw = vw * fit, dh = vh * fit;
+    ctx.drawImage(vidEl, (W - dw) / 2, (H - dh) / 2, dw, dh);
+  }
+  // dòng dưới: avatar + tên
+  const o = { name: vcur.name, gift: vcur.ev.gift || '', count: vcur.count };
+  const text = fmt(vcur.tier.text || '{name} đã được chúc phúc', o), sub = fmt(vcur.tier.sub || '', o);
+  const cy = H - (CFG.donate.videoBarBottom ?? 230);
+  const g = ctx.createLinearGradient(0, cy - 150, 0, cy + 150);
+  g.addColorStop(0, 'rgba(20,10,2,0)'); g.addColorStop(0.35, 'rgba(20,10,2,0.72)'); g.addColorStop(0.65, 'rgba(20,10,2,0.72)'); g.addColorStop(1, 'rgba(20,10,2,0)');
+  ctx.fillStyle = g; ctx.fillRect(0, cy - 150, W, 300);
+  const av = 104, gap = 24, showAv = CFG.donate.bannerAvatar !== false;
+  let fs = 64; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
+  while (ctx.measureText(text).width + (showAv ? av + gap : 0) > W - 80 && fs > 28) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
+  const tw = ctx.measureText(text).width, total = (showAv ? av + gap : 0) + tw, x0 = W / 2 - total / 2, ty = sub ? cy - 18 : cy;
+  if (showAv) drawAvatar({ avatarImg: vcur.avatarImg }, x0 + av / 2, ty, av / 2, vcur.name);
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(255,190,80,0.95)'; ctx.shadowBlur = 20; ctx.fillStyle = '#ffe9b0';
+  ctx.fillText(text, x0 + (showAv ? av + gap : 0), ty);
+  ctx.shadowBlur = 0;
+  if (sub) { ctx.textAlign = 'center'; ctx.font = '500 32px BeVN, "Segoe UI", sans-serif'; ctx.fillStyle = '#f6dcae'; ctx.fillText(sub, W / 2, cy + 46); }
+  ctx.restore();
+}
+
+// ================== PHỤ ĐỀ BÀI GIẢNG ==================
+let subLayout = null;
+function layoutSub(S, font, w) {
+  ctx.font = font;
+  const space = ctx.measureText(' ').width, lines = [[]]; let lw = 0;
+  S.sents.forEach((sent, si) => {
+    for (const word of sent.split(/\s+/).filter(Boolean)) {
+      const ww = ctx.measureText(word).width;
+      if (lw > 0 && lw + space + ww > w) { lines.push([]); lw = 0; }
+      lines[lines.length - 1].push({ word, si, x: lw ? lw + space : 0, w: ww });
+      lw += (lw ? space : 0) + ww;
+    }
+  });
+  return lines;
+}
+function drawSubtitles(t) {
+  const c = CFG.subtitles; if (!c || !c.enabled || !SUB.sents.length || !CFG.audio.sermonEnabled) return;
+  const x = c.x, y = c.y, w = c.w, h = c.h, pad = 22, fs = c.fontSize, lh = fs * 1.32;
+  const font = `700 ${fs}px Cormorant, Georgia, serif`;
+  const key = SUB.changed + '|' + fs + '|' + w;
+  if (!subLayout || subLayout.key !== key) subLayout = { key, lines: layoutSub(SUB, font, w - pad * 2), scroll: 0 };
+  const lines = subLayout.lines;
+  const fadeIn = clamp((t - SUB.changed) / 0.5, 0, 1);
+  ctx.save();
+  // nền
+  ctx.globalAlpha = 1;
+  const g = ctx.createLinearGradient(x, 0, x + w, 0);
+  g.addColorStop(0, `rgba(22,11,2,${c.bgAlpha})`); g.addColorStop(1, `rgba(22,11,2,${c.bgAlpha * 0.85})`);
+  ctx.fillStyle = g; roundRect(x, y, w, h, 18); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,214,120,0.55)'; ctx.lineWidth = 2; ctx.stroke();
+  let top = y + pad;
+  if (c.showTitle && SUB.title) {
+    ctx.font = `700 ${Math.round(fs * 0.62)}px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = 'rgba(255,214,120,0.95)'; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+    let tt = '✝ ' + SUB.title; while (ctx.measureText(tt).width > w - pad * 2 && tt.length > 6) tt = tt.slice(0, -2);
+    if (tt !== '✝ ' + SUB.title) tt += '…';
+    ctx.fillText(tt, x + pad, top); top += fs * 0.62 * 1.6;
+    ctx.fillStyle = 'rgba(255,214,120,0.35)'; ctx.fillRect(x + pad, top - fs * 0.3, w - pad * 2, 1.5);
+  }
+  const areaH = y + h - pad - top;
+  // cuộn để câu đang đọc luôn nằm trong khung
+  const curLine = lines.findIndex((L) => L.some((wd) => wd.si === SUB.cur));
+  let want = 0;
+  if (curLine >= 0) { const total = lines.length * lh; want = clamp(curLine * lh - areaH * 0.3, 0, Math.max(0, total - areaH)); }
+  subLayout.scroll += (want - subLayout.scroll) * 0.08;
+  ctx.beginPath(); ctx.rect(x, top - 4, w, areaH + 8); ctx.clip();
+  ctx.font = font; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
+  lines.forEach((L, li) => {
+    const ly = top + li * lh - subLayout.scroll;
+    if (ly < top - lh || ly > top + areaH) return;
+    for (const wd of L) {
+      const curS = wd.si === SUB.cur, read = wd.si < SUB.cur;
+      if (curS) { ctx.shadowColor = 'rgba(255,190,70,0.95)'; ctx.shadowBlur = 16; ctx.fillStyle = '#ffe39a'; }
+      else { ctx.shadowBlur = 0; ctx.fillStyle = read ? `rgba(255,240,215,${c.readAlpha})` : `rgba(255,240,215,${c.dimAlpha})`; }
+      ctx.globalAlpha = fadeIn; ctx.fillText(wd.word, x + pad + wd.x, ly);
+    }
+  });
+  ctx.restore();
+}
 
 // ================== VẼ ==================
 function drawBG() {
@@ -838,9 +1050,11 @@ function render() {
   for (const it of items) it.f();
   drawFX();
   drawNames();
+  drawSubtitles(t);
   drawBanners(t);
   drawTitle();
   drawGuides();
+  drawVideo(t);
 }
 function loop() {
   const t = now(); const dt = Math.min(0.1, t - last); last = t;
@@ -885,7 +1099,8 @@ api.onCmd((m) => {
     let id = 'sim' + Math.random(), name = m.name || simName();
     if (m.seated) { const p = people.filter((x) => !x.filler && x.state === 'seated' && !x.leaving)[Math.floor(Math.random() * namedCount())]; if (p) { id = p.id; name = p.name; } }
     if (m.avatar && !findPerson(id)) onJoin({ id, name, avatar: m.avatar });
-    onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: 1, total: 1, sim: true });
+    const coins = m.coins || 1;
+    onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: coins, total: coins, sim: true });
   }
   if (m.type === 'clear') { for (const p of people) if (!p.filler && p.state === 'seated') removePerson(p, true); queue = []; }
   if (m.type === 'sermon-next') sermonSkip();
@@ -895,8 +1110,9 @@ api.onCmd((m) => {
   if (m.type === 'pretts') pretts();
 });
 async function pretts() {
-  const texts = sermonTexts(); let ok = 0;
-  for (let i = 0; i < texts.length; i++) { try { await ttsBuffer(texts[i]); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: texts.length, ok }); }
+  const all = []; for (const sec of sermonSections()) { if (sec.title && CFG.audio.readTitles) all.push(sec.title); for (const p of sec.paras) all.push(...splitSentences(p)); }
+  let ok = 0;
+  for (let i = 0; i < all.length; i++) { try { await ttsBuffer(speakable(all[i])); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: all.length, ok }); }
 }
 api.onLiveEvent((ev) => {
   if (!ev) return;
@@ -908,7 +1124,7 @@ api.onConfig((c) => applyConfig(c, false));
 setInterval(() => {
   toPanel({
     type: 'status', seated: namedCount(), fillers: people.filter((p) => p.filler).length, slots: G ? G.slots.length : 0,
-    walking: walkers.length, queue: queue.length, sermon: { state: sermon.state, line: sermon.line, idx: sermon.idx, fallback: sermon.usingFallback },
+    walking: walkers.length, queue: queue.length + vq.length + (vcur ? 1 : 0), sermon: { state: sermon.state, line: sermon.line, idx: sermon.idx, fallback: sermon.usingFallback },
     videoOK, sitters: SITTERS.length, walkerSets: Object.keys(WALKERS), audio: AC.state,
     names: people.filter((p) => !p.filler && !p.leaving).slice(-12).map((p) => ({ name: p.name, left: Math.max(0, Math.round(p.expires - now())), state: p.state }))
   });
@@ -927,5 +1143,5 @@ document.addEventListener('click', () => AC.resume());
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);
   }
 })();
-window.__church = { loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
+window.__church = { SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
 })();
