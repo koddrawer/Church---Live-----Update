@@ -54,15 +54,21 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
 .frames .th canvas{height:120px}
 .sermonline{background:#110d0b;border-left:3px solid var(--gold);padding:8px 10px;border-radius:4px;color:#eadbc6;min-height:40px;font-size:13px}
 .prog{height:6px;background:#110d0b;border-radius:3px;overflow:hidden}.prog>i{display:block;height:100%;background:var(--gold);width:0}
+#lockBar{display:none;padding:8px 16px;background:#5a3a0c;color:#ffe3a0;font-weight:700;border-bottom:1px solid var(--gold)}
+body.plocked #lockBar{display:block}
+body.plocked main{opacity:.72}
+#btnPanelLock.on{background:linear-gradient(#c99436,#a8741f);color:#1a1007;font-weight:700}
 </style>
 </head>
 <body>
 <header>
   <h1>✝ Church Live</h1><span class="ver" id="ver"></span>
   <span class="sp"></span>
+  <button class="b" id="btnPanelLock" title="Khóa toàn bộ bảng điều khiển">🔓 Khóa bảng điều khiển</button>
   <span class="pill"><i class="dot" id="tkdot"></i><span id="tktxt">Chưa kết nối</span></span>
   <span class="pill"><i class="dot ok" id="audot"></i><span id="autxt">Âm thanh</span></span>
 </header>
+<div id="lockBar">🔒 Bảng điều khiển đang bị khóa — xem được, không chỉnh được. Bấm “Mở khóa” ở góc trên để chỉnh.</div>
 <nav id="nav">
   <button data-t="live" class="on">Live</button>
   <button data-t="seat">Người ngồi</button>

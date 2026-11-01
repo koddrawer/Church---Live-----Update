@@ -1207,7 +1207,7 @@ cv.addEventListener('wheel', (e) => {
   else if (it.id === 'banner') { CFG.donate.bannerScale = +clamp((CFG.donate.bannerScale || 1) * f, 0.4, 2).toFixed(3); saveEdit(it); }
 }, { passive: false });
 window.addEventListener('keydown', (e) => { if (e.key === 'e' || e.key === 'E') setEditMode(!editMode); if (e.key === 'Escape') setEditMode(false); });
-function setEditMode(on) { if (on && CFG.scene.layoutLocked) { toPanel({ type: 'log', msg: 'Bố cục đang bị khóa — mở khóa trong Bảng điều khiển để chỉnh', level: 'warn' }); on = false; }
+function setEditMode(on) { if (on && (CFG.scene.layoutLocked || (CFG.window && CFG.window.panelLocked))) { toPanel({ type: 'log', msg: 'Bố cục đang bị khóa — mở khóa trong Bảng điều khiển để chỉnh', level: 'warn' }); on = false; }
   editMode = !!on; drag = null; cv.style.cursor = ''; toPanel({ type: 'edit-mode', on: editMode }); }
 function drawEdit() {
   if (!editMode) return;
@@ -1248,7 +1248,7 @@ function applyConfig(c, first) {
   if (voiceChanged) { sermon.idx = 0; sermonRestart(); }
   if (!first && prev.audio.sermonEnabled && !CFG.audio.sermonEnabled) sermonSkip();
   applyAudio();
-  if (CFG.scene.layoutLocked && editMode) setEditMode(false);
+  if ((CFG.scene.layoutLocked || (CFG.window && CFG.window.panelLocked)) && editMode) setEditMode(false);
 }
 function reseatAll() {
   // gán lại ghế cho mọi người sau khi đổi hình học

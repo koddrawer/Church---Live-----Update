@@ -253,7 +253,7 @@ window.CHURCH_DEFAULTS = {
   },
   subtitles: { enabled: true, scale: 1, x: 28, y: 600, w: 410, h: 480, fontSize: 30, bgAlpha: 0.72, dimAlpha: 0.38, readAlpha: 0.64, showTitle: true },
   greet: { enabled: true, scale: 1, x: 690, y: 590, w: 360, h: 450, fontSize: 24, bgAlpha: 0.66, title: 'Chào mừng anh chị em', item: '{name}', avatar: true, showSeconds: 0, highlightSeconds: 4 },
-  window: { stageOnTop: false },
+  window: { stageOnTop: false, panelLocked: false },
   update: { autoCheck: true, autoApply: false }
 };
 

@@ -1,9 +1,9 @@
 {
-  "version": "1.0.8",
-  "notes": "Thêm nút khóa bố cục",
+  "version": "1.0.9",
+  "notes": "Thêm nút khóa toàn bộ bảng điều khiển",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T22:07:32.867Z",
+  "date": "2026-11-01T22:12:57.904Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 33052,
-      "sha256": "850abf8bc1f1278c3a95d787b8238e83b4a4409972fa39cd7977db735c0113fa"
+      "size": 33072,
+      "sha256": "c3fcdda0685d32e951914b04ca9e5f5b2fb5ed00024bfd18298f7251fa737880"
     },
     {
       "path": "fonts.css",
@@ -299,13 +299,13 @@
     },
     {
       "path": "panel.html",
-      "size": 31243,
-      "sha256": "e7d3181ab7a5ee113396c73a9ad5a778454d255367b0928f2e2cd6e92c083b73"
+      "size": 31822,
+      "sha256": "0814b0b69dda42b4b7d70423b30d0bf484ea89bbffdf3a36acde971565ea36f0"
     },
     {
       "path": "panel.js",
-      "size": 22412,
-      "sha256": "e30e5a3612045d926411d3fceefe69c4b2184702d1c0c7ccb07421f72142ea5b"
+      "size": 23167,
+      "sha256": "fcfd5a4e252fa2d0505702e949224eff64b7d3736af4db19cdcfbf21468d4c5d"
     },
     {
       "path": "slicer.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 78623,
-      "sha256": "a9564cc8fc825402151debe9840af9cf23c7e02b90b9cab57cd016f53735bd90"
+      "size": 78711,
+      "sha256": "b69d692da06f6243f0f32189eb3273b3adc71bad871467d4064bb719873e0801"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "b67289fc5276feeb242ae61764f3fcf26cc94dcf9084b2fc684c523ba02fb6ca"
+      "sha256": "f570564d1705c74207224a1e3f89c8ff8e4062261a72d9cd852745c19fdcebf0"
     }
   ]
 }

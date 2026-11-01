@@ -41,6 +41,7 @@ function fillInputs() {
   if (document.activeElement !== $('#blessList')) $('#blessList').value = (CFG.donate.blessSpeeches || (CFG.audio.sermonLang === 'en' ? BLESSINGS_EN : BLESSINGS_VI)).join('\n');
   renderTiers();
   applyLock();
+  applyPanelLock();
 }
 function renderTiers() {
   const box = $('#tiers'); box.innerHTML = '';
@@ -166,8 +167,20 @@ function applyLock() {
   for (const el of $$('[data-k]')) if (LAYOUT_KEYS.test(el.dataset.k)) { el.disabled = on; el.style.opacity = on ? 0.45 : 1; }
   if ($('#btnGeoReset')) { $('#btnGeoReset').disabled = on; $('#btnGeoReset').style.opacity = on ? 0.4 : 1; }
 }
+function applyPanelLock() {
+  const on = !!(CFG.window && CFG.window.panelLocked);
+  document.body.classList.toggle('plocked', on);
+  $('main').inert = on;
+  const b = $('#btnPanelLock'); b.textContent = on ? '🔒 Mở khóa' : '🔓 Khóa bảng điều khiển'; b.classList.toggle('on', on);
+}
+$('#btnPanelLock').onclick = async () => {
+  const on = !(CFG.window && CFG.window.panelLocked);
+  if (!on && !confirm('Mở khóa bảng điều khiển?')) return;
+  if (on && editOn) { editOn = false; api.toStage({ type: 'edit-layout', on: false }); }
+  await save('window.panelLocked', on); applyPanelLock(); log(on ? 'Đã khóa bảng điều khiển' : 'Đã mở khóa bảng điều khiển');
+};
 $('#btnLock').onclick = async () => { const on = !CFG.scene.layoutLocked; if (on && editOn) { editOn = false; api.toStage({ type: 'edit-layout', on: false }); } await save('scene.layoutLocked', on); applyLock(); log(on ? 'Đã khóa bố cục' : 'Đã mở khóa bố cục'); };
-api.onConfig((c) => { setTimeout(applyLock, 0); raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
+api.onConfig((c) => { setTimeout(() => { applyLock(); applyPanelLock(); }, 0); raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
 $('#btnVideo').onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }] }); if (f) { await save('scene.videoFile', f); fillInputs(); } };
 $('#btnVideoClear').onclick = async () => { await save('scene.videoFile', ''); fillInputs(); };
 $('#btnGeoReset').onclick = async () => { if (raw.scene) delete raw.scene.geometry; CFG = deepMerge(CHURCH_DEFAULTS, raw); await api.setConfig({ scene: raw.scene || {} }); fillInputs(); };
