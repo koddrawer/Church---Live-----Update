@@ -1,9 +1,9 @@
 {
-  "version": "1.0.10",
-  "notes": "Video chúc phúc phát ngẫu nhiên kiểu rút thăm, không trùng liền",
+  "version": "1.0.11",
+  "notes": "Sửa lỗi kết nối TikTok (Euler Business plan) — cần tắt mở lại app sau khi cập nhật",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T22:43:09.007Z",
+  "date": "2026-11-01T23:42:30.297Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -298,6 +298,11 @@
       "sha256": "b9a7682298e0e50d4706a281f2859b276654ee2266b2a1b3307dbf10812c83fb"
     },
     {
+      "path": "main-ext.js",
+      "size": 5733,
+      "sha256": "99c0d0610e17c38a51d82edcb466e9cd48ae902c0547143640c7fa289a1ca96c"
+    },
+    {
       "path": "panel.html",
       "size": 32012,
       "sha256": "9f10e11f560eb83f05b03b2bd4d844e76b8d8a6e9a7da1f5c44c1bc080fb3b0a"
@@ -325,7 +330,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "bc5aa1f946fa49c025b72ed7fcd050801e704dc5fa353356a1b1034784b18313"
+      "sha256": "96e42bffc5bba2cf80e47a5a17cb4e4689b71a914f53579ac159a7d074da9912"
     }
   ]
 }
