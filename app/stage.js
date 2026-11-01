@@ -636,7 +636,7 @@ function update(dt) {
   walkers = walkers.filter((w) => !w.done);
   fx = fx.filter((f) => (f.life -= dt) > 0);
   for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy -= 8 * dt; }
-  banners = banners.filter((b) => t < b.end + 1);
+  banners = banners.filter((b) => (b.shownAt == null ? t - b.start < 90 : t < b.shownAt + bannerDur(b) + 1));
 }
 // Làn đi bộ: chỉ trong thảm lối đi giữa (không lấn sang ghế/đèn/hoa hai bên)
 function laneHalf(rail) {
@@ -710,8 +710,9 @@ function startBlessing(w) {
 function pushBanner(w, ev) {
   if (!CFG.donate.showBanner) return;
   const o = { name: cleanName(w.person.name), gift: ev.gift || 'quà', count: w.count };
-  banners = banners.filter((b) => b.w !== w);
-  banners.push({ w, title: fmt(CFG.donate.banner, o), sub: fmt(CFG.donate.bannerSub, o), name: o.name, start: now(), end: w.blessEnd || now() + CFG.donate.blessSeconds });
+  const old = banners.find((b) => b.w === w);
+  if (old) { old.title = fmt(CFG.donate.banner, o); old.sub = fmt(CFG.donate.bannerSub, o); return; }
+  banners.push({ w, title: fmt(CFG.donate.banner, o), sub: fmt(CFG.donate.bannerSub, o), name: o.name, start: now(), shownAt: null });
 }
 function spawnSparkle(w, burst) {
   const h = standH(w.rail), foot = G.footOfRail(w.rail);
@@ -921,7 +922,7 @@ function drawBeams(t) {
     if (w.phase !== 'bless' && w.phase !== 'vanish') continue;
     const into = clamp((t - w.blessStart) / 1.0, 0, 1), out = w.phase === 'vanish' ? clamp(1 - (t - w.vStart) / 2.2, 0, 1) : clamp((w.blessEnd - t) / 0.8, 0, 1);
     const a = into * out * (0.75 + 0.25 * Math.sin(t * 3));
-    const topX = G.g.centerX, topY = 560, bx = w.x, by = G.footOfRail(w.rail), hgt = standH(w.rail);
+    const topX = G.g.centerX, topY = CFG.donate.beamTopY ?? 800, bx = w.x, by = G.footOfRail(w.rail), hgt = standH(w.rail);
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     const gr = ctx.createLinearGradient(0, topY, 0, by + hgt * 0.08);
     gr.addColorStop(0, `rgba(255,240,190,${0.0})`); gr.addColorStop(0.25, `rgba(255,236,170,${0.3 * a})`); gr.addColorStop(0.9, `rgba(255,215,120,${0.5 * a})`); gr.addColorStop(1, 'rgba(255,215,120,0)');
@@ -979,19 +980,22 @@ function drawNames() {
 }
 function bannerAvoid() {
   const z = [];
-  const f = CFG.donate.faceZone; if (f) z.push(f);                      // mặt Chúa
+  for (const f of (CFG.donate.avoidZones || [])) if (f && f.w && f.h) z.push(f);   // hình Chúa Giêsu, thánh giá
   const sc = CFG.subtitles || {}; if (sc.enabled) z.push(subRect());
   const gc = CFG.greet || {}; if (gc.enabled) z.push(greetRect());
   return z;
 }
+const bannerDur = () => Math.max(2, CFG.donate.bannerSeconds || 5);
 function drawBanners(t) {
-  const d = CFG.donate, k = d.bannerScale || 1;
-  const list = banners.slice(-(d.bannerMax || 2));
+  const d = CFG.donate, k = d.bannerScale || 1, max = Math.max(1, d.bannerMax || 1);
+  // băng chờ lượt: chỉ hiện tối đa `max` băng, băng sau đợi băng trước tắt
+  const list = banners.filter((b) => b.shownAt != null && t < b.shownAt + bannerDur(b) + 1);
+  for (const b of banners) { if (list.length >= max) break; if (b.shownAt == null) { b.shownAt = t; list.push(b); } }
   const gw = Math.min(W, (d.bannerWidth || 900)), gh = 116 * k, sp = gh + 12 * k;
   const zones = bannerAvoid();
   let y = (d.bannerY ?? 110);
   list.forEach((b, i) => {
-    const inA = clamp((t - b.start) / 0.6, 0, 1), outA = clamp((b.end + 1 - t) / 1, 0, 1), a = Math.min(inA, outA);
+    const inA = clamp((t - b.shownAt) / 0.6, 0, 1), outA = clamp((b.shownAt + bannerDur(b) + 1 - t) / 1, 0, 1), a = Math.min(inA, outA);
     // tìm chỗ trống theo chiều dọc, tránh mặt Chúa và các khung chữ
     let cy = y;
     for (let guard = 0; guard < 8; guard++) {
@@ -1101,6 +1105,7 @@ function drawGuides() {
     ctx.fillStyle = '#0f8'; ctx.font = '700 18px sans-serif'; ctx.fillText(String(r.k), xi + 6, r.y + 6);
   }
   for (const s of G.slots) { ctx.strokeStyle = s.occupied ? 'rgba(255,80,80,0.9)' : 'rgba(255,255,0,0.8)'; ctx.strokeRect(s.x - s.slotW / 2, s.headTop, s.slotW, s.y - s.headTop); }
+  ctx.strokeStyle = 'rgba(255,60,60,0.95)'; ctx.setLineDash([10, 8]); for (const z of (CFG.donate.avoidZones || [])) ctx.strokeRect(z.x, z.y, z.w, z.h); ctx.setLineDash([]);
   ctx.strokeStyle = 'rgba(255,0,255,0.9)'; ctx.beginPath();
   for (const sgn of [-1, 1]) { for (let r = G.rows[G.rows.length - 1]; r >= G.altarRail; r -= 4) { const x = G.g.centerX + sgn * laneHalf(r), y = G.footOfRail(r); if (r === G.rows[G.rows.length - 1]) ctx.moveTo(x, y); else ctx.lineTo(x, y); } }
   ctx.stroke();
@@ -1128,12 +1133,105 @@ function render() {
   drawTitle();
   drawGuides();
   drawVideo(t);
+  drawEdit();
 }
 function loop() {
   const t = now(); const dt = Math.min(0.1, t - last); last = t;
   if (assetsReady && G) update(dt);
   render();
   requestAnimationFrame(loop);
+}
+
+// ================== CHỈNH BỐ CỤC BẰNG CHUỘT ==================
+// Bật bằng nút trong Bảng điều khiển hoặc phím E trên màn hình. Kéo để di chuyển, kéo góc dưới-phải để đổi cỡ, lăn chuột để phóng to/thu nhỏ.
+let editMode = false, drag = null, editRaw = null;
+function editItems() {
+  const d = CFG.donate, items = [];
+  if (CFG.subtitles) items.push({ id: 'sub', label: 'Bảng lời giảng', color: '#5fd0ff', rect: subRect() });
+  if (CFG.greet) items.push({ id: 'greet', label: 'Bảng chào', color: '#7dff9a', rect: greetRect() });
+  const k = d.bannerScale || 1, gw = Math.min(W, d.bannerWidth || 900), gh = 116 * k;
+  items.push({ id: 'banner', label: 'Băng chúc phúc', color: '#ffd23f', rect: { x: W / 2 - gw / 2, y: (d.bannerY ?? 110) - gh / 2, w: gw, h: gh } });
+  (d.avoidZones || []).forEach((z, i) => items.push({ id: 'zone' + i, zi: i, label: i === 0 ? 'Vùng hình Chúa (băng chữ tránh)' : 'Vùng tránh ' + (i + 1), color: '#ff5a5a', rect: { ...z } }));
+  return items;
+}
+function applyEdit(it, r, final) {
+  const d = CFG.donate;
+  if (it.id === 'sub' || it.id === 'greet') {
+    const c = it.id === 'sub' ? CFG.subtitles : CFG.greet, k = c.scale || 1;
+    c.x = Math.round(r.x); c.y = Math.round(r.y); c.w = Math.round(Math.max(120, r.w) / k); c.h = Math.round(Math.max(90, r.h) / k);
+  } else if (it.id === 'banner') {
+    d.bannerY = Math.round(r.y + r.h / 2); d.bannerWidth = Math.round(clamp(r.w, 300, W)); d.bannerScale = +clamp(r.h / 116, 0.4, 2).toFixed(2);
+  } else if (it.zi != null) {
+    d.avoidZones = (d.avoidZones || []).map((z, i) => i === it.zi ? { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(Math.max(20, r.w)), h: Math.round(Math.max(20, r.h)) } : z);
+  }
+  subLayout = null;
+  if (final) saveEdit(it);
+}
+async function saveEdit(it) {
+  const raw = await api.getConfig();
+  const pick = (top, keys) => { raw[top] = { ...(raw[top] || {}) }; for (const k of keys) raw[top][k] = CFG[top][k]; return api.setConfig({ [top]: raw[top] }); };
+  if (it.id === 'sub') await pick('subtitles', ['x', 'y', 'w', 'h', 'scale', 'fontSize']);
+  else if (it.id === 'greet') await pick('greet', ['x', 'y', 'w', 'h', 'scale', 'fontSize']);
+  else if (it.id === 'banner') await pick('donate', ['bannerY', 'bannerWidth', 'bannerScale']);
+  else await pick('donate', ['avoidZones']);
+}
+function canvasXY(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
+function hitItem(p) {
+  const its = editItems().reverse();
+  for (const it of its) { const r = it.rect; if (Math.abs(p.x - (r.x + r.w)) < 34 && Math.abs(p.y - (r.y + r.h)) < 34) return { it, mode: 'resize' }; }
+  for (const it of its) { const r = it.rect; if (p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h) return { it, mode: 'move' }; }
+  return null;
+}
+cv.addEventListener('mousedown', (e) => {
+  if (!editMode) return;
+  const p = canvasXY(e), h = hitItem(p); if (!h) return;
+  drag = { ...h, p0: p, r0: { ...h.it.rect } }; e.preventDefault();
+});
+window.addEventListener('mousemove', (e) => {
+  if (!editMode) { cv.style.cursor = ''; return; }
+  const p = canvasXY(e);
+  if (!drag) { const h = hitItem(p); cv.style.cursor = h ? (h.mode === 'resize' ? 'nwse-resize' : 'move') : 'default'; return; }
+  const dx = p.x - drag.p0.x, dy = p.y - drag.p0.y, r0 = drag.r0;
+  let r;
+  if (drag.mode === 'move') r = { x: clamp(r0.x + dx, -r0.w + 60, W - 60), y: clamp(r0.y + dy, -r0.h + 40, H - 40), w: r0.w, h: r0.h };
+  else if (drag.it.id === 'banner') { const nw = r0.w + dx * 2; r = { x: W / 2 - nw / 2, y: r0.y, w: nw, h: Math.max(40, r0.h + dy) }; }
+  else r = { x: r0.x, y: r0.y, w: Math.max(60, r0.w + dx), h: Math.max(40, r0.h + dy) };
+  applyEdit(drag.it, r, false);
+});
+window.addEventListener('mouseup', () => { if (drag) { const it = drag.it; const r = editItems().find((x) => x.id === it.id).rect; applyEdit(it, r, true); drag = null; } });
+cv.addEventListener('wheel', (e) => {
+  if (!editMode) return;
+  const h = hitItem(canvasXY(e)); if (!h) return; e.preventDefault();
+  const f = e.deltaY < 0 ? 1.05 : 1 / 1.05, it = h.it;
+  if (it.id === 'sub' || it.id === 'greet') { const c = it.id === 'sub' ? CFG.subtitles : CFG.greet; c.scale = +clamp((c.scale || 1) * f, 0.4, 3).toFixed(3); subLayout = null; saveEdit(it); }
+  else if (it.id === 'banner') { CFG.donate.bannerScale = +clamp((CFG.donate.bannerScale || 1) * f, 0.4, 2).toFixed(3); saveEdit(it); }
+}, { passive: false });
+window.addEventListener('keydown', (e) => { if (e.key === 'e' || e.key === 'E') setEditMode(!editMode); if (e.key === 'Escape') setEditMode(false); });
+function setEditMode(on) { editMode = !!on; drag = null; cv.style.cursor = ''; toPanel({ type: 'edit-mode', on: editMode }); }
+function drawEdit() {
+  if (!editMode) return;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillRect(0, 0, W, H);
+  // xem trước nội dung để căn chỉnh
+  if (!banners.some((b) => b.shownAt != null)) {
+    const d = CFG.donate, k = d.bannerScale || 1, gw = Math.min(W, d.bannerWidth || 900), gh = 116 * k, cy = d.bannerY ?? 110;
+    ctx.fillStyle = 'rgba(40,20,4,0.7)'; ctx.fillRect(W / 2 - gw / 2, cy - gh / 2, gw, gh);
+    ctx.font = `700 ${50 * k}px Cormorant, Georgia, serif`; ctx.fillStyle = '#ffe9b0'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('Tên người xem đã được chúc phúc', W / 2, cy);
+  }
+  for (const it of editItems()) {
+    const r = it.rect;
+    ctx.lineWidth = 3; ctx.strokeStyle = it.color; ctx.setLineDash([12, 8]); ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.setLineDash([]);
+    ctx.fillStyle = it.color; ctx.fillRect(r.x + r.w - 18, r.y + r.h - 18, 22, 22);
+    ctx.font = '700 22px BeVN, sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+    const lw = ctx.measureText(it.label).width + 16, ly = r.y < 34 ? r.y + r.h + 32 : r.y; ctx.fillStyle = 'rgba(0,0,0,0.75)'; ctx.fillRect(r.x, ly - 30, lw, 30);
+    ctx.fillStyle = it.color; ctx.fillText(it.label, r.x + 8, ly - 4);
+  }
+  ctx.font = '700 28px BeVN, sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  const msg = 'CHỈNH BỐ CỤC — kéo để di chuyển · kéo ô vuông góc để đổi cỡ · lăn chuột để phóng to · E/Esc để thoát';
+  ctx.fillStyle = 'rgba(0,0,0,0.8)'; ctx.fillRect(0, H - 60, W, 60); ctx.fillStyle = '#ffd23f';
+  let mf = 26; ctx.font = `700 ${mf}px BeVN, sans-serif`; while (ctx.measureText(msg).width > W - 30 && mf > 12) { mf--; ctx.font = `700 ${mf}px BeVN, sans-serif`; } ctx.fillText(msg, W / 2, H - 44);
+  ctx.restore();
 }
 
 // ================== GIAO TIẾP ==================
@@ -1176,6 +1274,7 @@ api.onCmd((m) => {
     onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: coins, total: coins, sim: true });
   }
   if (m.type === 'clear') { for (const p of people) if (!p.filler && p.state === 'seated') removePerson(p, true); queue = []; }
+  if (m.type === 'edit-layout') setEditMode(m.on);
   if (m.type === 'sermon-next') sermonSkip();
   if (m.type === 'sermon-restart') { sermon.idx = 0; sermonRestart(); }
   if (m.type === 'speak') speakBlessing(m.text);

@@ -118,6 +118,7 @@ api.onLog((l) => log(l.msg, l.level));
 api.onStageMsg((m) => {
   if (!m) return;
   if (m.type === 'log') log('[màn hình] ' + m.msg, m.level);
+  if (m.type === 'edit-mode') { editOn = m.on; $('#btnEdit').textContent = m.on ? '✓ Xong — thoát chỉnh bố cục' : '✥ Chỉnh bố cục bằng chuột trên màn hình'; }
   if (m.type === 'blessed') log('✝ Chúc phúc ' + m.name + ' (' + (m.gift || '') + ' ×' + m.count + ')');
   if (m.type === 'pretts') { $('#prettsBar').style.width = (100 * m.done / m.total) + '%'; if (m.done === m.total) log(`Đã tạo giọng ${m.ok}/${m.total} đoạn`); }
   if (m.type === 'status') {
@@ -152,6 +153,9 @@ $('#btnMusic').onclick = async () => { const f = await api.pickFile({ filters: [
 $('#btnMusicClear').onclick = async () => { await save('audio.musicFile', ''); fillInputs(); };
 
 // ---------- scene ----------
+let editOn = false;
+$('#btnEdit').onclick = () => { editOn = !editOn; api.toStage({ type: 'edit-layout', on: editOn }); };
+api.onConfig((c) => { raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
 $('#btnVideo').onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }] }); if (f) { await save('scene.videoFile', f); fillInputs(); } };
 $('#btnVideoClear').onclick = async () => { await save('scene.videoFile', ''); fillInputs(); };
 $('#btnGeoReset').onclick = async () => { if (raw.scene) delete raw.scene.geometry; CFG = deepMerge(CHURCH_DEFAULTS, raw); await api.setConfig({ scene: raw.scene || {} }); fillInputs(); };

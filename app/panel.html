@@ -179,7 +179,7 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Bề rộng băng (px)</label><input type="range" min="400" max="1080" step="10" data-k="donate.bannerWidth"><span class="val"></span></div>
       <div class="row"><label>Cỡ avatar</label><input type="range" min="40" max="180" step="2" data-k="donate.bannerAvatarSize"><span class="val"></span></div>
       <div class="row"><label>Số băng hiện cùng lúc</label><input type="number" min="1" max="5" data-k="donate.bannerMax"></div>
-      <div class="row"><label>Vị trí băng chữ (Y)</label><input type="range" min="60" max="1800" step="5" data-k="donate.bannerY"><span class="val"></span></div>
+      <div class="row"><label>Vị trí băng chữ (Y)</label><input type="range" min="30" max="1800" step="2" data-k="donate.bannerY"><span class="val"></span></div>
       <div class="row"><label>Dòng chính</label><input type="text" data-k="donate.banner" style="flex:1"></div>
       <div class="row"><label>Dòng phụ</label><input type="text" data-k="donate.bannerSub" style="flex:1"></div>
       <p class="hint">Biến: {name} tên, {gift} tên quà, {count} số lượng.</p>
@@ -259,6 +259,8 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
   <div class="grid">
     <div class="card">
       <h3>Bối cảnh</h3>
+      <div class="row"><button class="b p" id="btnEdit">✥ Chỉnh bố cục bằng chuột trên màn hình</button></div>
+      <p class="hint">Kéo thả bảng lời giảng, bảng chào, băng chúc phúc và vùng hình Chúa (băng chữ tránh) ngay trên cửa sổ 9:16. Phím E trên cửa sổ đó cũng bật/tắt.</p>
       <div class="row"><label>Video nền</label><span id="videoName" class="hint" style="flex:1">Nhà thờ (mặc định)</span><button class="b" id="btnVideo">Chọn…</button><button class="b" id="btnVideoClear">Mặc định</button></div>
       <div class="row"><label>Tông màu ấm cho nhân vật</label><input type="range" min="0" max="0.6" step="0.01" data-k="scene.warmTint"><span class="val"></span></div>
       <div class="row"><label>Hiện đường căn hàng ghế</label><input type="checkbox" data-k="scene.showGuides"></div>

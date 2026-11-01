@@ -1,9 +1,9 @@
 {
-  "version": "1.0.6",
-  "notes": "Băng chúc phúc né mặt Chúa + chỉnh cỡ/avatar, chỉnh cỡ bảng lời giảng, bảng chào người vào live, video chờ đúng lượt",
+  "version": "1.0.7",
+  "notes": "Băng chúc phúc không che hình Chúa (1 băng/lượt ở trên cùng), chỉnh bố cục 2 bảng bằng chuột",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T21:52:17.554Z",
+  "date": "2026-11-01T22:04:59.666Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32664,
-      "sha256": "42d4c81fc70f359c9c372fc7ee125e6f86d5d04dc3a9b69989253048c53ae7de"
+      "size": 32949,
+      "sha256": "02cbec0a0fdd1be6777c24f98a8933bf4ad3053094c17fe15ac46e67d56bc54e"
     },
     {
       "path": "fonts.css",
@@ -299,13 +299,13 @@
     },
     {
       "path": "panel.html",
-      "size": 30845,
-      "sha256": "ff7e6a98fc3214caf3b2f2c8e6444fad56f12288991072e22f9d856614aabaed"
+      "size": 31182,
+      "sha256": "7180cdfe900db7fce579837994fb8dfaa2bce7ea4e5255950eaf579d48440f64"
     },
     {
       "path": "panel.js",
-      "size": 20627,
-      "sha256": "125d43e131bbfd3541320480dc24fff82ba8db09d88807b140820312898efdbe"
+      "size": 21293,
+      "sha256": "ee36c3bcdc3e3e80e44d31965bb9279bc1e1f3709b962bec34776e4687f19927"
     },
     {
       "path": "slicer.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 70914,
-      "sha256": "df5d3b65de4648ad149bc386e07b46a1b01045f37ec8934870dc35de00ed83fc"
+      "size": 78374,
+      "sha256": "21dad2b9c5e2c8d68650246bf0dc26e212f64f19a9a0b8a8859a8bf4427bcdad"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "24322f427a53c503a8c25fa8091e659a49b56322d61b960da8a13009ea9145d6"
+      "sha256": "5efb4932b29332cf07124c163d406f7c2fd2666151f3c1955c8ab836f6e240b7"
     }
   ]
 }

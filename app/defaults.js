@@ -182,12 +182,15 @@ window.CHURCH_DEFAULTS = {
     bannerAvatar: true,     // hiện avatar trước tên
     bannerSub: 'đã dâng {gift} ×{count}',
     showBanner: true,
-    bannerY: 110,           // vị trí băng chúc phúc (tâm băng đầu tiên, px từ trên xuống)
-    bannerScale: 0.9,       // cỡ băng chúc phúc
+    bannerY: 62,           // vị trí băng chúc phúc (tâm băng đầu tiên, px từ trên xuống)
+    bannerScale: 0.82,       // cỡ băng chúc phúc
     bannerWidth: 900,       // bề rộng băng (px, tối đa 1080)
     bannerAvatarSize: 86,   // cỡ avatar trên băng
-    bannerMax: 2,           // số băng hiện cùng lúc
-    faceZone: { x: 420, y: 240, w: 240, h: 180 }, // vùng mặt Chúa — băng chữ tự né
+    bannerMax: 1,           // số băng hiện cùng lúc (băng sau chờ lượt)
+    bannerSeconds: 5,       // mỗi băng hiện bao lâu
+    // vùng băng chữ không được che: hình Chúa Giêsu (cả vầng hào quang) và tượng thánh giá
+    avoidZones: [{ x: 300, y: 214, w: 480, h: 600 }, { x: 470, y: 950, w: 140, h: 185 }],
+    beamTopY: 800,          // tia sáng chúc phúc bắt đầu từ dưới chân Chúa
     seatAfterSeconds: 20
   },
   audio: {
