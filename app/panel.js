@@ -262,6 +262,7 @@ $('#btnSlice').onclick = async () => {
 $$('[data-size]').forEach((b) => b.onclick = () => api.stageWindow({ size: +b.dataset.size }));
 $('#btnFull').onclick = () => api.stageWindow({ fullscreen: true });
 $('#btnReloadStage').onclick = () => api.stageWindow({ reload: true });
+$('#btnRelaunch').onclick = () => { if (confirm('Khởi động lại toàn bộ app?')) api.invoke('relaunch').catch(() => log('Bản cài này chưa hỗ trợ khởi động lại tự động — hãy tắt app rồi mở lại.', 'warn')); };
 $('#btnCheck').onclick = async () => { $('#updInfo').textContent = 'Đang kiểm tra…'; const r = await api.checkUpdate({}); if (!r.ok) $('#updInfo').textContent = 'Lỗi: ' + r.error; };
 $('#btnApply').onclick = async () => { $('#updInfo').textContent = 'Đang cập nhật…'; const r = await api.checkUpdate({ apply: true }); if (!r.ok) $('#updInfo').textContent = 'Lỗi: ' + r.error; else if (!r.hasUpdate) $('#updInfo').textContent = 'Đang dùng bản mới nhất (' + r.current + ')'; };
 $('#btnResetOv').onclick = () => { if (confirm('Xoá các bản cập nhật đã tải và quay về bản gốc trong bộ cài?')) api.resetOverlay(); };
@@ -270,6 +271,7 @@ api.onUpdateStatus((s) => {
   if (s.stage === 'downloading') { $('#updBar').style.width = (100 * s.done / s.total) + '%'; $('#updInfo').textContent = `Đang tải ${s.done}/${s.total}: ${s.file}`; }
   if (s.stage === 'applied') $('#updInfo').textContent = 'Đã cập nhật xong, đang tải lại…';
   if (s.stage === 'error') $('#updInfo').textContent = 'Lỗi cập nhật: ' + s.error;
+  if (s.stage === 'restart-needed') { $('#updInfo').textContent = 'Bản cập nhật cần khởi động lại app để có hiệu lực.'; log('⚠ Bản cập nhật cần KHỞI ĐỘNG LẠI app (nút ở tab Cửa sổ & cập nhật)', 'warn'); if (confirm('Bản cập nhật này cần khởi động lại app. Khởi động lại ngay?')) api.invoke('relaunch'); }
 });
 $('#btnExport').onclick = () => { const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([JSON.stringify(raw, null, 2)], { type: 'application/json' })); a.download = 'church-live-config.json'; a.click(); };
 $('#btnImport').onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'JSON', extensions: ['json'] }] }); if (!f) return; try { raw = JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(await api.readFileB64(f)), (c) => c.charCodeAt(0)))); } catch (e) { log('File cấu hình lỗi: ' + e.message, 'error'); return; } await api.replaceConfig(raw); CFG = deepMerge(CHURCH_DEFAULTS, raw); fillInputs(); };

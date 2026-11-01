@@ -5,6 +5,9 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
+  const EXT_VER = '1.0.12';
+  try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
+  setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
   const tk = { conn: null, state: 'idle', username: '', want: false, retry: null, opts: {} };
 
@@ -43,6 +46,7 @@ module.exports = (ctx) => {
     if (!username) return { ok: false, error: 'Chưa nhập username' };
     tk.username = username; tk.want = true; tk.opts = opts;
     status('connecting');
+    log('Đang kết nối @' + username + ' (kết nối bản ' + EXT_VER + ', không lấy danh sách quà)…');
     try {
       const { pathToFileURL } = require('url');
       const mod = await import(pathToFileURL(req.resolve('tiktok-live-connector')).href);

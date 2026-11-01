@@ -1,9 +1,9 @@
 {
-  "version": "1.0.11",
-  "notes": "Sửa lỗi kết nối TikTok (Euler Business plan) — cần tắt mở lại app sau khi cập nhật",
+  "version": "1.0.12",
+  "notes": "Sửa lỗi kết nối TikTok — cần KHỞI ĐỘNG LẠI app sau khi cập nhật",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T23:42:30.297Z",
+  "date": "2026-11-01T23:50:35.441Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -299,18 +299,18 @@
     },
     {
       "path": "main-ext.js",
-      "size": 5733,
-      "sha256": "99c0d0610e17c38a51d82edcb466e9cd48ae902c0547143640c7fa289a1ca96c"
+      "size": 6068,
+      "sha256": "31bbedc42140c3de8e0a906241c7b43dafe245b940b001fc122c8c5a83323407"
     },
     {
       "path": "panel.html",
-      "size": 32012,
-      "sha256": "9f10e11f560eb83f05b03b2bd4d844e76b8d8a6e9a7da1f5c44c1bc080fb3b0a"
+      "size": 32080,
+      "sha256": "ea7aa3a10c85b97fa297a3b359a2cd8d9dbc815ed071beeb695da6a4e2816bd2"
     },
     {
       "path": "panel.js",
-      "size": 23167,
-      "sha256": "fcfd5a4e252fa2d0505702e949224eff64b7d3736af4db19cdcfbf21468d4c5d"
+      "size": 23794,
+      "sha256": "474f0a7f56a9e4d2aee7297316999e22fc90ee110e5663814bede18f94d5b319"
     },
     {
       "path": "slicer.js",
@@ -330,7 +330,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "96e42bffc5bba2cf80e47a5a17cb4e4689b71a914f53579ac159a7d074da9912"
+      "sha256": "0276bc0632e46c7e701ecd04ad160d72e3a435b3c7012c9dc5925abe8fb55f3a"
     }
   ]
 }
