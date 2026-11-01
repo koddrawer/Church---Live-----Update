@@ -130,16 +130,18 @@ async function renderAssets() {
   const walkerNames = [...Object.keys(CFG.characters.walkers), ...Object.keys(ua.walkers || {}).filter((n) => !CFG.characters.walkers[n])];
   const box = $('#sitters'); box.innerHTML = '';
   const defs = CFG.characters.sitters.map((s, i) => ({ ...s, i, builtin: true }));
-  for (const f of ua.sitters || []) defs.push({ file: 'church://user/sitters/' + encodeURIComponent(f), walker: (CFG.characters.userSitterWalker || {})[f] || walkerNames[0], user: f });
+  for (const f of ua.sitters || []) defs.push({ file: 'church://user/sitters/' + encodeURIComponent(f), gender: (CFG.characters.userSitterGender || {})[f] || null, user: f });
+  const G_OPTS = [['m', 'Nam'], ['f', 'Nữ'], ['', 'Chung']];
+  const gSel = (val) => { const sel = document.createElement('select'); for (const [v, t] of G_OPTS) { const o = document.createElement('option'); o.value = v; o.textContent = t; sel.appendChild(o); } sel.value = val || ''; return sel; };
   for (const d of defs) {
     const el = document.createElement('div'); el.className = 'th' + (d.disabled ? ' off' : '');
-    el.innerHTML = `<img src="${d.file}"><select></select><label style="display:flex;gap:4px;justify-content:center;margin-top:4px"><input type="checkbox" ${d.disabled ? '' : 'checked'} ${d.user ? 'disabled' : ''}> dùng</label>${d.user ? '<button class="b d" style="padding:2px 8px;margin-top:4px">Xoá</button>' : ''}`;
-    const sel = $('select', el);
-    for (const n of walkerNames) { const o = document.createElement('option'); o.value = n; o.textContent = '→ ' + n; sel.appendChild(o); }
-    sel.value = d.walker;
+    const dg = d.gender !== undefined ? d.gender : (CHURCH_DEFAULTS.characters.sitters.find((x) => x.file === d.file) || {}).gender;
+    el.innerHTML = `<img src="${d.file}"><label style="display:flex;gap:4px;justify-content:center;margin-top:4px"><input type="checkbox" ${d.disabled ? '' : 'checked'} ${d.user ? 'disabled' : ''}> dùng</label>${d.user ? '<button class="b d" style="padding:2px 8px;margin-top:4px">Xoá</button>' : ''}`;
+    const sel = gSel(dg); el.insertBefore(sel, el.children[1]);
     sel.onchange = async () => {
-      if (d.builtin) { const arr = CFG.characters.sitters.map((s) => ({ ...s })); arr[d.i].walker = sel.value; await save('characters.sitters', arr); }
-      else { const m = { ...(CFG.characters.userSitterWalker || {}) }; m[d.user] = sel.value; await save('characters.userSitterWalker', m); }
+      const v = sel.value || null;
+      if (d.builtin) { const arr = CFG.characters.sitters.map((s) => ({ ...s })); arr[d.i].gender = v; await save('characters.sitters', arr); }
+      else { const m = { ...(CFG.characters.userSitterGender || {}) }; m[d.user] = v; await save('characters.userSitterGender', m); }
     };
     const cb = $('input[type=checkbox]', el);
     cb.onchange = async () => { if (!d.builtin) return; const arr = CFG.characters.sitters.map((s) => ({ ...s })); arr[d.i].disabled = !cb.checked; await save('characters.sitters', arr); renderAssets(); };
@@ -152,6 +154,9 @@ async function renderAssets() {
     const base = CFG.characters.walkers[n] ? CFG.characters.walkers[n].base : 'church://user/walkers/' + encodeURIComponent(n) + '/';
     const el = document.createElement('div'); el.className = 'th';
     el.innerHTML = `<div style="display:flex;gap:2px;height:110px;align-items:flex-end;justify-content:center">${['right1', 'back1', 'front1', 'kneel'].map((f) => `<img src="${base}${f}.png" style="height:100%;width:24%;object-fit:contain;margin:0">`).join('')}</div><b>${n}</b>${CFG.characters.walkers[n] ? '' : '<br><button class="b d" style="padding:2px 8px;margin-top:4px">Xoá</button>'}`;
+    const wgv = (CFG.characters.walkerGender || {})[n] ?? (CFG.characters.walkers[n] || {}).gender ?? '';
+    const ws = gSel(wgv); ws.style.marginTop = '4px'; el.insertBefore(ws, el.querySelector('b').nextSibling);
+    ws.onchange = async () => { const m = { ...(CFG.characters.walkerGender || {}) }; m[n] = ws.value || null; await save('characters.walkerGender', m); };
     const del = $('button', el);
     if (del) del.onclick = async () => { await api.deleteUserAsset('walkers/' + n); api.toStage({ type: 'reload-assets' }); renderAssets(); };
     wb.appendChild(el);

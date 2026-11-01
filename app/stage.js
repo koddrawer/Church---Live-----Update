@@ -60,7 +60,7 @@ async function loadAssets() {
   const sitterDefs = [...CFG.characters.sitters];
   for (const f of ua.sitters || []) {
     const url = 'church://user/sitters/' + encodeURIComponent(f);
-    if (!sitterDefs.find((s) => s.file === url)) sitterDefs.push({ file: url, walker: (CFG.characters.userSitterWalker || {})[f] || Object.keys(ua.walkers || {})[0] || 'young_blue' });
+    if (!sitterDefs.find((s) => s.file === url)) sitterDefs.push({ file: url, gender: (CFG.characters.userSitterGender || {})[f] || null });
   }
   const walkerDefs = { ...CFG.characters.walkers };
   for (const [name, frames] of Object.entries(ua.walkers || {})) if (FRAMES.every((fr) => frames.includes(fr) || ['bow', 'kneel', 'front1', 'front2'].includes(fr))) walkerDefs[name] = { base: 'church://user/walkers/' + encodeURIComponent(name) + '/' };
@@ -72,7 +72,8 @@ async function loadAssets() {
     const img = await loadImg(s.file);
     if (!img) { logp('Không tải được ảnh ngồi: ' + s.file, 'warn'); continue; }
     const sh = img.height * crop;
-    sit.push({ src: s.file, walker: s.walker, crop: warmCanvas(img, 0, 0, img.width, sh, 360, false, 0.04), cropFlip: warmCanvas(img, 0, 0, img.width, sh, 360, true, 0.04), aspect: img.width / sh });
+    const dg = (CHURCH_DEFAULTS.characters.sitters.find((d) => d.file === s.file) || {}).gender;
+    sit.push({ src: s.file, gender: s.gender !== undefined ? s.gender : (dg || null), crop: warmCanvas(img, 0, 0, img.width, sh, 360, false, 0.04), cropFlip: warmCanvas(img, 0, 0, img.width, sh, 360, true, 0.04), aspect: img.width / sh });
   }
   const wk = {};
   for (const [name, def] of Object.entries(walkerDefs)) {
@@ -85,10 +86,12 @@ async function loadAssets() {
     set.left2 = set.left2 || set.left1; set.right2 = set.right2 || set.right1; set.back2 = set.back2 || set.back1;
     set.front1 = set.front1 || set.back1; set.front2 = set.front2 || set.front1;
     set.bow = set.bow || set.back1; set.kneel = set.kneel || set.bow;
+    set.gender = (CFG.characters.walkerGender || {})[name] ?? def.gender ?? null;
+    set.name = name; set.user = !CFG.characters.walkers[name];
     wk[name] = set;
   }
   SITTERS = sit; WALKERS = wk; assetsReady = true;
-  logp(`Đã nạp ${sit.length} ảnh người ngồi, ${Object.keys(wk).length} bộ hoạt ảnh đi bộ`);
+  logp(`Đã nạp ${sit.length} ảnh người ngồi, ${Object.keys(wk).length} bộ hoạt ảnh đi bộ: ` + Object.values(wk).map((w) => w.name + '(' + ({ m: 'nam', f: 'nữ' }[w.gender] || 'chung') + ')').join(', '));
 }
 
 // ================== VIDEO NỀN ==================
@@ -343,6 +346,7 @@ function pickSlot() {
   return fs[fs.length - 1];
 }
 function seatPerson({ id, name, filler = false, donor = false, avatar = '' }) {
+  const gender = filler ? null : guessGenderFromName(name);
   if (!SITTERS.length) return null;
   const slot = pickSlot();
   if (!slot) {
@@ -352,13 +356,108 @@ function seatPerson({ id, name, filler = false, donor = false, avatar = '' }) {
     removePerson(old, true);
     return seatPerson({ id, name, filler, donor, avatar });
   }
-  const used = new Set(people.map((p) => p.sit));
-  let sitIdx = Math.floor(Math.random() * SITTERS.length);
-  for (let tries = 0; tries < 6 && used.has(sitIdx) && people.length < SITTERS.length * 3; tries++) sitIdx = Math.floor(Math.random() * SITTERS.length);
+  const sitIdx = pickSitter(gender);
   const t = now();
-  const p = { uid: nextUid++, id, name, avatar, filler, sit: sitIdx, slot, born: t, expires: filler ? Infinity : t + CFG.seating.seatSeconds, alpha: 0, fadeIn: CFG.seating.fadeSeconds, state: 'seated', leaving: false, bob: rnd(0, 6.28) };
+  const p = { uid: nextUid++, id, name, avatar, filler, gender, genderSrc: gender ? 'name' : null, sit: sitIdx, slot, born: t, expires: filler ? Infinity : t + CFG.seating.seatSeconds, alpha: 0, fadeIn: CFG.seating.fadeSeconds, state: 'seated', leaving: false, bob: rnd(0, 6.28) };
   slot.occupied = p; people.push(p);
+  if (!filler) enrichPerson(p);
   return p;
+}
+// ---- giới tính & avatar ----
+function pickSitter(g) {
+  const all = SITTERS.map((s, i) => i);
+  let cand = g ? all.filter((i) => SITTERS[i].gender === g) : all;
+  if (!cand.length) cand = all.filter((i) => !SITTERS[i].gender);
+  if (!cand.length) cand = all;
+  const used = new Map(); for (const p of people) used.set(p.sit, (used.get(p.sit) || 0) + 1);
+  const min = Math.min(...cand.map((i) => used.get(i) || 0));
+  const best = cand.filter((i) => (used.get(i) || 0) === min);
+  return best[Math.floor(Math.random() * best.length)];
+}
+const walkerUse = new Map();
+function pickWalker(g) {
+  const all = Object.values(WALKERS);
+  if (!all.length) return null;
+  // bộ chưa gắn giới tính (chung) luôn được tính vào
+  let cand = g ? all.filter((w) => w.gender === g || !w.gender) : all;
+  if (!cand.length) cand = all;
+  const min = Math.min(...cand.map((w) => walkerUse.get(w.name) || 0));
+  const best = cand.filter((w) => (walkerUse.get(w.name) || 0) === min);
+  const pick = best[Math.floor(Math.random() * best.length)];
+  walkerUse.set(pick.name, (walkerUse.get(pick.name) || 0) + 1);
+  return pick.name;
+}
+const strip = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd');
+const NAME_F = new Set('thi lan hoa mai linh trang huong ngoc thao hang nhung yen vy nga nhi thu ha hanh hien huyen loan ly nguyet oanh phuong quyen thuy tram tuyet uyen van xuan diep dieu giang hong kieu lien lieu nhan thu thuy trinh chau dung2 my my2 hue tham tien2 nhu quynh ngan ngoc anh2 maria anna teresa teresa lucia martha marta rosa agnes cecilia catarina monica isave madalena elizabeth mary sarah emma olivia sophia anna jessica jennifer emily lisa linda susan karen nancy betty helen sandra donna carol ruth sharon michelle laura amy kim angela melissa rebecca stephanie nicole hannah grace chloe lily zoe mia ella ava girl gai chi me co ba2 baby2 lady queen princess miss ms mrs nu sister mama mom wife vo'.split(' '));
+const NAME_M = new Set('van hung dung cuong tuan hai long nam quang duc thang phuc khoa bao huy hoang kien lam loc manh nghia nhan2 phong quan son tai thanh2 thien toan trung tung vinh viet vu dat dinh duy hieu hung khoi luan nguyen phat thinh tien tri trong minh giuse phero gioan phaolo anton daminh giacobe phanxico micae gabriel gioakim john james robert michael william david richard joseph thomas charles daniel matthew anthony mark paul steven andrew kevin brian george edward ryan jacob gary eric peter jack henry boy trai ong bo chu bac anh3 mr king prince bro brother dad papa husband chong'.split(' '));
+const EMO_F = /[🌸🌷💅👸💖💕🎀🦋👩💄🌺💗💞👧🧚]/u, EMO_M = /[👨🧔👦🤴💪⚽]/u;
+function guessGenderFromName(name) {
+  if (!name || CFG.characters.genderMode === 'off') return null;
+  let f = 0, m = 0;
+  if (EMO_F.test(name)) f += 1; if (EMO_M.test(name)) m += 1;
+  const toks = strip(name).split(/[^a-z]+/).filter(Boolean);
+  toks.forEach((t, i) => {
+    const w = i === toks.length - 1 ? 1.5 : 1;   // tên gọi tiếng Việt thường ở cuối
+    if (t === 'thi') f += 3; if (t === 'van') m += 2;
+    if (NAME_F.has(t)) f += w; if (NAME_M.has(t)) m += w;
+  });
+  // tên dính liền kiểu "lannguyen99": dò từ đầu chuỗi
+  if (!f && !m && toks[0] && toks[0].length > 4) { for (const n of NAME_F) if (n.length >= 3 && toks[0].startsWith(n)) { f += 0.5; break; } for (const n of NAME_M) if (n.length >= 3 && toks[0].startsWith(n)) { m += 0.5; break; } }
+  if (f > m) return 'f'; if (m > f) return 'm'; return null;
+}
+let faceReady = null;
+function loadFaceApi() {
+  if (faceReady) return faceReady;
+  faceReady = new Promise((res) => {
+    const sc = document.createElement('script'); sc.src = 'assets/faceapi/face-api.js';
+    sc.onload = async () => {
+      try {
+        const tf = faceapi.tf;
+        let ok = false;
+        for (const b of ['webgl', 'cpu']) { try { if (await tf.setBackend(b)) { await tf.ready(); ok = true; break; } } catch {} }
+        if (!ok) throw new Error('không khởi tạo được TensorFlow');
+        const base = 'assets/faceapi';
+        await faceapi.nets.tinyFaceDetector.loadFromUri(base);
+        await faceapi.nets.ageGenderNet.loadFromUri(base);
+        logp('Đã bật nhận diện giới tính qua avatar'); res(true);
+      } catch (e) { window.__faceErr = e.message; logp('Không nạp được bộ nhận diện khuôn mặt: ' + e.message, 'warn'); res(false); }
+    };
+    sc.onerror = () => res(false);
+    document.head.appendChild(sc);
+  });
+  return faceReady;
+}
+let faceChain = Promise.resolve();
+function detectGender(img) {
+  const job = faceChain.then(async () => {
+    if (!(await loadFaceApi())) return null;
+    try {
+      const r = await faceapi.detectSingleFace(img, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.4 })).withAgeAndGender();
+      if (!r || r.genderProbability < (CFG.characters.faceMinConf || 0.72)) return null;
+      return { g: r.gender === 'female' ? 'f' : 'm', p: r.genderProbability };
+    } catch { return null; }
+  });
+  faceChain = job.catch(() => {});
+  return job;
+}
+async function loadAvatar(url) {
+  if (!url) return null;
+  let src = url;
+  if (/^https?:/i.test(url)) { try { src = api.fetchUrl ? ((await api.fetchUrl(url)) || null) : url; } catch { src = null; } }
+  if (!src) return null;
+  return await new Promise((res) => { const i = new Image(); i.onload = () => res(i); i.onerror = () => res(null); i.src = src; });
+}
+async function enrichPerson(p) {
+  if (!p.avatar) return;
+  const img = await loadAvatar(p.avatar);
+  if (!img) return;
+  p.avatarImg = img;
+  if (CFG.characters.genderMode !== 'auto') return;
+  const r = await detectGender(img);
+  if (!r) return;
+  p.gender = r.g; p.genderSrc = 'face';
+  // vừa mới hiện thì đổi luôn ảnh ngồi cho đúng giới tính
+  if (p.state === 'seated' && !p.leaving && now() - p.born < 2.5 && SITTERS[p.sit] && SITTERS[p.sit].gender && SITTERS[p.sit].gender !== r.g) p.sit = pickSitter(r.g);
 }
 function removePerson(p, quick) { p.leaving = true; p.leaveStart = now(); p.leaveDur = quick ? 0.4 : CFG.seating.fadeSeconds; }
 function findPerson(id) { return people.find((p) => p.id === id && !p.leaving); }
@@ -389,6 +488,8 @@ function onGift(ev) {
   const total = ev.total ?? (ev.diamonds || 0) * (ev.count || 1);
   if (total < CFG.donate.minDiamonds && !ev.sim) return;
   // gộp nếu đang đi / đang chờ
+  const ex = findPerson(ev.id);
+  if (ex && !ex.avatar && ev.avatar) { ex.avatar = ev.avatar; enrichPerson(ex); }
   const w = walkers.find((x) => x.person.id === ev.id && !x.done);
   if (w) { w.gifts.push(ev); w.count += ev.count || 1; if (w.phase === 'bless') { w.blessEnd += 3; pushBanner(w, ev); } return; }
   const q = queue.find((x) => x.id === ev.id);
@@ -415,8 +516,13 @@ function processQueue() {
 
 function startWalker(p, ev, spot, delay) {
   const sdef = SITTERS[p.sit];
-  const setName = (sdef && WALKERS[sdef.walker]) ? sdef.walker : Object.keys(WALKERS)[0];
+  const gender = p.gender || (sdef && sdef.gender) || null;
+  const setName = pickWalker(gender);
   if (!setName) return;
+  const wg = WALKERS[setName].gender;
+  // ảnh ngồi khi quay về ghế khớp giới tính với hoạt ảnh
+  if (wg && sdef && sdef.gender && sdef.gender !== wg) p.sit = pickSitter(wg);
+  toPanel({ type: 'log', msg: `${p.name}: giới tính ${({ m: 'nam', f: 'nữ' }[gender] || 'chưa rõ')}${p.genderSrc ? ' (' + (p.genderSrc === 'face' ? 'avatar' : 'tên') + ')' : ''} → hoạt ảnh "${setName}"` });
   const s = p.slot, d = CFG.donate, g = G.g;
   const dir = s.side === 'L' ? 1 : -1; // hướng ra lối đi
   const inner = G.innerL(s.y);
@@ -528,7 +634,7 @@ function pushBanner(w, ev) {
   if (!CFG.donate.showBanner) return;
   const o = { name: cleanName(w.person.name), gift: ev.gift || 'quà', count: w.count };
   banners = banners.filter((b) => b.w !== w);
-  banners.push({ w, title: fmt(CFG.donate.banner, o), sub: fmt(CFG.donate.bannerSub, o), start: now(), end: w.blessEnd || now() + CFG.donate.blessSeconds });
+  banners.push({ w, title: fmt(CFG.donate.banner, o), sub: fmt(CFG.donate.bannerSub, o), name: o.name, start: now(), end: w.blessEnd || now() + CFG.donate.blessSeconds });
 }
 function spawnSparkle(w, burst) {
   const h = standH(w.rail), foot = G.footOfRail(w.rail);
@@ -651,7 +757,7 @@ function drawNames() {
   for (const t of tags) nameTag(t.txt, t.x, t.y, t.size, t.a * (t.dim ? 0.35 : 1), t.gold);
 }
 function drawBanners(t) {
-  const list = banners.slice(-2);
+  const list = banners.slice(-3);
   list.forEach((b, i) => {
     const inA = clamp((t - b.start) / 0.6, 0, 1), outA = clamp((b.end + 1 - t) / 1, 0, 1), a = Math.min(inA, outA);
     if (a <= 0) return;
@@ -664,15 +770,37 @@ function drawBanners(t) {
     gr.addColorStop(0, 'rgba(40,20,4,0)'); gr.addColorStop(0.18, 'rgba(40,20,4,0.72)'); gr.addColorStop(0.82, 'rgba(40,20,4,0.72)'); gr.addColorStop(1, 'rgba(40,20,4,0)');
     ctx.fillStyle = gr; ctx.fillRect(W / 2 - gw / 2, cy - gh / 2, gw, gh);
     ctx.fillStyle = 'rgba(255,214,120,0.85)'; ctx.fillRect(W / 2 - 300, cy - gh / 2, 600, 2); ctx.fillRect(W / 2 - 300, cy + gh / 2 - 2, 600, 2);
-    let fs = 64; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
-    while (ctx.measureText(b.title).width > 860 && fs > 30) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
+    const showAv = CFG.donate.bannerAvatar !== false;
+    const av = 92, gap = showAv ? 22 : 0, avW = showAv ? av : 0;
+    let fs = 60; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
+    while (ctx.measureText(b.title).width + avW + gap > 860 && fs > 28) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
+    const tw = ctx.measureText(b.title).width, total = avW + gap + tw, x0 = W / 2 - total / 2, ty = b.sub ? cy - 14 : cy;
+    if (showAv) drawAvatar(b.w.person, x0 + av / 2, ty, av / 2, b.name);
+    ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(255,190,80,0.9)'; ctx.shadowBlur = 18;
-    ctx.fillStyle = '#ffe9b0'; ctx.fillText(b.title, W / 2, cy - 14);
-    ctx.shadowBlur = 0;
+    ctx.fillStyle = '#ffe9b0'; ctx.fillText(b.title, x0 + avW + gap, ty);
+    ctx.shadowBlur = 0; ctx.textAlign = 'center';
     ctx.font = `500 30px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = '#f6dcae';
     if (b.sub) ctx.fillText(b.sub, W / 2, cy + 38);
     ctx.restore();
   });
+}
+function drawAvatar(p, cx, cy, r, name) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(255,200,90,0.9)'; ctx.shadowBlur = 16;
+  ctx.beginPath(); ctx.arc(cx, cy, r + 4, 0, Math.PI * 2); ctx.fillStyle = '#e8b85c'; ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.closePath(); ctx.clip();
+  if (p.avatarImg) {
+    const im = p.avatarImg, s = Math.min(im.width, im.height);
+    ctx.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, cx - r, cy - r, r * 2, r * 2);
+  } else {
+    const g = ctx.createLinearGradient(cx, cy - r, cx, cy + r); g.addColorStop(0, '#7a4a1c'); g.addColorStop(1, '#3a200a');
+    ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    ctx.fillStyle = '#ffe3a0'; ctx.font = `700 ${r * 1.05}px BeVN, "Segoe UI", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(([...String(name || '?').trim()][0] || '?').toUpperCase(), cx, cy + r * 0.05);
+  }
+  ctx.restore();
 }
 function drawTitle() {
   if (!CFG.scene.showTitle || !CFG.scene.title) return;
@@ -756,7 +884,8 @@ api.onCmd((m) => {
   if (m.type === 'sim-gift') {
     let id = 'sim' + Math.random(), name = m.name || simName();
     if (m.seated) { const p = people.filter((x) => !x.filler && x.state === 'seated' && !x.leaving)[Math.floor(Math.random() * namedCount())]; if (p) { id = p.id; name = p.name; } }
-    onGift({ id, name, gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: 1, total: 1, sim: true });
+    if (m.avatar && !findPerson(id)) onJoin({ id, name, avatar: m.avatar });
+    onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: 1, total: 1, sim: true });
   }
   if (m.type === 'clear') { for (const p of people) if (!p.filler && p.state === 'seated') removePerson(p, true); queue = []; }
   if (m.type === 'sermon-next') sermonSkip();
@@ -798,5 +927,5 @@ document.addEventListener('click', () => AC.resume());
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);
   }
 })();
-window.__church = { laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
+window.__church = { loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
 })();

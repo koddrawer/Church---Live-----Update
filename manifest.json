@@ -1,10 +1,42 @@
 {
-  "version": "1.0.2",
-  "notes": "Chuyển sang repo Church---Live-----Update; nhân vật chỉ đi trong lối đi giữa",
+  "version": "1.0.3",
+  "notes": "Chọn hoạt ảnh theo giới tính (avatar + tên), dùng cả bộ hoạt ảnh tự thêm, băng chúc phúc có avatar",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T19:25:07.899Z",
+  "date": "2026-11-01T19:55:15.578Z",
   "files": [
+    {
+      "path": "assets/faceapi/LICENSE.txt",
+      "size": 1067,
+      "sha256": "9a3442b79acaf4fbc7c2e07b7e2d8f84af9bb3871bf08a69d80304ab00640e9a"
+    },
+    {
+      "path": "assets/faceapi/age_gender_model-weights_manifest.json",
+      "size": 8392,
+      "sha256": "74b60bf3ebf981bf4e661e9cca3a185614e10b25d797118b62e2a68d3ff2569f"
+    },
+    {
+      "path": "assets/faceapi/age_gender_model.bin",
+      "size": 429708,
+      "sha256": "49f92bbc0afef2342c4385e4a2b0acb6d7a727c6f0aa539499719a81acf9abaa",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/faceapi/face-api.js",
+      "size": 1333943,
+      "sha256": "0160f7af3a8c78cece45c7ecc765383bad74becfd438bb787cdd627b2d6f2cf6"
+    },
+    {
+      "path": "assets/faceapi/tiny_face_detector_model-weights_manifest.json",
+      "size": 3219,
+      "sha256": "5d1af4849ac48d5b985f4a9b16010c512353ddd6fcc63d50fd0bc9e9e64296e5"
+    },
+    {
+      "path": "assets/faceapi/tiny_face_detector_model.bin",
+      "size": 193321,
+      "sha256": "b7503ce7df31039b1c43316a9b865cab6a70dd748cc602d3fa28b551503c3871",
+      "enc": "b64"
+    },
     {
       "path": "assets/fonts/OFL-bevietnam.txt",
       "size": 6476,
@@ -257,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 10990,
-      "sha256": "0ebae65c97609191240acbc31f8433beec8a108375ce4b0d2ff97a66d597dce7"
+      "size": 11243,
+      "sha256": "cc12f2a89142ded0a6fdb54645579cb6794380ad19c07047b938f1fc1025fec9"
     },
     {
       "path": "fonts.css",
@@ -267,13 +299,13 @@
     },
     {
       "path": "panel.html",
-      "size": 22994,
-      "sha256": "03306e0b4261be3c42b7941555d37d13968f7a671c64154a4e2f1693c546eab9"
+      "size": 23633,
+      "sha256": "bcdb8d3a961bc0635ef111cbe72a93b9b0bbf7ef33533f8c24c85951c3a9d1f5"
     },
     {
       "path": "panel.js",
-      "size": 15557,
-      "sha256": "b32e92e728930d8cbe7cc2b3cab58edd3e207f929cd311c0d875f5b8e82329d2"
+      "size": 16219,
+      "sha256": "c2d31b6c51f2e4d3a6c335d9e70af7897c3b236cf2436bc906b78e5d43bd7a14"
     },
     {
       "path": "slicer.js",
@@ -287,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 45033,
-      "sha256": "ec4bcf562e9d56fc355d8bd827957707e49bfef41fe2db03ef4026f1d6ba35dc"
+      "size": 53786,
+      "sha256": "f7ac99ff3a40edcdde0ea20ac4867235fa1ef6e00d5b57ae20384100c513e004"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "b6f433f3e0920fc721300367fdde4b94b96b74c78db1070d58ecd927116da50a"
+      "sha256": "7af2ff43c2a60cd6be901ffd180a51e6e590a00f158460adcf8277f9ad6e4d6a"
     }
   ]
 }

@@ -54,7 +54,8 @@ window.CHURCH_DEFAULTS = {
     walkFps: 3.2,
     speakBlessing: true,
     blessSpeech: 'Cầu Chúa ban phước lành cho {name}. Amen.',
-    banner: '✝ {name} được chúc phúc',
+    banner: '{name} đã được chúc phúc',
+    bannerAvatar: true,     // hiện avatar trước tên
     bannerSub: 'đã dâng {gift} ×{count}',
     showBanner: true,
     seatAfterSeconds: 20
@@ -94,22 +95,26 @@ window.CHURCH_DEFAULTS = {
     }
   },
   characters: {
-    // mỗi ảnh ngồi gán với bộ hoạt ảnh đi bộ dùng khi donate
+    // giới tính từng ảnh ngồi: 'm' nam, 'f' nữ, null = chung
     sitters: [
-      { file: 'church://app/assets/sitters/sit1.png', walker: 'elder_red' },
-      { file: 'church://app/assets/sitters/sit2.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit3.png', walker: 'elder_red' },
-      { file: 'church://app/assets/sitters/sit4.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit5.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit6.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit7.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit8.png', walker: 'young_blue' },
-      { file: 'church://app/assets/sitters/sit9.png', walker: 'young_blue' }
+      { file: 'church://app/assets/sitters/sit1.png', gender: 'm' },
+      { file: 'church://app/assets/sitters/sit2.png', gender: 'm' },
+      { file: 'church://app/assets/sitters/sit3.png', gender: 'm' },
+      { file: 'church://app/assets/sitters/sit4.png', gender: 'm' },
+      { file: 'church://app/assets/sitters/sit5.png', gender: 'm' },
+      { file: 'church://app/assets/sitters/sit6.png', gender: 'f' },
+      { file: 'church://app/assets/sitters/sit7.png', gender: 'f' },
+      { file: 'church://app/assets/sitters/sit8.png', gender: 'f' },
+      { file: 'church://app/assets/sitters/sit9.png', gender: 'f' }
     ],
     walkers: {
-      young_blue: { base: 'church://app/assets/walkers/young_blue/' },
-      elder_red: { base: 'church://app/assets/walkers/elder_red/' }
+      young_blue: { base: 'church://app/assets/walkers/young_blue/', gender: 'm' },
+      elder_red: { base: 'church://app/assets/walkers/elder_red/', gender: 'm' }
     },
+    walkerGender: {},       // giới tính các bộ hoạt ảnh (ghi đè), vd { woman_blue: 'f' }
+    userSitterGender: {},
+    genderMode: 'auto',     // 'auto' = avatar + tên, 'name' = chỉ theo tên, 'off' = ngẫu nhiên
+    faceMinConf: 0.72,
     blessPose: 'kneel'  // 'kneel' = quỳ, 'bow' = đứng cúi đầu
   },
   window: { stageOnTop: false },

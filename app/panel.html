@@ -167,6 +167,7 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Cha sứ đọc lời chúc</label><input type="checkbox" data-k="donate.speakBlessing"></div>
       <div class="row"><label>Lời chúc</label><input type="text" data-k="donate.blessSpeech" style="flex:1"></div>
       <div class="row"><label>Hiện băng chữ</label><input type="checkbox" data-k="donate.showBanner"></div>
+      <div class="row"><label>Hiện avatar trước tên</label><input type="checkbox" data-k="donate.bannerAvatar"></div>
       <div class="row"><label>Dòng chính</label><input type="text" data-k="donate.banner" style="flex:1"></div>
       <div class="row"><label>Dòng phụ</label><input type="text" data-k="donate.bannerSub" style="flex:1"></div>
       <p class="hint">Biến: {name} tên, {gift} tên quà, {count} số lượng.</p>
@@ -245,7 +246,9 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><button class="b" id="btnGeoReset">Khôi phục phối cảnh gốc</button></div>
     </div>
     <div class="card" style="grid-column:1/-1">
-      <h3>Người cầu nguyện (ảnh ngồi) → bộ hoạt ảnh khi đi lên</h3>
+      <h3>Người cầu nguyện (ảnh ngồi) & giới tính</h3>
+      <div class="row"><label>Chọn hoạt ảnh theo giới tính</label><select data-k="characters.genderMode"><option value="auto">Tự nhận biết (avatar + tên)</option><option value="name">Chỉ đoán theo tên</option><option value="off">Ngẫu nhiên</option></select></div>
+      <p class="hint">Người xem nữ → ảnh ngồi & hoạt ảnh “Nữ”, nam → “Nam”. Bộ để “Chung” dùng được cho cả hai. Không đoán được thì chọn ngẫu nhiên, luân phiên đều giữa các bộ.</p>
       <div class="thumbs" id="sitters"></div>
       <div class="row"><button class="b" id="btnAddSitter">+ Thêm ảnh ngồi (PNG nền trong suốt)</button><button class="b" id="btnOpenAssets">Mở thư mục tài nguyên</button><button class="b" id="btnReloadAssets">Nạp lại</button></div>
     </div>
