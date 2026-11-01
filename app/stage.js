@@ -530,6 +530,7 @@ function ensureFillers() {
 // ---- sự kiện live ----
 function onJoin(ev) {
   if (!assetsReady) return;
+  if (ev.type !== 'gift' && !ev.noGreet) addGreet(ev);
   const ex = findPerson(ev.id);
   if (ex) { if (ex.state === 'seated') ex.expires = now() + CFG.seating.seatSeconds; return; }
   if (namedCount() >= CFG.seating.maxSeated) {
@@ -546,7 +547,7 @@ function onGift(ev) {
   if (total < CFG.donate.minDiamonds && !ev.sim) return;
   const tier = tierFor(total);
   let hold = false;
-  if (tier) { enqueueVideo(ev, tier); hold = !!tier.walk && CFG.donate.walkAfterVideo; if (!tier.walk) { const p0 = findPerson(ev.id); if (p0 && !p0.avatar && ev.avatar) { p0.avatar = ev.avatar; enrichPerson(p0); } return; } }
+  if (tier) { enqueueVideo(ev, tier, ++giftSeq); hold = !!tier.walk && CFG.donate.walkAfterVideo; if (!tier.walk) { const p0 = findPerson(ev.id); if (p0 && !p0.avatar && ev.avatar) { p0.avatar = ev.avatar; enrichPerson(p0); } return; } }
   // gộp nếu đang đi / đang chờ
   const ex = findPerson(ev.id);
   if (ex && !ex.avatar && ev.avatar) { ex.avatar = ev.avatar; enrichPerson(ex); }
@@ -554,7 +555,7 @@ function onGift(ev) {
   if (w) { w.gifts.push(ev); w.count += ev.count || 1; if (w.phase === 'bless') { w.blessEnd += 3; pushBanner(w, ev); } return; }
   const q = queue.find((x) => x.id === ev.id);
   if (q) { q.count += ev.count || 1; if (hold) q.holdVideo = true; return; }
-  queue.push({ ...ev, count: ev.count || 1, at: now(), holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
+  queue.push({ ...ev, count: ev.count || 1, at: now(), seq: ++giftSeq, holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
 }
 function altarSpots() {
   const g = G.g, s = g.altarSpread; return [g.centerX, g.centerX - s, g.centerX + s, g.centerX - 2 * s, g.centerX + 2 * s];
@@ -575,7 +576,10 @@ function processQueue() {
   const usedSpots = new Set(act.filter((w) => w.spot != null && !['down', 'vanish'].includes(w.phase)).map((w) => w.spot));
   const spot = altarSpots().findIndex((_, i) => !usedSpots.has(i));
   if (spot < 0) return;
-  const qi = queue.findIndex((q) => !q.holdVideo);
+  // video chờ phát chặn những lượt đi đến sau nó (giữ đúng thứ tự donate)
+  if (vcur || vq.loading) return;
+  const vSeq = vq.length ? vq[0].seq : Infinity;
+  const qi = queue.findIndex((q) => !q.holdVideo && (q.seq ?? 0) < vSeq);
   if (qi < 0) return;
   const ev = queue.splice(qi, 1)[0];
   let p = findPerson(ev.id);
@@ -726,8 +730,9 @@ const vidGain = AC.createGain(); vidGain.connect(master);
 try { AC.createMediaElementSource(vidEl).connect(vidGain); } catch {}
 let vq = [], vcur = null;
 const videoPlaying = () => !!vcur;
-function enqueueVideo(ev, tier) {
-  const it = { ev, tier, name: cleanName(ev.name), avatar: ev.avatar, count: ev.count || 1 };
+let giftSeq = 0;
+function enqueueVideo(ev, tier, seq) {
+  const it = { seq, ev, tier, name: cleanName(ev.name), avatar: ev.avatar, count: ev.count || 1 };
   const p = findPerson(ev.id); if (p) it.person = p;
   loadAvatar(ev.avatar).then((img) => { it.avatarImg = img || (p && p.avatarImg) || null; });
   vq.push(it);
@@ -748,6 +753,9 @@ async function stepVideo() {
     return;
   }
   if (!vq.length || vq.loading) return;
+  // đợi những người đang đi lên / đang được chúc phúc xong, và các lượt donate trước video
+  if (walkers.some((w) => !w.done && (APPROACH.includes(w.phase) || w.phase === 'bless'))) return;
+  if (queue.some((q) => (q.seq ?? 0) < vq[0].seq)) return;
   const it = vq.shift();
   const files = it.tier.videos || []; if (!files.length) return;
   const f = files[Math.floor(Math.random() * files.length)];
@@ -764,6 +772,7 @@ async function stepVideo() {
   toPanel({ type: 'blessed', name: it.ev.name, gift: it.ev.gift, count: it.count });
 }
 function drawVideo(t) {
+  window.__vcur = vcur ? vcur.name : null;
   if (!vcur) return;
   const a = Math.min(clamp((t - vcur.start) / 0.6, 0, 1), vcur.ending ? clamp(1 - (t - vcur.ending) / 0.7, 0, 1) : 1);
   if (a <= 0) return;
@@ -812,7 +821,7 @@ function layoutSub(S, font, w) {
 }
 function drawSubtitles(t) {
   const c = CFG.subtitles; if (!c || !c.enabled || !SUB.sents.length || !CFG.audio.sermonEnabled) return;
-  const x = c.x, y = c.y, w = c.w, h = c.h, pad = 22, fs = c.fontSize, lh = fs * 1.32;
+  const k = c.scale || 1, x = c.x, y = c.y, w = c.w * k, h = c.h * k, pad = 22 * k, fs = c.fontSize * k, lh = fs * 1.32;
   const font = `700 ${fs}px Cormorant, Georgia, serif`;
   const key = SUB.changed + '|' + fs + '|' + w;
   if (!subLayout || subLayout.key !== key) subLayout = { key, lines: layoutSub(SUB, font, w - pad * 2), scroll: 0 };
@@ -968,38 +977,98 @@ function drawNames() {
   tags.reverse();
   for (const t of tags) nameTag(t.txt, t.x, t.y, t.size, t.a * (t.dim ? 0.35 : 1), t.gold);
 }
+function bannerAvoid() {
+  const z = [];
+  const f = CFG.donate.faceZone; if (f) z.push(f);                      // mặt Chúa
+  const sc = CFG.subtitles || {}; if (sc.enabled) z.push(subRect());
+  const gc = CFG.greet || {}; if (gc.enabled) z.push(greetRect());
+  return z;
+}
 function drawBanners(t) {
-  const list = banners.slice(-3);
+  const d = CFG.donate, k = d.bannerScale || 1;
+  const list = banners.slice(-(d.bannerMax || 2));
+  const gw = Math.min(W, (d.bannerWidth || 900)), gh = 116 * k, sp = gh + 12 * k;
+  const zones = bannerAvoid();
+  let y = (d.bannerY ?? 110);
   list.forEach((b, i) => {
     const inA = clamp((t - b.start) / 0.6, 0, 1), outA = clamp((b.end + 1 - t) / 1, 0, 1), a = Math.min(inA, outA);
+    // tìm chỗ trống theo chiều dọc, tránh mặt Chúa và các khung chữ
+    let cy = y;
+    for (let guard = 0; guard < 8; guard++) {
+      const hit = zones.find((z) => cy + gh / 2 > z.y && cy - gh / 2 < z.y + z.h && W / 2 + gw / 2 > z.x && W / 2 - gw / 2 < z.x + z.w);
+      if (!hit) break; cy = hit.y + hit.h + gh / 2 + 8;
+    }
+    y = cy + sp;
     if (a <= 0) return;
-    // xếp từ trên xuống, tránh khung phụ đề
-    const sp = 128, sc = CFG.subtitles || {};
-    let cy = (CFG.donate.bannerY ?? 120) + i * sp - (1 - inA) * 30;
-    if (sc.enabled && cy + 64 > sc.y && cy - 64 < sc.y + sc.h) cy = sc.y + sc.h + 70 + i * sp;
+    cy -= (1 - inA) * 30;
     ctx.save(); ctx.globalAlpha = a;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    // nền
-    const gw = 900, gh = 116;
     const gr = ctx.createLinearGradient(W / 2 - gw / 2, 0, W / 2 + gw / 2, 0);
-    gr.addColorStop(0, 'rgba(40,20,4,0)'); gr.addColorStop(0.18, 'rgba(40,20,4,0.72)'); gr.addColorStop(0.82, 'rgba(40,20,4,0.72)'); gr.addColorStop(1, 'rgba(40,20,4,0)');
+    gr.addColorStop(0, 'rgba(40,20,4,0)'); gr.addColorStop(0.16, 'rgba(40,20,4,0.75)'); gr.addColorStop(0.84, 'rgba(40,20,4,0.75)'); gr.addColorStop(1, 'rgba(40,20,4,0)');
     ctx.fillStyle = gr; ctx.fillRect(W / 2 - gw / 2, cy - gh / 2, gw, gh);
-    ctx.fillStyle = 'rgba(255,214,120,0.85)'; ctx.fillRect(W / 2 - 300, cy - gh / 2, 600, 2); ctx.fillRect(W / 2 - 300, cy + gh / 2 - 2, 600, 2);
-    const showAv = CFG.donate.bannerAvatar !== false;
-    const av = 86, gap = showAv ? 20 : 0, avW = showAv ? av : 0;
-    let fs = 56; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
-    while (ctx.measureText(b.title).width + avW + gap > 860 && fs > 28) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
-    const tw = ctx.measureText(b.title).width, total = avW + gap + tw, x0 = W / 2 - total / 2, ty = b.sub ? cy - 14 : cy;
+    ctx.fillStyle = 'rgba(255,214,120,0.85)'; ctx.fillRect(W / 2 - gw * 0.33, cy - gh / 2, gw * 0.66, 2); ctx.fillRect(W / 2 - gw * 0.33, cy + gh / 2 - 2, gw * 0.66, 2);
+    const showAv = d.bannerAvatar !== false;
+    const av = (d.bannerAvatarSize || 86) * k, gap = showAv ? 20 * k : 0, avW = showAv ? av : 0;
+    let fs = 56 * k; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
+    while (ctx.measureText(b.title).width + avW + gap > gw * 0.94 && fs > 20) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
+    const tw = ctx.measureText(b.title).width, total = avW + gap + tw, x0 = W / 2 - total / 2, ty = b.sub ? cy - 14 * k : cy;
     if (showAv) drawAvatar(b.w.person, x0 + av / 2, ty, av / 2, b.name);
     ctx.textAlign = 'left';
     ctx.shadowColor = 'rgba(255,190,80,0.9)'; ctx.shadowBlur = 18;
     ctx.fillStyle = '#ffe9b0'; ctx.fillText(b.title, x0 + avW + gap, ty);
     ctx.shadowBlur = 0; ctx.textAlign = 'center';
-    ctx.font = `500 30px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = '#f6dcae';
-    if (b.sub) ctx.fillText(b.sub, W / 2, cy + 38);
+    ctx.font = `500 ${30 * k}px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = '#f6dcae';
+    if (b.sub) ctx.fillText(b.sub, W / 2, cy + 38 * k);
     ctx.restore();
   });
 }
+// ================== BẢNG CHÀO NGƯỜI VÀO LIVE ==================
+const greets = [];
+function addGreet(ev) {
+  const c = CFG.greet; if (!c || !c.enabled || !ev.name) return;
+  const ex = greets.findIndex((g) => g.id === ev.id); if (ex >= 0) greets.splice(ex, 1);
+  const g = { id: ev.id, name: cleanName(ev.name), t: now(), avatarImg: null };
+  greets.unshift(g); if (greets.length > 40) greets.length = 40;
+  if (c.avatar && ev.avatar) loadAvatar(ev.avatar).then((img) => { g.avatarImg = img; });
+}
+function greetRect() { const c = CFG.greet, k = c.scale || 1; return { x: c.x, y: c.y, w: c.w * k, h: c.h * k }; }
+function subRect() { const c = CFG.subtitles, k = c.scale || 1; return { x: c.x, y: c.y, w: c.w * k, h: c.h * k }; }
+function drawGreet(t) {
+  const c = CFG.greet; if (!c || !c.enabled) return;
+  const R0 = greetRect(), k = c.scale || 1, pad = 18 * k, fs = c.fontSize * k, rowH = fs * 1.9;
+  ctx.save();
+  const g = ctx.createLinearGradient(R0.x, 0, R0.x + R0.w, 0);
+  g.addColorStop(0, `rgba(22,11,2,${c.bgAlpha * 0.85})`); g.addColorStop(1, `rgba(22,11,2,${c.bgAlpha})`);
+  ctx.fillStyle = g; roundRect(R0.x, R0.y, R0.w, R0.h, 18 * k); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,214,120,0.55)'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  ctx.font = `700 ${fs * 1.05}px Cormorant, Georgia, serif`; ctx.fillStyle = '#ffd98a';
+  ctx.shadowColor = 'rgba(255,190,80,0.8)'; ctx.shadowBlur = 10;
+  let title = c.title || ''; while (ctx.measureText(title).width > R0.w - pad * 2 && title.length > 4) title = title.slice(0, -1);
+  ctx.fillText(title, R0.x + R0.w / 2, R0.y + pad + fs * 0.6); ctx.shadowBlur = 0;
+  const top = R0.y + pad + fs * 1.5;
+  ctx.fillStyle = 'rgba(255,214,120,0.35)'; ctx.fillRect(R0.x + pad, top, R0.w - pad * 2, 1.5);
+  ctx.beginPath(); ctx.rect(R0.x, top + 4, R0.w, R0.y + R0.h - top - 8); ctx.clip();
+  const maxRows = Math.floor((R0.y + R0.h - pad - top) / rowH);
+  const life = c.showSeconds || 0;
+  const rows = greets.filter((x) => !life || t - x.t < life).slice(0, maxRows);
+  rows.forEach((r, i) => {
+    const age = t - r.t, slide = clamp(age / 0.45, 0, 1), fresh = age < (c.highlightSeconds || 4);
+    const fade = life ? clamp((life - age) / 1.5, 0, 1) : 1;
+    const ry = top + 8 + i * rowH + rowH / 2 - (1 - slide) * rowH * 0.6;
+    ctx.globalAlpha = slide * fade * (fresh ? 1 : 0.78);
+    let x = R0.x + pad;
+    const av = fs * 1.4;
+    if (c.avatar) { drawAvatar(r, x + av / 2, ry, av / 2, r.name); x += av + 12 * k; }
+    const txt = fmt(c.item || '{name}', { name: r.name });
+    ctx.font = `${fresh ? 700 : 500} ${fs}px BeVN, "Segoe UI", sans-serif`; ctx.textAlign = 'left';
+    let s2 = txt; while (ctx.measureText(s2).width > R0.x + R0.w - pad - x && s2.length > 2) s2 = s2.slice(0, -2) + '…';
+    if (fresh) { ctx.shadowColor = 'rgba(255,190,70,0.9)'; ctx.shadowBlur = 12; ctx.fillStyle = '#ffe39a'; } else { ctx.shadowBlur = 0; ctx.fillStyle = '#f3e6d0'; }
+    ctx.fillText(s2, x, ry); ctx.shadowBlur = 0;
+  });
+  ctx.restore();
+}
+
 function drawAvatar(p, cx, cy, r, name) {
   ctx.save();
   ctx.shadowColor = 'rgba(255,200,90,0.9)'; ctx.shadowBlur = 16;
@@ -1054,6 +1123,7 @@ function render() {
   drawFX();
   drawNames();
   drawSubtitles(t);
+  drawGreet(t);
   drawBanners(t);
   drawTitle();
   drawGuides();

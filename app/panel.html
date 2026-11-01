@@ -175,6 +175,10 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Lời chúc</label><input type="text" data-k="donate.blessSpeech" style="flex:1"></div>
       <div class="row"><label>Hiện băng chữ</label><input type="checkbox" data-k="donate.showBanner"></div>
       <div class="row"><label>Hiện avatar trước tên</label><input type="checkbox" data-k="donate.bannerAvatar"></div>
+      <div class="row"><label>Cỡ băng chúc phúc</label><input type="range" min="0.5" max="1.6" step="0.02" data-k="donate.bannerScale"><span class="val"></span></div>
+      <div class="row"><label>Bề rộng băng (px)</label><input type="range" min="400" max="1080" step="10" data-k="donate.bannerWidth"><span class="val"></span></div>
+      <div class="row"><label>Cỡ avatar</label><input type="range" min="40" max="180" step="2" data-k="donate.bannerAvatarSize"><span class="val"></span></div>
+      <div class="row"><label>Số băng hiện cùng lúc</label><input type="number" min="1" max="5" data-k="donate.bannerMax"></div>
       <div class="row"><label>Vị trí băng chữ (Y)</label><input type="range" min="60" max="1800" step="5" data-k="donate.bannerY"><span class="val"></span></div>
       <div class="row"><label>Dòng chính</label><input type="text" data-k="donate.banner" style="flex:1"></div>
       <div class="row"><label>Dòng phụ</label><input type="text" data-k="donate.bannerSub" style="flex:1"></div>
@@ -263,6 +267,7 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
     <div class="card">
       <h3>Phụ đề bài giảng (cho người khiếm thính)</h3>
       <div class="row"><label>Hiện phụ đề</label><input type="checkbox" data-k="subtitles.enabled"><label style="min-width:0">Hiện tên bài</label><input type="checkbox" data-k="subtitles.showTitle"></div>
+      <div class="row"><label>Kích thước bảng (tỉ lệ)</label><input type="range" min="0.5" max="2" step="0.02" data-k="subtitles.scale"><span class="val"></span></div>
       <div class="row"><label>Cỡ chữ</label><input type="range" min="18" max="56" step="1" data-k="subtitles.fontSize"><span class="val"></span></div>
       <div class="row"><label>Vị trí X</label><input type="range" min="0" max="900" step="2" data-k="subtitles.x"><span class="val"></span></div>
       <div class="row"><label>Vị trí Y</label><input type="range" min="0" max="1800" step="2" data-k="subtitles.y"><span class="val"></span></div>
@@ -271,6 +276,21 @@ button.d{border-color:#6b2d26;color:#ffb2a8}
       <div class="row"><label>Độ đậm nền</label><input type="range" min="0" max="1" step="0.02" data-k="subtitles.bgAlpha"><span class="val"></span></div>
       <div class="row"><label>Độ mờ câu chưa đọc</label><input type="range" min="0.05" max="1" step="0.01" data-k="subtitles.dimAlpha"><span class="val"></span></div>
       <p class="hint">Khung 1080×1920. Câu đang đọc sáng vàng, câu chưa đọc mờ.</p>
+    </div>
+    <div class="card">
+      <h3>Bảng chào người vào live</h3>
+      <div class="row"><label>Hiện bảng chào</label><input type="checkbox" data-k="greet.enabled"><label style="min-width:0">Avatar</label><input type="checkbox" data-k="greet.avatar"></div>
+      <div class="row"><label>Tiêu đề</label><input type="text" data-k="greet.title" style="flex:1"></div>
+      <div class="row"><label>Dòng mỗi người</label><input type="text" data-k="greet.item" style="flex:1" placeholder="{name}"></div>
+      <div class="row"><label>Kích thước bảng (tỉ lệ)</label><input type="range" min="0.5" max="2" step="0.02" data-k="greet.scale"><span class="val"></span></div>
+      <div class="row"><label>Cỡ chữ</label><input type="range" min="14" max="48" step="1" data-k="greet.fontSize"><span class="val"></span></div>
+      <div class="row"><label>Vị trí X</label><input type="range" min="0" max="1000" step="2" data-k="greet.x"><span class="val"></span></div>
+      <div class="row"><label>Vị trí Y</label><input type="range" min="0" max="1800" step="2" data-k="greet.y"><span class="val"></span></div>
+      <div class="row"><label>Rộng</label><input type="range" min="150" max="1080" step="2" data-k="greet.w"><span class="val"></span></div>
+      <div class="row"><label>Cao</label><input type="range" min="100" max="1400" step="2" data-k="greet.h"><span class="val"></span></div>
+      <div class="row"><label>Độ đậm nền</label><input type="range" min="0" max="1" step="0.02" data-k="greet.bgAlpha"><span class="val"></span></div>
+      <div class="row"><label>Ẩn tên sau (giây, 0 = không ẩn)</label><input type="number" min="0" max="3600" data-k="greet.showSeconds"></div>
+      <p class="hint">Người mới vào hiện trên cùng, sáng vàng vài giây. Dòng chữ dùng {name}, vd “Chào {name}”.</p>
     </div>
     <div class="card">
       <h3>Căn chỉnh phối cảnh</h3>

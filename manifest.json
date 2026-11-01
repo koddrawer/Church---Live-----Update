@@ -1,9 +1,9 @@
 {
-  "version": "1.0.5",
-  "notes": "Băng chúc phúc chuyển lên phía trên, không đè lên phụ đề bài giảng",
+  "version": "1.0.6",
+  "notes": "Băng chúc phúc né mặt Chúa + chỉnh cỡ/avatar, chỉnh cỡ bảng lời giảng, bảng chào người vào live, video chờ đúng lượt",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T21:33:26.678Z",
+  "date": "2026-11-01T21:52:17.554Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32117,
-      "sha256": "e28676d4829885ee860ab789ad0b1d8b5be0c10f3bd181a5f4df5c917b6fec39"
+      "size": 32664,
+      "sha256": "42d4c81fc70f359c9c372fc7ee125e6f86d5d04dc3a9b69989253048c53ae7de"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "panel.html",
-      "size": 28150,
-      "sha256": "1db572af7421910e265195c7938284b374600c0832390880db74483914d63f78"
+      "size": 30845,
+      "sha256": "ff7e6a98fc3214caf3b2f2c8e6444fad56f12288991072e22f9d856614aabaed"
     },
     {
       "path": "panel.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 66547,
-      "sha256": "cae78e4d4f2d8874cc3ab5c0098f87673428123472badde448f37b7184cbf23f"
+      "size": 70914,
+      "sha256": "df5d3b65de4648ad149bc386e07b46a1b01045f37ec8934870dc35de00ed83fc"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "0dbbd4e0615ba5ab102dd9ec8fd6954986b1fac2ac15d751a8f63035c4137569"
+      "sha256": "24322f427a53c503a8c25fa8091e659a49b56322d61b960da8a13009ea9145d6"
     }
   ]
 }

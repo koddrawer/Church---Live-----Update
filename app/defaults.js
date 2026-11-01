@@ -182,7 +182,12 @@ window.CHURCH_DEFAULTS = {
     bannerAvatar: true,     // hiện avatar trước tên
     bannerSub: 'đã dâng {gift} ×{count}',
     showBanner: true,
-    bannerY: 120,           // vị trí băng chúc phúc (tâm băng đầu tiên, px từ trên xuống)
+    bannerY: 110,           // vị trí băng chúc phúc (tâm băng đầu tiên, px từ trên xuống)
+    bannerScale: 0.9,       // cỡ băng chúc phúc
+    bannerWidth: 900,       // bề rộng băng (px, tối đa 1080)
+    bannerAvatarSize: 86,   // cỡ avatar trên băng
+    bannerMax: 2,           // số băng hiện cùng lúc
+    faceZone: { x: 420, y: 240, w: 240, h: 180 }, // vùng mặt Chúa — băng chữ tự né
     seatAfterSeconds: 20
   },
   audio: {
@@ -242,7 +247,8 @@ window.CHURCH_DEFAULTS = {
     faceMinConf: 0.72,
     blessPose: 'kneel'  // 'kneel' = quỳ, 'bow' = đứng cúi đầu
   },
-  subtitles: { enabled: true, x: 28, y: 600, w: 410, h: 480, fontSize: 30, bgAlpha: 0.72, dimAlpha: 0.38, readAlpha: 0.64, showTitle: true },
+  subtitles: { enabled: true, scale: 1, x: 28, y: 600, w: 410, h: 480, fontSize: 30, bgAlpha: 0.72, dimAlpha: 0.38, readAlpha: 0.64, showTitle: true },
+  greet: { enabled: true, scale: 1, x: 690, y: 590, w: 360, h: 450, fontSize: 24, bgAlpha: 0.66, title: 'Chào mừng anh chị em', item: '{name}', avatar: true, showSeconds: 0, highlightSeconds: 4 },
   window: { stageOnTop: false },
   update: { autoCheck: true, autoApply: false }
 };
