@@ -973,18 +973,21 @@ function drawBanners(t) {
   list.forEach((b, i) => {
     const inA = clamp((t - b.start) / 0.6, 0, 1), outA = clamp((b.end + 1 - t) / 1, 0, 1), a = Math.min(inA, outA);
     if (a <= 0) return;
-    const cy = 1060 - (list.length - 1 - i) * 150 + (1 - inA) * 30;
+    // xếp từ trên xuống, tránh khung phụ đề
+    const sp = 128, sc = CFG.subtitles || {};
+    let cy = (CFG.donate.bannerY ?? 120) + i * sp - (1 - inA) * 30;
+    if (sc.enabled && cy + 64 > sc.y && cy - 64 < sc.y + sc.h) cy = sc.y + sc.h + 70 + i * sp;
     ctx.save(); ctx.globalAlpha = a;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     // nền
-    const gw = 900, gh = 128;
+    const gw = 900, gh = 116;
     const gr = ctx.createLinearGradient(W / 2 - gw / 2, 0, W / 2 + gw / 2, 0);
     gr.addColorStop(0, 'rgba(40,20,4,0)'); gr.addColorStop(0.18, 'rgba(40,20,4,0.72)'); gr.addColorStop(0.82, 'rgba(40,20,4,0.72)'); gr.addColorStop(1, 'rgba(40,20,4,0)');
     ctx.fillStyle = gr; ctx.fillRect(W / 2 - gw / 2, cy - gh / 2, gw, gh);
     ctx.fillStyle = 'rgba(255,214,120,0.85)'; ctx.fillRect(W / 2 - 300, cy - gh / 2, 600, 2); ctx.fillRect(W / 2 - 300, cy + gh / 2 - 2, 600, 2);
     const showAv = CFG.donate.bannerAvatar !== false;
-    const av = 92, gap = showAv ? 22 : 0, avW = showAv ? av : 0;
-    let fs = 60; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
+    const av = 86, gap = showAv ? 20 : 0, avW = showAv ? av : 0;
+    let fs = 56; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
     while (ctx.measureText(b.title).width + avW + gap > 860 && fs > 28) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
     const tw = ctx.measureText(b.title).width, total = avW + gap + tw, x0 = W / 2 - total / 2, ty = b.sub ? cy - 14 : cy;
     if (showAv) drawAvatar(b.w.person, x0 + av / 2, ty, av / 2, b.name);

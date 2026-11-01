@@ -1,9 +1,9 @@
 {
-  "version": "1.0.4",
-  "notes": "Bài giảng/lời răn/lời chúc từ tài liệu, phụ đề bài giảng, người sau đi sớm hơn, video chúc phúc 5/10/30 xu",
+  "version": "1.0.5",
+  "notes": "Băng chúc phúc chuyển lên phía trên, không đè lên phụ đề bài giảng",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T21:15:25.834Z",
+  "date": "2026-11-01T21:33:26.678Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32009,
-      "sha256": "844ad169a468f62aab1d3b5c8af8b566898bea7c92c0dc12fba4fd801b3de9be"
+      "size": 32117,
+      "sha256": "e28676d4829885ee860ab789ad0b1d8b5be0c10f3bd181a5f4df5c917b6fec39"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "panel.html",
-      "size": 27982,
-      "sha256": "5b4e7ac06be3b8c1d1ada80f1c0d6915969241447f7bb6d2088316a45148c2df"
+      "size": 28150,
+      "sha256": "1db572af7421910e265195c7938284b374600c0832390880db74483914d63f78"
     },
     {
       "path": "panel.js",
@@ -319,13 +319,13 @@
     },
     {
       "path": "stage.js",
-      "size": 66348,
-      "sha256": "41be19f3b966a79c255e19836d25de18900612d0cce8e9598123a98d77e42756"
+      "size": 66547,
+      "sha256": "cae78e4d4f2d8874cc3ab5c0098f87673428123472badde448f37b7184cbf23f"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "de4fbc1f89d72b1bf74d5bb47e990fe42990adeceaab132072cd51ab0b09a177"
+      "sha256": "0dbbd4e0615ba5ab102dd9ec8fd6954986b1fac2ac15d751a8f63035c4137569"
     }
   ]
 }

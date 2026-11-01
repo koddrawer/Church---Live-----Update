@@ -182,6 +182,7 @@ window.CHURCH_DEFAULTS = {
     bannerAvatar: true,     // hiện avatar trước tên
     bannerSub: 'đã dâng {gift} ×{count}',
     showBanner: true,
+    bannerY: 120,           // vị trí băng chúc phúc (tâm băng đầu tiên, px từ trên xuống)
     seatAfterSeconds: 20
   },
   audio: {
