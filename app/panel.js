@@ -292,7 +292,7 @@ $('#btnLiveLang').onclick = async () => {
   const tiers = (CFG.donate.tiers || []).map((t) => ({ ...t, text: P.donate.tierText }));
   merge('donate', { blessSpeech: P.donate.blessSpeech, banner: P.donate.banner, bannerSub: P.donate.bannerSub, blessSpeeches: null, tiers });
   merge('greet', P.greet);
-  raw.social = { ...(raw.social || {}), follow: { ...((raw.social || {}).follow || {}), ...P.social.follow }, share: { ...((raw.social || {}).share || {}), ...P.social.share } };
+  raw.social = { ...(raw.social || {}), join: { ...((raw.social || {}).join || {}), ...P.social.join }, follow: { ...((raw.social || {}).follow || {}), ...P.social.follow }, share: { ...((raw.social || {}).share || {}), ...P.social.share } };
   merge('scene', { liveLang: L, ...(CFG.scene.title ? { title: P.sceneTitle } : {}) });
   const patch = {}; for (const top of ['audio', 'donate', 'greet', 'social', 'scene']) patch[top] = raw[top];
   await api.setConfig(patch);

@@ -206,6 +206,19 @@ body.plocked main{opacity:.72}
       <p class="hint">Mỗi dòng một lời chúc, dùng {name} cho tên người donate.</p>
     </div>
     <div class="card">
+      <h3>🙏 Chúc phúc người mới vào live</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.join.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.join.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="1" max="20" step="0.5" data-k="social.join.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.join.floatText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời chào</label><input type="checkbox" data-k="social.join.speak"></div>
+      <div class="row"><label>Lời chào</label><input type="text" data-k="social.join.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.join.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.join.sub" style="flex:1"></div>
+      <div class="row"><label>Mỗi người tối đa 1 lần / (giây)</label><input type="number" min="0" max="86400" data-k="social.join.cooldown"></div>
+      <p class="hint">Phòng đông thì nên để “Ánh sáng tại chỗ ngồi”. Chọn “Đi lên bục” khi người vào nhiều sẽ xếp hàng rất dài. Lời chào của cha sứ dùng chung giới hạn “cách nhau ít nhất” với follow/chia sẻ.</p>
+    </div>
+    <div class="card">
       <h3>❤ Chúc phúc người theo dõi mới</h3>
       <div class="row"><label>Bật</label><input type="checkbox" data-k="social.follow.enabled"></div>
       <div class="row"><label>Cách chúc phúc</label><select data-k="social.follow.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>

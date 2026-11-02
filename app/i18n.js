@@ -108,6 +108,10 @@ const EN = {
 "Khôi phục mặc định": "Restore defaults",
 "Mỗi dòng một lời chúc, dùng {name} cho tên người donate.": "One blessing per line; use {name} for the gift sender's name.",
 "❤ Chúc phúc người theo dõi mới": "❤ Blessing for new followers",
+"🙏 Chúc phúc người mới vào live": "🙏 Blessing for new viewers",
+"Cha sứ đọc lời chào": "Priest says a welcome",
+"Lời chào": "Welcome line",
+"Phòng đông thì nên để “Ánh sáng tại chỗ ngồi”. Chọn “Đi lên bục” khi người vào nhiều sẽ xếp hàng rất dài. Lời chào của cha sứ dùng chung giới hạn “cách nhau ít nhất” với follow/chia sẻ.": "For busy rooms, use “Light at their seat”. “Walk to the altar” creates a very long queue when many people join. The priest's welcome shares the “minimum gap” limit with follows/shares.",
 "Bật": "On",
 "Cách chúc phúc": "Blessing style",
 "Ánh sáng tại chỗ ngồi (nhanh)": "Light at their seat (quick)",
@@ -331,6 +335,7 @@ window.LIVE_PRESETS = {
     donate: { blessSpeech: 'Cầu Chúa ban phước lành cho {name}. Amen.', banner: '{name} đã được chúc phúc', bannerSub: 'đã dâng {gift} ×{count}', tierText: '{name} đã được chúc phúc' },
     greet: { title: 'Chào mừng anh chị em', item: '{name}' },
     social: {
+      join: { speech: 'Chào mừng {name}. Xin Chúa chúc lành cho {name}.', floatText: '✝ Chúa chúc lành', banner: '{name} đã được chúc phúc', sub: 'chào mừng bạn đến với nhà thờ' },
       follow: { speech: 'Cảm ơn {name} đã theo dõi. Xin Chúa chúc lành cho {name}.', floatText: '✝ Chúa chúc lành', greetText: '❤ {name} đã theo dõi', banner: '{name} đã được chúc phúc', sub: 'cảm ơn bạn đã theo dõi' },
       share: { speech: 'Cảm ơn {name} đã chia sẻ buổi cầu nguyện. Xin Chúa ban bình an cho {name}.', floatText: '✝ Chúa chúc lành', greetText: '🔗 {name} đã chia sẻ buổi live', banner: '{name} đã được chúc phúc', sub: 'cảm ơn bạn đã chia sẻ buổi live' }
     },
@@ -341,6 +346,7 @@ window.LIVE_PRESETS = {
     donate: { blessSpeech: 'May God bless you, {name}. Amen.', banner: '{name} has been blessed', bannerSub: 'offered {gift} ×{count}', tierText: '{name} has been blessed' },
     greet: { title: 'Welcome, brothers and sisters', item: '{name}' },
     social: {
+      join: { speech: 'Welcome, {name}. May God bless you, {name}.', floatText: '✝ God bless you', banner: '{name} has been blessed', sub: 'welcome to our church' },
       follow: { speech: 'Thank you {name} for following. May God bless you, {name}.', floatText: '✝ God bless you', greetText: '❤ {name} followed', banner: '{name} has been blessed', sub: 'thank you for following' },
       share: { speech: 'Thank you {name} for sharing this prayer. May God grant you peace, {name}.', floatText: '✝ God bless you', greetText: '🔗 {name} shared the LIVE', banner: '{name} has been blessed', sub: 'thank you for sharing the LIVE' }
     },

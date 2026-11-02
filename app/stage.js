@@ -1305,7 +1305,7 @@ const SIM_NAMES = ['Maria Lan', 'Giuse Hùng', 'Anna Thu', 'Phêrô Minh', 'Têr
 function simName() { return SIM_NAMES[Math.floor(Math.random() * SIM_NAMES.length)] + (Math.random() < 0.3 ? ' ' + (simN++) : ''); }
 api.onCmd((m) => {
   if (!m) return;
-  if (m.type === 'sim-join') { for (let i = 0; i < (m.n || 1); i++) onJoin({ id: 'sim' + Math.random(), name: m.name || simName() }); }
+  if (m.type === 'sim-join') { for (let i = 0; i < (m.n || 1); i++) handleJoin({ type: 'join', id: 'sim' + Math.random(), name: m.name || simName(), sim: true }); }
   if (m.type === 'sim-gift') {
     let id = 'sim' + Math.random(), name = m.name || simName();
     if (m.seated) { const p = people.filter((x) => !x.filler && x.state === 'seated' && !x.leaving)[Math.floor(Math.random() * namedCount())]; if (p) { id = p.id; name = p.name; } }
@@ -1342,9 +1342,9 @@ function onSocial(ev) {
   if (!ev.sim && socialSeen.has(key) && t - socialSeen.get(key) < cd) return;
   socialSeen.set(key, t);
   const name = cleanName(ev.name);
-  addGreet({ ...ev, greetText: fmt(c.greetText || '{name}', { name }) });
-  toPanel({ type: 'log', msg: (ev.type === 'follow' ? '❤ ' + ev.name + ' đã theo dõi' : '🔗 ' + ev.name + ' đã chia sẻ buổi live') + ' → ' + (c.mode === 'walk' ? 'đi lên bục' : 'chúc phúc tại chỗ') });
-  if (c.mode === 'walk') { onJoin({ ...ev, noGreet: true }); onGift({ ...ev, social: ev.type, gift: ev.type === 'follow' ? 'theo dõi' : 'chia sẻ', count: 1, total: 0 }); return; }
+  if (ev.type !== 'join' || c.greetText) addGreet({ ...ev, greetText: fmt(c.greetText || '{name}', { name }) });
+  if (ev.type !== 'join') toPanel({ type: 'log', msg: (ev.type === 'follow' ? '❤ ' + ev.name + ' đã theo dõi' : '🔗 ' + ev.name + ' đã chia sẻ buổi live') + ' → ' + (c.mode === 'walk' ? 'đi lên bục' : 'chúc phúc tại chỗ') });
+  if (c.mode === 'walk') { onJoin({ ...ev, noGreet: true }); onGift({ ...ev, social: ev.type, gift: ev.type === 'follow' ? 'theo dõi' : ev.type === 'share' ? 'chia sẻ' : 'vào nhà thờ', count: 1, total: 0 }); return; }
   let p = findPerson(ev.id);
   if (!p) { onJoin({ ...ev, noGreet: true }); p = findPerson(ev.id); }
   if (!p) return;
@@ -1355,10 +1355,17 @@ function onSocial(ev) {
   // vài đốm sáng bay lên
   if (p.slot) for (let i = 0; i < 18; i++) fx.push({ x: p.slot.x + rnd(-40, 40), y: p.slot.headTop + rnd(0, p.slot.cropH * 0.6), vx: rnd(-10, 10), vy: rnd(-70, -15), life: rnd(1.2, 2.4), max: 2.4, r: rnd(2, 4.5) });
 }
+// người mới vào: cho ngồi + (tuỳ chọn) chúc phúc
+function handleJoin(ev) {
+  const isNew = !findPerson(ev.id);
+  onJoin(ev);
+  const c = CFG.social && CFG.social.join;
+  if (c && c.enabled && (isNew || ev.sim)) setTimeout(() => onSocial({ ...ev, type: 'join' }), Math.max(0, (CFG.seating.fadeSeconds || 1) * 1000 * 0.6));
+}
 api.onLiveEvent((ev) => {
   if (!ev) return;
   if (ev.type === 'follow' || ev.type === 'share') { onSocial(ev); return; }
-  if (ev.type === 'join') onJoin(ev);
+  if (ev.type === 'join') handleJoin(ev);
   else if (ev.type === 'chat' && CFG.seating.chatAlsoSeats) onJoin(ev);
   else if (ev.type === 'gift') { onJoin(ev); onGift(ev); }
 });

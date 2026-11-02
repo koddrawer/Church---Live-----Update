@@ -255,6 +255,10 @@ window.CHURCH_DEFAULTS = {
   // chúc phúc cho người theo dõi mới / chia sẻ buổi live
   social: {
     speakCooldown: 8,       // cha sứ đọc lời cảm ơn tối đa 1 lần mỗi N giây (tránh dồn dập)
+    join: { enabled: false, mode: 'glow', glowSeconds: 3, speak: false, cooldown: 1800,
+      speech: 'Chào mừng {name}. Xin Chúa chúc lành cho {name}.',
+      floatText: '✝ Chúa chúc lành', greetText: '',
+      banner: '{name} đã được chúc phúc', sub: 'chào mừng bạn đến với nhà thờ' },
     follow: { enabled: true, mode: 'glow', glowSeconds: 5, speak: true,
       speech: 'Cảm ơn {name} đã theo dõi. Xin Chúa chúc lành cho {name}.',
       floatText: '✝ Chúa chúc lành', greetText: '❤ {name} đã theo dõi',
