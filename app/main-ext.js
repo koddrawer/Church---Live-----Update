@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.25';
+  const EXT_VER = '1.0.26';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -51,11 +51,12 @@ module.exports = (ctx) => {
       await fsp.rename(r.audioFilePath, file);
     } finally { try { t.close(); } catch {} fsp.rm(tmp, { recursive: true, force: true }).catch(() => {}); }
   }
-  function tts({ text, voice, rate, pitch, bg }) {
+  function tts({ text, voice, rate, pitch, bg, onlyCached }) {
     voice = voice || 'vi-VN-NamMinhNeural';
     const key = crypto.createHash('sha256').update([voice, rate || '', pitch || '', text].join('|')).digest('hex').slice(0, 24);
     const file = path.join(TTS_DIR, key + '.mp3');
     if (fs.existsSync(file) && fs.statSync(file).size > 800) return Promise.resolve({ ok: true, url: 'church://tts/' + key + '.mp3', cached: true });
+    if (onlyCached) return Promise.resolve({ ok: false, notReady: true });
     if (ttsJobs.has(key)) return ttsJobs.get(key);
     const job = withSlot(async () => {
       await fsp.mkdir(TTS_DIR, { recursive: true });

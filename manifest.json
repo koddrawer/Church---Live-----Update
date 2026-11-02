@@ -1,9 +1,9 @@
 {
-  "version": "1.0.25",
-  "notes": "Tạo sẵn giọng đọc không còn bị đơ: chạy chậm, nhường câu đang giảng, tự nghỉ và thử lại khi máy chủ từ chối — khởi động lại app",
+  "version": "1.0.26",
+  "notes": "Câu chưa có giọng đọc → giảng lại từ đầu ngay, không ngừng chờ — khởi động lại app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T05:15:51.168Z",
+  "date": "2026-11-02T05:20:18.898Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32143,
-      "sha256": "6a3eeed1ded5d68ba68ab61d02ec4496425de4b296d6eecc3f2bc47bd778f382"
+      "size": 32258,
+      "sha256": "9b5106cadae08936a4fb3a73f9cfc2c8882dc336a352bcb6f65585800abbad1f"
     },
     {
       "path": "fonts.css",
@@ -299,18 +299,18 @@
     },
     {
       "path": "i18n.js",
-      "size": 24040,
-      "sha256": "6d3483ea5ba0be15742ce17f82ef6f8173dbc09917bdcf79c97c5731a5c56975"
+      "size": 24152,
+      "sha256": "31a78f8aba83b96f56a06a3df5cbc1fa3ca5fb6f030d9879850f194a2574e6c8"
     },
     {
       "path": "main-ext.js",
-      "size": 12597,
-      "sha256": "a7bc9955c056021faff2115ce05e21ce439254e96d91d2aa24860550a58bc8a5"
+      "size": 12684,
+      "sha256": "c3f29fb779d43852e209c3400527f2f655f5805238c1fcb3e658bb65f40d8061"
     },
     {
       "path": "panel.html",
-      "size": 38683,
-      "sha256": "4d9ae878964e838bf1edbd64efa089bf74facb06e1428c1d6c2a85f524d7f469"
+      "size": 38835,
+      "sha256": "6d24e08b0a963907d745d38ef7221e8dcd86ec7f690e94745519844491459ea7"
     },
     {
       "path": "panel.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 88490,
-      "sha256": "d54dc200453dbdd94a74634a25b88d524d1476bf9ed6a6ba22915b3b26bde9af"
+      "size": 90032,
+      "sha256": "dc1714c8fe457f0566cd13d3d91cbda7a18946815a334321cfb2cd0a011b05bb"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "be3abcfa0204a5c3eb285ab1e42c0e1b197585beadc89b9e37d98f7c572a9ba7"
+      "sha256": "63e84f2f9bf5fc74a64768cc5ca4da802230569e2d3397982253c11b7083accc"
     }
   ]
 }

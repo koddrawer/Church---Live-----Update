@@ -174,6 +174,7 @@ const EN = {
 "Giọng đọc đã tạo sẵn": "Speech ready",
 "máy chủ chưa trả lời, thử lại sau": "server not responding, retrying in",
 "Tự tạo sẵn giọng khi mở app": "Pre-generate speech on start",
+"Câu chưa có giọng → giảng lại từ đầu": "Missing speech → restart sermon from the beginning",
 "Câu tiếp": "Next line",
 "Giảng lại từ đầu": "Restart sermon",
 "Giọng Edge TTS cần mạng; lần đầu tạo xong sẽ lưu sẵn trên máy. Nếu lỗi, app tự dùng giọng của Windows (không có vang). Chế độ “file ghi âm”: chép mp3 vào thư mục": "Edge TTS needs internet; once generated, audio is cached on this PC. If it fails, the app falls back to a Windows voice (no reverb). “Recordings” mode: copy mp3 files into the folder",

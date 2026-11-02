@@ -283,6 +283,18 @@ function speakable(t) {
 }
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function waitGap(sec, my) { const end = Date.now() + sec * 1000; while (Date.now() < end && sermon.token === my) await sleep(100); }
+// Kiểm tra nhanh câu đã có giọng đọc sẵn chưa (file đã lưu hoặc đã tải xong trong bộ nhớ)
+const readySet = new Set();
+async function audioReady(text, lang) {
+  const a = CFG.audio, voice = voiceFor(lang), t = speakable(text);
+  const key = [voice, a.rate, a.pitch, t].join('|');
+  if (readySet.has(key)) return true;
+  try {
+    const r = await Promise.race([api.tts({ text: t, voice, rate: a.rate, pitch: a.pitch, onlyCached: true }), sleep(400).then(() => null)]);
+    if (r && r.ok) { readySet.add(key); return true; }
+  } catch {}
+  return false;
+}
 async function sayLine(text, my) {
   let buf = null; const t0 = performance.now();
   try { buf = await ttsBuffer(speakable(text), (CFG.audio.sermonLang || 'vi')); if (performance.now() - t0 > 4000 && Date.now() - (window.__slowWarn || 0) > 60000) { window.__slowWarn = Date.now(); logp('Máy chủ giọng đọc phản hồi chậm (' + ((performance.now() - t0) / 1000).toFixed(1) + 's/câu). Bấm “Tạo trước toàn bộ giọng đọc” để đọc mượt từ file đã lưu.', 'warn'); } if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
@@ -293,7 +305,10 @@ async function sayLine(text, my) {
   while ((videoPlaying() || blessSpeaking) && sermon.token === my) await sleep(250); // tạm dừng giảng khi chiếu video / cha sứ đang chúc phúc
   if (sermon.token !== my) return;
   sermon.state = 'playing';
-  if (buf) await playBuffer(buf, voiceBus); else await speakFallback(speakable(text), (CFG.audio.sermonLang || 'vi'));
+  if (buf) { await playBuffer(buf, voiceBus); return true; }
+  if (CFG.audio.restartOnMissing !== false) return false;
+  await speakFallback(speakable(text), (CFG.audio.sermonLang || 'vi'));
+  return true;
 }
 async function sermonLoop() {
   const my = ++sermon.token;
@@ -327,24 +342,36 @@ async function sermonLoop() {
       const sec = secs[order[si]]; sermon.idx = order[si] + 1; si++;
       SUB.title = sec.title;
       if (sec.title && CFG.audio.readTitles) { sermon.line = sec.title; SUB.sents = [sec.title]; SUB.cur = 0; SUB.changed = now(); await sayLine(sec.title, my); await waitGap(0.6, my); }
-      // danh sách phẳng mọi câu của mục để tải trước nhiều câu phía sau (kể cả sang đoạn mới)
-      const flat = []; sec.paras.forEach((pp) => splitSentences(pp).forEach((x) => flat.push(x)));
-      let fi = 0;
-      const prefetch = () => { for (let j = fi + 1; j <= fi + (CFG.audio.prefetch || 5) && j < flat.length; j++) ttsBuffer(speakable(flat[j]), (CFG.audio.sermonLang || 'vi')).catch(() => {}); };
-      for (const para of sec.paras) {
-        if (sermon.token !== my) break;
-        const sents = splitSentences(para);
-        SUB.sents = sents; SUB.cur = -1; SUB.changed = now(); SUB.scroll = 0;
-        for (let k = 0; k < sents.length && sermon.token === my; k++, fi++) {
-          if (!CFG.audio.sermonEnabled) break;
-          prefetch(); // tải trước vài câu tiếp theo
-          SUB.cur = k; sermon.line = sents[k]; sermon.state = 'loading';
-          await sayLine(sents[k], my);
-          await waitGap(CFG.audio.sentenceGap, my);
+      // danh sách phẳng mọi câu của mục
+      const paras = sec.paras.map(splitSentences);
+      const flat = []; paras.forEach((ss, pi) => ss.forEach((x, k) => flat.push({ pi, k, x })));
+      const L = CFG.audio.sermonLang || 'vi';
+      const prefetch = (from) => { for (let j = from + 1; j <= from + (CFG.audio.prefetch || 5) && j < flat.length; j++) ttsBuffer(speakable(flat[j].x), L).catch(() => {}); };
+      let fi = 0, lastPi = -1, restarts = 0;
+      while (fi < flat.length && sermon.token === my) {
+        if (!CFG.audio.sermonEnabled) break;
+        const it = flat[fi];
+        if (it.pi !== lastPi) {
+          if (lastPi >= 0) { SUB.cur = SUB.sents.length; await waitGap(CFG.audio.gapSeconds, my); }
+          SUB.sents = paras[it.pi]; SUB.cur = -1; SUB.changed = now(); SUB.scroll = 0; lastPi = it.pi;
         }
-        SUB.cur = SUB.sents.length;
-        await waitGap(CFG.audio.gapSeconds, my);
+        // câu chưa tạo kịp (hoặc lỗi) → không ngừng chờ, quay lại giảng từ đầu những câu đã có sẵn
+        if (fi > 0 && CFG.audio.restartOnMissing !== false && !(await audioReady(it.x, L))) {
+          ttsBuffer(speakable(it.x), L).catch(() => {}); prefetch(fi);
+          if (Date.now() - (window.__restartWarn || 0) > 120000) { window.__restartWarn = Date.now(); logp('Câu tiếp theo chưa tạo kịp giọng đọc → giảng lại từ đầu trong lúc chờ.', 'warn'); }
+          restarts++; fi = 0; lastPi = -1;
+          continue;
+        }
+        prefetch(fi);
+        SUB.cur = it.k; sermon.line = it.x; sermon.state = 'loading';
+        const ok = await sayLine(it.x, my);
+        if (ok === false && fi > 0 && CFG.audio.restartOnMissing !== false) { fi = 0; lastPi = -1; continue; }
+        if (ok === false && fi === 0) await speakFallback(speakable(it.x), L); // chưa có câu nào sẵn: giữ nhịp phụ đề
+        await waitGap(CFG.audio.sentenceGap, my);
+        fi++;
       }
+      SUB.cur = SUB.sents.length;
+      await waitGap(CFG.audio.gapSeconds, my);
       await waitGap(CFG.audio.sectionGap, my);
     } catch (e) { sermon.state = 'error: ' + e.message; await sleep(3000); }
   }
