@@ -1,9 +1,9 @@
 {
-  "version": "1.0.15",
-  "notes": "Giao diện tiếng Anh, buổi live tiếng Anh (giọng, bài giảng dịch, chữ trên màn hình)",
+  "version": "1.0.16",
+  "notes": "Bài giảng tiếng Anh chỉ còn nội dung, bỏ tiêu đề và trích dẫn chương/câu",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T00:26:00.312Z",
+  "date": "2026-11-02T02:01:47.998Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -319,8 +319,8 @@
     },
     {
       "path": "sermons_en.js",
-      "size": 17225,
-      "sha256": "8381fc99a042845559928b85590ca2ffbb7d7a51d5b498fbd9fdc57fa1fde34c"
+      "size": 15236,
+      "sha256": "3d10a77fa722d19597c98f4c47759442ca532a37d95f7f45faeed79f14c0af5c"
     },
     {
       "path": "slicer.js",
@@ -340,7 +340,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "4ca2c78ac1c3ee5773a3152a53a552e8dbba285e050e066b06746bb2d9f3673b"
+      "sha256": "dbd83519c7da2ebd69a4c85518d5643ef2befc4b00c8a5b457efd11b1371ae1f"
     }
   ]
 }
