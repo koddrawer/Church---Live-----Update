@@ -1,9 +1,9 @@
 {
-  "version": "1.0.13",
-  "notes": "Sửa lỗi kết nối TikTok — cần KHỞI ĐỘNG LẠI app sau khi cập nhật",
+  "version": "1.0.14",
+  "notes": "Chúc phúc người follow mới và chia sẻ live — khởi động lại app sau khi cập nhật",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-01T23:58:07.371Z",
+  "date": "2026-11-02T00:12:11.054Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 33072,
-      "sha256": "c3fcdda0685d32e951914b04ca9e5f5b2fb5ed00024bfd18298f7251fa737880"
+      "size": 33994,
+      "sha256": "7660e1d76fb93bf787065a313eb82f0d6206514186d81044c23e2a59b5a77ead"
     },
     {
       "path": "fonts.css",
@@ -299,18 +299,18 @@
     },
     {
       "path": "main-ext.js",
-      "size": 6068,
-      "sha256": "21a142271cdc032e3b45ae3e2416638597e636d449b19a19cfbf4e5fc408fb59"
+      "size": 6178,
+      "sha256": "8a1d0a0c8a52d514ed4fa092d343a88bba8264855020c336744c232ba33aa601"
     },
     {
       "path": "panel.html",
-      "size": 32080,
-      "sha256": "ea7aa3a10c85b97fa297a3b359a2cd8d9dbc815ed071beeb695da6a4e2816bd2"
+      "size": 35854,
+      "sha256": "cf457721409a7c1a30129a345eced31c3ab5502b574f3de66500fcac7ddb4172"
     },
     {
       "path": "panel.js",
-      "size": 23794,
-      "sha256": "474f0a7f56a9e4d2aee7297316999e22fc90ee110e5663814bede18f94d5b319"
+      "size": 24049,
+      "sha256": "b1ea1599dd2f3b27f170e76443dd1c4920146b87bc32f542f9137503e376b3f1"
     },
     {
       "path": "slicer.js",
@@ -324,13 +324,13 @@
     },
     {
       "path": "stage.js",
-      "size": 79371,
-      "sha256": "ed46f88c36be2bb776fde11d0c5bc465868c3df5a948c66efbfe9284f143a559"
+      "size": 83567,
+      "sha256": "dcbb6a6ddfdcce3813aad80af44aead97028e5e69a753b553c9499b254c01211"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "a5bc844c40428b9c20a50a60fc7dc096b062db9210d817cf60e4c4a33ab880bb"
+      "sha256": "445d79036bf2c4f38400c6c32a7b31f1fdae58396eab3e3551d373f24a4e64e1"
     }
   ]
 }

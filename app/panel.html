@@ -107,6 +107,11 @@ body.plocked main{opacity:.72}
         <button class="b p" data-sim="g30">Donate 30 xu</button>
         <button class="b" data-sim="g1x5">5 người donate liên tiếp</button>
       </div>
+      <div class="row">
+        <button class="b" data-sim="follow">❤ Follow mới</button>
+        <button class="b" data-sim="share">🔗 Chia sẻ live</button>
+        <button class="b" data-sim="followSeated">❤ Người đang ngồi follow</button>
+      </div>
       <div class="row"><button class="b d" data-sim="clear">Xoá người có tên</button><button class="b" data-sim="next">Bỏ qua câu giảng</button></div>
     </div>
     <div class="card" style="grid-column:1/-1">
@@ -196,6 +201,36 @@ body.plocked main{opacity:.72}
       <textarea id="blessList" style="min-height:150px"></textarea>
       <div class="row"><button class="b p" id="btnSaveBless">Lưu danh sách</button><button class="b" id="btnResetBless">Khôi phục mặc định</button></div>
       <p class="hint">Mỗi dòng một lời chúc, dùng {name} cho tên người donate.</p>
+    </div>
+    <div class="card">
+      <h3>❤ Chúc phúc người theo dõi mới</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.follow.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.follow.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="social.follow.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.follow.floatText" style="flex:1"></div>
+      <div class="row"><label>Dòng trên bảng chào</label><input type="text" data-k="social.follow.greetText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời cảm ơn</label><input type="checkbox" data-k="social.follow.speak"></div>
+      <div class="row"><label>Lời cảm ơn</label><input type="text" data-k="social.follow.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.follow.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.follow.sub" style="flex:1"></div>
+    </div>
+    <div class="card">
+      <h3>🔗 Chúc phúc người chia sẻ live</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.share.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.share.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="social.share.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.share.floatText" style="flex:1"></div>
+      <div class="row"><label>Dòng trên bảng chào</label><input type="text" data-k="social.share.greetText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời cảm ơn</label><input type="checkbox" data-k="social.share.speak"></div>
+      <div class="row"><label>Lời cảm ơn</label><input type="text" data-k="social.share.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.share.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.share.sub" style="flex:1"></div>
+      <div class="row"><label>Mỗi người tối đa 1 lần / (giây)</label><input type="number" min="0" max="3600" data-k="social.share.cooldown"></div>
+    </div>
+    <div class="card">
+      <h3>Follow & chia sẻ — chung</h3>
+      <div class="row"><label>Cha sứ đọc cảm ơn cách nhau ít nhất (giây)</label><input type="number" min="0" max="120" data-k="social.speakCooldown"></div>
+      <p class="hint">Mỗi người chỉ được chúc phúc follow 1 lần. Khi nhiều người follow/chia sẻ dồn dập, ánh sáng vẫn hiện cho từng người nhưng cha sứ chỉ đọc lời cảm ơn cách quãng để không ngắt bài giảng liên tục. Biến: {name}.</p>
     </div>
     <div class="card" style="grid-column:1/-1">
       <h3>Video chúc phúc theo mức xu</h3>

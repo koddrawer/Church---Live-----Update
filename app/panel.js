@@ -110,6 +110,9 @@ $$('[data-sim]').forEach((b) => b.onclick = () => {
   if (s === 'g30') api.toStage({ type: 'sim-gift', name, gift: 'Vương miện', count: 1, coins: 30 });
   if (s === 'g1x5') for (let i = 0; i < 5; i++) api.toStage({ type: 'sim-gift', gift: 'Hoa hồng', count: 1, coins: 1 });
   if (s === 'clear') api.toStage({ type: 'clear' });
+  if (s === 'follow') api.toStage({ type: 'sim-social', kind: 'follow', name });
+  if (s === 'share') api.toStage({ type: 'sim-social', kind: 'share', name });
+  if (s === 'followSeated') api.toStage({ type: 'sim-social', kind: 'follow', seated: true });
   if (s === 'next') api.toStage({ type: 'sermon-next' });
 });
 api.onLiveEvent((e) => {

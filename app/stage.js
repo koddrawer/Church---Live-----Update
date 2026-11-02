@@ -544,8 +544,8 @@ function onJoin(ev) {
 function onGift(ev) {
   if (!assetsReady) return;
   const total = ev.total ?? (ev.diamonds || 0) * (ev.count || 1);
-  if (total < CFG.donate.minDiamonds && !ev.sim) return;
-  const tier = tierFor(total);
+  if (total < CFG.donate.minDiamonds && !ev.sim && !ev.social) return;
+  const tier = ev.social ? null : tierFor(total);
   let hold = false;
   if (tier) { enqueueVideo(ev, tier, ++giftSeq); hold = !!tier.walk && CFG.donate.walkAfterVideo; if (!tier.walk) { const p0 = findPerson(ev.id); if (p0 && !p0.avatar && ev.avatar) { p0.avatar = ev.avatar; enrichPerson(p0); } return; } }
   // gộp nếu đang đi / đang chờ
@@ -702,7 +702,9 @@ function finishPerson(w, reseat) {
 function startBlessing(w) {
   chime();
   const ev = w.ev;
-  if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
+  const scw = ev.social && CFG.social ? CFG.social[ev.social] : null;
+  if (scw) { if (scw.speak) socialSpeak(fmt(scw.speech, { name: cleanName(w.person.name) })); }
+  else if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
   pushBanner(w, ev);
   for (let i = 0; i < 40; i++) spawnSparkle(w, true);
   toPanel({ type: 'blessed', name: w.person.name, gift: ev.gift, count: w.count });
@@ -710,9 +712,11 @@ function startBlessing(w) {
 function pushBanner(w, ev) {
   if (!CFG.donate.showBanner) return;
   const o = { name: cleanName(w.person.name), gift: ev.gift || 'quà', count: w.count };
+  const sc = ev.social && CFG.social ? CFG.social[ev.social] : null;
+  const tt = sc ? (sc.banner || CFG.donate.banner) : CFG.donate.banner, st = sc ? (sc.sub || '') : CFG.donate.bannerSub;
   const old = banners.find((b) => b.w === w);
-  if (old) { old.title = fmt(CFG.donate.banner, o); old.sub = fmt(CFG.donate.bannerSub, o); return; }
-  banners.push({ w, title: fmt(CFG.donate.banner, o), sub: fmt(CFG.donate.bannerSub, o), name: o.name, start: now(), shownAt: null });
+  if (old) { old.title = fmt(tt, o); old.sub = fmt(st, o); return; }
+  banners.push({ w, title: fmt(tt, o), sub: fmt(st, o), name: o.name, start: now(), shownAt: null });
 }
 function spawnSparkle(w, burst) {
   const h = standH(w.rail), foot = G.footOfRail(w.rail);
@@ -886,11 +890,25 @@ function drawSeated(p, t) {
   const h = s.cropH, w = h * sd.aspect;
   const breathe = Math.sin(t * 1.3 + p.bob) * h * 0.005;
   const x = s.x - w / 2, y = s.headTop + breathe;
+  const glow = p.glowUntil && t < p.glowUntil ? Math.min(clamp((t - p.glowStart) / 0.5, 0, 1), clamp((p.glowUntil - t) / 0.8, 0, 1)) : 0;
+  if (glow > 0) {
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const cx = s.x, cy = y + h * 0.35, r = h * (0.85 + 0.06 * Math.sin(t * 3));
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, `rgba(255,236,170,${0.6 * glow})`); g.addColorStop(0.55, `rgba(255,200,90,${0.25 * glow})`); g.addColorStop(1, 'rgba(255,180,60,0)');
+    ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+    // tia sáng nhỏ từ trên xuống
+    const bg = ctx.createLinearGradient(0, cy - h * 2.2, 0, cy);
+    bg.addColorStop(0, 'rgba(255,240,190,0)'); bg.addColorStop(1, `rgba(255,220,130,${0.35 * glow})`);
+    ctx.fillStyle = bg; ctx.beginPath(); ctx.moveTo(cx - w * 0.12, cy - h * 2.2); ctx.lineTo(cx + w * 0.12, cy - h * 2.2); ctx.lineTo(cx + w * 0.5, cy); ctx.lineTo(cx - w * 0.5, cy); ctx.closePath(); ctx.fill();
+    ctx.restore();
+  }
   ctx.save();
   ctx.beginPath(); ctx.rect(0, 0, W, s.y + 1); ctx.clip();   // lưng ghế che phần dưới
   ctx.globalAlpha = p.alpha;
   ctx.drawImage(img, x, y, w, h);
   ctx.restore();
+  p._glow = glow;
   p._head = { x: s.x + (s.side === 'R' ? -1 : 1) * w * 0.03, y: y + h * 0.02 };
 }
 function frameFor(w) {
@@ -987,6 +1005,16 @@ function drawNames() {
   }
   tags.reverse();
   for (const t of tags) nameTag(t.txt, t.x, t.y, t.size, t.a * (t.dim ? 0.35 : 1), t.gold);
+  const now_ = now();
+  for (const p of people) {
+    if (!p._glow || !p._head || !p.glowText) continue;
+    const k = clamp((now_ - p.glowStart) / (p.glowUntil - p.glowStart), 0, 1);
+    const fs = clamp(p.slot.ppm * 0.16, 18, 34) * CFG.seating.nameScale;
+    ctx.save(); ctx.globalAlpha = p._glow; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.shadowColor = 'rgba(255,190,70,0.95)'; ctx.shadowBlur = 14; ctx.fillStyle = '#ffe39a';
+    ctx.fillText(p.glowText, clamp(p._head.x, 120, W - 120), p._head.y - fs * 1.9 - k * 40);
+    ctx.restore();
+  }
 }
 function bannerAvoid() {
   const z = [];
@@ -1041,7 +1069,7 @@ const greets = [];
 function addGreet(ev) {
   const c = CFG.greet; if (!c || !c.enabled || !ev.name) return;
   const ex = greets.findIndex((g) => g.id === ev.id); if (ex >= 0) greets.splice(ex, 1);
-  const g = { id: ev.id, name: cleanName(ev.name), t: now(), avatarImg: null };
+  const g = { id: ev.id, name: cleanName(ev.name), t: now(), avatarImg: null, text: ev.greetText || null };
   greets.unshift(g); if (greets.length > 40) greets.length = 40;
   if (c.avatar && ev.avatar) loadAvatar(ev.avatar).then((img) => { g.avatarImg = img; });
 }
@@ -1074,7 +1102,7 @@ function drawGreet(t) {
     let x = R0.x + pad;
     const av = fs * 1.4;
     if (c.avatar) { drawAvatar(r, x + av / 2, ry, av / 2, r.name); x += av + 12 * k; }
-    const txt = fmt(c.item || '{name}', { name: r.name });
+    const txt = r.text || fmt(c.item || '{name}', { name: r.name });
     ctx.font = `${fresh ? 700 : 500} ${fs}px BeVN, "Segoe UI", sans-serif`; ctx.textAlign = 'left';
     let s2 = txt; while (ctx.measureText(s2).width > R0.x + R0.w - pad - x && s2.length > 2) s2 = s2.slice(0, -2) + '…';
     if (fresh) { ctx.shadowColor = 'rgba(255,190,70,0.9)'; ctx.shadowBlur = 12; ctx.fillStyle = '#ffe39a'; } else { ctx.shadowBlur = 0; ctx.fillStyle = '#f3e6d0'; }
@@ -1287,6 +1315,7 @@ api.onCmd((m) => {
   }
   if (m.type === 'clear') { for (const p of people) if (!p.filler && p.state === 'seated') removePerson(p, true); queue = []; }
   if (m.type === 'edit-layout') setEditMode(m.on);
+  if (m.type === 'sim-social') { const ps = people.filter((x) => !x.filler && x.state === 'seated' && !x.leaving); const p = m.seated && ps.length ? ps[Math.floor(Math.random() * ps.length)] : null; onSocial({ type: m.kind, id: p ? p.id : 'sim' + Math.random(), name: p ? p.name : (m.name || simName()), sim: true }); }
   if (m.type === 'sermon-next') sermonSkip();
   if (m.type === 'sermon-restart') { sermon.idx = 0; sermonRestart(); }
   if (m.type === 'speak') speakBlessing(m.text);
@@ -1298,8 +1327,37 @@ async function pretts() {
   let ok = 0;
   for (let i = 0; i < all.length; i++) { try { await ttsBuffer(speakable(all[i])); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: all.length, ok }); }
 }
+// ---- Follow / chia sẻ: chúc phúc ----
+const socialSeen = new Map();
+let lastSocialSpeak = 0;
+function socialSpeak(text) {
+  const t = now(); if (t - lastSocialSpeak < (CFG.social.speakCooldown || 0)) return;
+  lastSocialSpeak = t; speakBlessing(text);
+}
+function onSocial(ev) {
+  if (!assetsReady || !CFG.social) return;
+  const c = CFG.social[ev.type]; if (!c || !c.enabled) return;
+  const key = ev.type + '|' + ev.id, t = now();
+  const cd = ev.type === 'follow' ? 6 * 3600 : (c.cooldown || 0);
+  if (!ev.sim && socialSeen.has(key) && t - socialSeen.get(key) < cd) return;
+  socialSeen.set(key, t);
+  const name = cleanName(ev.name);
+  addGreet({ ...ev, greetText: fmt(c.greetText || '{name}', { name }) });
+  toPanel({ type: 'log', msg: (ev.type === 'follow' ? '❤ ' + ev.name + ' đã theo dõi' : '🔗 ' + ev.name + ' đã chia sẻ buổi live') + ' → ' + (c.mode === 'walk' ? 'đi lên bục' : 'chúc phúc tại chỗ') });
+  if (c.mode === 'walk') { onJoin({ ...ev, noGreet: true }); onGift({ ...ev, social: ev.type, gift: ev.type === 'follow' ? 'theo dõi' : 'chia sẻ', count: 1, total: 0 }); return; }
+  let p = findPerson(ev.id);
+  if (!p) { onJoin({ ...ev, noGreet: true }); p = findPerson(ev.id); }
+  if (!p) return;
+  if (p.state === 'seated') p.expires = Math.max(p.expires, t + (c.glowSeconds || 5) + 5);
+  p.glowStart = t + 0.4; p.glowUntil = p.glowStart + (c.glowSeconds || 5); p.glowText = fmt(c.floatText || '', { name });
+  chime();
+  if (c.speak) socialSpeak(fmt(c.speech, { name }));
+  // vài đốm sáng bay lên
+  if (p.slot) for (let i = 0; i < 18; i++) fx.push({ x: p.slot.x + rnd(-40, 40), y: p.slot.headTop + rnd(0, p.slot.cropH * 0.6), vx: rnd(-10, 10), vy: rnd(-70, -15), life: rnd(1.2, 2.4), max: 2.4, r: rnd(2, 4.5) });
+}
 api.onLiveEvent((ev) => {
   if (!ev) return;
+  if (ev.type === 'follow' || ev.type === 'share') { onSocial(ev); return; }
   if (ev.type === 'join') onJoin(ev);
   else if (ev.type === 'chat' && CFG.seating.chatAlsoSeats) onJoin(ev);
   else if (ev.type === 'gift') { onJoin(ev); onGift(ev); }

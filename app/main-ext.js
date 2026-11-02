@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.13';
+  const EXT_VER = '1.0.14';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -59,6 +59,7 @@ module.exports = (ctx) => {
       c.on(WebcastEvent.MEMBER, (d) => both('live-event', { type: 'join', ...pickUser(d.user) }));
       c.on(WebcastEvent.CHAT, (d) => both('live-event', { type: 'chat', ...pickUser(d.user), text: d.comment || d.content || '' }));
       if (WebcastEvent.FOLLOW) c.on(WebcastEvent.FOLLOW, (d) => both('live-event', { type: 'follow', ...pickUser(d.user) }));
+      c.on(WebcastEvent.SHARE || 'share', (d) => both('live-event', { type: 'share', ...pickUser(d.user) }));
       c.on(WebcastEvent.GIFT, (d) => {
         const g = d.giftDetails || d.gift || {};
         const giftType = g.giftType ?? g.type ?? d.giftType ?? 0;

@@ -251,6 +251,18 @@ window.CHURCH_DEFAULTS = {
     faceMinConf: 0.72,
     blessPose: 'kneel'  // 'kneel' = quỳ, 'bow' = đứng cúi đầu
   },
+  // chúc phúc cho người theo dõi mới / chia sẻ buổi live
+  social: {
+    speakCooldown: 8,       // cha sứ đọc lời cảm ơn tối đa 1 lần mỗi N giây (tránh dồn dập)
+    follow: { enabled: true, mode: 'glow', glowSeconds: 5, speak: true,
+      speech: 'Cảm ơn {name} đã theo dõi. Xin Chúa chúc lành cho {name}.',
+      floatText: '✝ Chúa chúc lành', greetText: '❤ {name} đã theo dõi',
+      banner: '{name} đã được chúc phúc', sub: 'cảm ơn bạn đã theo dõi' },
+    share: { enabled: true, mode: 'glow', glowSeconds: 5, speak: true, cooldown: 120,
+      speech: 'Cảm ơn {name} đã chia sẻ buổi cầu nguyện. Xin Chúa ban bình an cho {name}.',
+      floatText: '✝ Chúa chúc lành', greetText: '🔗 {name} đã chia sẻ buổi live',
+      banner: '{name} đã được chúc phúc', sub: 'cảm ơn bạn đã chia sẻ buổi live' }
+  },
   subtitles: { enabled: true, scale: 1, x: 28, y: 600, w: 410, h: 480, fontSize: 30, bgAlpha: 0.72, dimAlpha: 0.38, readAlpha: 0.64, showTitle: true },
   greet: { enabled: true, scale: 1, x: 690, y: 590, w: 360, h: 450, fontSize: 24, bgAlpha: 0.66, title: 'Chào mừng anh chị em', item: '{name}', avatar: true, showSeconds: 0, highlightSeconds: 4 },
   window: { stageOnTop: false, panelLocked: false },
