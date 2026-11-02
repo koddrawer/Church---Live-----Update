@@ -209,7 +209,8 @@ window.CHURCH_DEFAULTS = {
     videoFile: '',          // để trống = video nhà thờ mặc định
     warmTint: 0.18,
     showGuides: false,
-    layoutLocked: false,    // khóa bố cục: không kéo thả/chỉnh vị trí, cỡ các bảng
+    layoutLocked: false,
+    liveLang: 'vi',         // ngôn ngữ chữ trên màn hình (vi/en)    // khóa bố cục: không kéo thả/chỉnh vị trí, cỡ các bảng
     title: '', showTitle: false,
     geometry: {
       // vị trí mép trên lưng ghế (px, khung 1080x1920) đo từ video, hàng 0 sát bục
@@ -265,7 +266,7 @@ window.CHURCH_DEFAULTS = {
   },
   subtitles: { enabled: true, scale: 1, x: 28, y: 600, w: 410, h: 480, fontSize: 30, bgAlpha: 0.72, dimAlpha: 0.38, readAlpha: 0.64, showTitle: true },
   greet: { enabled: true, scale: 1, x: 690, y: 590, w: 360, h: 450, fontSize: 24, bgAlpha: 0.66, title: 'Chào mừng anh chị em', item: '{name}', avatar: true, showSeconds: 0, highlightSeconds: 4 },
-  window: { stageOnTop: false, panelLocked: false },
+  window: { stageOnTop: false, panelLocked: false, uiLang: 'vi' },
   update: { autoCheck: true, autoApply: false }
 };
 

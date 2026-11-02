@@ -281,11 +281,32 @@ $('#btnImport').onclick = async () => { const f = await api.pickFile({ filters: 
 $('#btnResetAll').onclick = async () => { if (!confirm('Khôi phục toàn bộ cài đặt mặc định?')) return; raw = {}; await api.replaceConfig({}); CFG = deepMerge(CHURCH_DEFAULTS, {}); fillInputs(); };
 $('#btnTtsClear').onclick = async () => { await api.ttsClear(); log('Đã xoá cache giọng đọc'); };
 
+// ---- ngôn ngữ ----
+$('#uiLang').onchange = async () => { await save('window.uiLang', $('#uiLang').value); I18N.setLang($('#uiLang').value); };
+$('#btnLiveLang').onclick = async () => {
+  const L = $('#liveLang').value, P = LIVE_PRESETS[L]; if (!P) return;
+  const msg = 'Đổi toàn bộ chữ trên màn hình, giọng và bài giảng sang ngôn ngữ này? Các câu chữ bạn đã tự sửa (băng chúc phúc, bảng chào, lời cảm ơn…) sẽ được thay bằng bản mặc định của ngôn ngữ đó.';
+  if (!confirm(I18N.t(msg))) return;
+  const merge = (top, obj) => { raw[top] = { ...(raw[top] || {}), ...obj }; };
+  merge('audio', P.audio);
+  const tiers = (CFG.donate.tiers || []).map((t) => ({ ...t, text: P.donate.tierText }));
+  merge('donate', { blessSpeech: P.donate.blessSpeech, banner: P.donate.banner, bannerSub: P.donate.bannerSub, blessSpeeches: null, tiers });
+  merge('greet', P.greet);
+  raw.social = { ...(raw.social || {}), follow: { ...((raw.social || {}).follow || {}), ...P.social.follow }, share: { ...((raw.social || {}).share || {}), ...P.social.share } };
+  merge('scene', { liveLang: L, ...(CFG.scene.title ? { title: P.sceneTitle } : {}) });
+  const patch = {}; for (const top of ['audio', 'donate', 'greet', 'social', 'scene']) patch[top] = raw[top];
+  await api.setConfig(patch);
+  CFG = deepMerge(CHURCH_DEFAULTS, raw); fillInputs();
+  $('#textLang').value = L; loadTexts();
+  log(L === 'en' ? 'Live language: English' : 'Ngôn ngữ buổi live: Tiếng Việt');
+};
 (async () => {
   const c = await api.getConfig();
   raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v;
   CFG = deepMerge(CHURCH_DEFAULTS, raw);
   fillInputs();
+  $('#uiLang').value = (CFG.window && CFG.window.uiLang) || 'vi'; $('#liveLang').value = CFG.scene.liveLang || CFG.audio.sermonLang || 'vi';
+  window.__uiLang = $('#uiLang').value; I18N.start();
   const info = await api.info();
   $('#ver').textContent = `app ${info.app} · shell ${info.shell}`;
   $('#paths').textContent = 'Dữ liệu: ' + info.userData + ' · Repo cập nhật: ' + info.repo;

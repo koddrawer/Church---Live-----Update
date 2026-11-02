@@ -1256,7 +1256,7 @@ function drawEdit() {
     const d = CFG.donate, k = d.bannerScale || 1, gw = Math.min(W, d.bannerWidth || 900), gh = 116 * k, cy = d.bannerY ?? 110;
     ctx.fillStyle = 'rgba(40,20,4,0.7)'; ctx.fillRect(W / 2 - gw / 2, cy - gh / 2, gw, gh);
     ctx.font = `700 ${50 * k}px Cormorant, Georgia, serif`; ctx.fillStyle = '#ffe9b0'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('Tên người xem đã được chúc phúc', W / 2, cy);
+    ctx.fillText(CFG.scene.liveLang === 'en' ? 'Viewer name has been blessed' : 'Tên người xem đã được chúc phúc', W / 2, cy);
   }
   for (const it of editItems()) {
     const r = it.rect;

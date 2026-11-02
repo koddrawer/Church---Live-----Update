@@ -64,6 +64,7 @@ body.plocked main{opacity:.72}
 <header>
   <h1>✝ Church Live</h1><span class="ver" id="ver"></span>
   <span class="sp"></span>
+  <select id="uiLang" title="Ngôn ngữ giao diện"><option value="vi">🇻🇳 Tiếng Việt</option><option value="en">🇬🇧 English</option></select>
   <button class="b" id="btnPanelLock" title="Khóa toàn bộ bảng điều khiển">🔓 Khóa bảng điều khiển</button>
   <span class="pill"><i class="dot" id="tkdot"></i><span id="tktxt">Chưa kết nối</span></span>
   <span class="pill"><i class="dot ok" id="audot"></i><span id="autxt">Âm thanh</span></span>
@@ -88,6 +89,8 @@ body.plocked main{opacity:.72}
       <div class="row"><label>Tự kết nối khi mở app</label><input type="checkbox" data-k="tiktok.autoConnect"></div>
       <div class="row"><label>Tự kết nối lại</label><input type="checkbox" data-k="tiktok.autoReconnect"></div>
       <div class="row"><button class="b p" id="btnConnect">Kết nối</button><button class="b" id="btnDisconnect">Ngắt</button></div>
+      <div class="row"><label>Ngôn ngữ buổi live</label><select id="liveLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select><button class="b p" id="btnLiveLang">Áp dụng</button></div>
+      <p class="hint" id="liveLangHint">Đổi giọng cha sứ, bài giảng, phụ đề, lời chúc và mọi chữ trên màn hình sang ngôn ngữ đã chọn.</p>
       <p class="hint">Người vào phòng → hiện người ngồi cầu nguyện có tên. Ai tặng quà → đứng dậy đi lên bục nhận chúc phúc.</p>
     </div>
     <div class="card">
@@ -391,6 +394,8 @@ body.plocked main{opacity:.72}
 </section>
 </main>
 <script src="defaults.js"></script>
+<script src="sermons_en.js"></script>
+<script src="i18n.js"></script>
 <script src="slicer.js"></script>
 <script src="panel.js"></script>
 </body>

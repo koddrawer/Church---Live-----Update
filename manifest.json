@@ -1,9 +1,9 @@
 {
-  "version": "1.0.14",
-  "notes": "Chúc phúc người follow mới và chia sẻ live — khởi động lại app sau khi cập nhật",
+  "version": "1.0.15",
+  "notes": "Giao diện tiếng Anh, buổi live tiếng Anh (giọng, bài giảng dịch, chữ trên màn hình)",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T00:12:11.054Z",
+  "date": "2026-11-02T00:26:00.312Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,13 +289,18 @@
     },
     {
       "path": "defaults.js",
-      "size": 33994,
-      "sha256": "7660e1d76fb93bf787065a313eb82f0d6206514186d81044c23e2a59b5a77ead"
+      "size": 34082,
+      "sha256": "b83e23d57316756926952f020011bcd07cbfa81153a1ff52e563f8803ae31902"
     },
     {
       "path": "fonts.css",
       "size": 2877,
       "sha256": "b9a7682298e0e50d4706a281f2859b276654ee2266b2a1b3307dbf10812c83fb"
+    },
+    {
+      "path": "i18n.js",
+      "size": 22100,
+      "sha256": "77d9ffe4c6fbfb3443a38f56902fe3e22307b30c8cdcfb066e7cce9c3677fef0"
     },
     {
       "path": "main-ext.js",
@@ -304,13 +309,18 @@
     },
     {
       "path": "panel.html",
-      "size": 35854,
-      "sha256": "cf457721409a7c1a30129a345eced31c3ab5502b574f3de66500fcac7ddb4172"
+      "size": 36486,
+      "sha256": "43b18f9525504aaea7b80315cd00587a2eec4750a1cfe8322c1307325a5f4685"
     },
     {
       "path": "panel.js",
-      "size": 24049,
-      "sha256": "b1ea1599dd2f3b27f170e76443dd1c4920146b87bc32f542f9137503e376b3f1"
+      "size": 25773,
+      "sha256": "9b5782e346180cfb48f7a44947e3e90da7e9bc7af265d4696ca86e69a1736b98"
+    },
+    {
+      "path": "sermons_en.js",
+      "size": 17225,
+      "sha256": "8381fc99a042845559928b85590ca2ffbb7d7a51d5b498fbd9fdc57fa1fde34c"
     },
     {
       "path": "slicer.js",
@@ -319,18 +329,18 @@
     },
     {
       "path": "stage.html",
-      "size": 817,
-      "sha256": "038e38f25bc845623c95018aa9e8e2215ca0403f5ba561c3978bad653cded3e7"
+      "size": 855,
+      "sha256": "967b0c4b208c31b31029bb51d38aedfd9798dee55659d8fd6ebce50a0abc672e"
     },
     {
       "path": "stage.js",
-      "size": 83567,
-      "sha256": "dcbb6a6ddfdcce3813aad80af44aead97028e5e69a753b553c9499b254c01211"
+      "size": 83630,
+      "sha256": "d9b861a32dcf09019caa366359544a02d8bfe1b6af528728597fc92c444bd041"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "445d79036bf2c4f38400c6c32a7b31f1fdae58396eab3e3551d373f24a4e64e1"
+      "sha256": "4ca2c78ac1c3ee5773a3152a53a552e8dbba285e050e066b06746bb2d9f3673b"
     }
   ]
 }
