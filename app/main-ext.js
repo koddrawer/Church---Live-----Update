@@ -5,10 +5,80 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.14';
+  const EXT_VER = '1.0.20';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
+  const fs = require('fs'), fsp = fs.promises, crypto = require('crypto');
+  const { BrowserWindow } = require('electron');
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  // ---------- Giọng đọc Edge TTS: xếp hàng từng câu + thử lại (tránh bị Microsoft chặn khi gửi dồn dập) ----------
+  const TTS_DIR = path.join(app.getPath('userData'), 'tts-cache');
+  let ttsChain = Promise.resolve();
+  const ttsJobs = new Map();
+  async function ttsOnce(text, voice, rate, pitch, file) {
+    const { MsEdgeTTS, OUTPUT_FORMAT } = req('msedge-tts');
+    const tmp = path.join(TTS_DIR, 'tmp-' + crypto.randomBytes(6).toString('hex'));
+    await fsp.mkdir(tmp, { recursive: true });
+    const t = new MsEdgeTTS();
+    try {
+      await t.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
+      const opt = {}; if (rate) opt.rate = rate; if (pitch) opt.pitch = pitch;
+      const r = await Promise.race([t.toFile(tmp, text, opt), sleep(30000).then(() => { throw new Error('TTS timeout'); })]);
+      const st = fs.statSync(r.audioFilePath);
+      if (st.size < 800) throw new Error('TTS trả về file rỗng');
+      await fsp.rename(r.audioFilePath, file);
+    } finally { try { t.close(); } catch {} fsp.rm(tmp, { recursive: true, force: true }).catch(() => {}); }
+  }
+  function tts({ text, voice, rate, pitch }) {
+    voice = voice || 'vi-VN-NamMinhNeural';
+    const key = crypto.createHash('sha256').update([voice, rate || '', pitch || '', text].join('|')).digest('hex').slice(0, 24);
+    const file = path.join(TTS_DIR, key + '.mp3');
+    if (fs.existsSync(file) && fs.statSync(file).size > 800) return Promise.resolve({ ok: true, url: 'church://tts/' + key + '.mp3', cached: true });
+    if (ttsJobs.has(key)) return ttsJobs.get(key);
+    const job = (ttsChain = ttsChain.catch(() => {}).then(async () => {
+      await fsp.mkdir(TTS_DIR, { recursive: true });
+      let last;
+      for (let i = 0; i < 3; i++) {
+        try { await ttsOnce(text, voice, rate, pitch, file); return { ok: true, url: 'church://tts/' + key + '.mp3' }; }
+        catch (e) { last = e; await sleep(800 * (i + 1)); }
+      }
+      return { ok: false, error: (last && last.message) || 'TTS lỗi' };
+    }).finally(() => ttsJobs.delete(key)));
+    ttsJobs.set(key, job);
+    return job;
+  }
+  try { ipcMain.removeHandler('tts'); } catch {}
+  ipcMain.handle('tts', (e, a) => tts(a));
+
+  // ---------- Lấy Room ID bằng trình duyệt ẩn (khi cách thường bị TikTok chặn) ----------
+  const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';
+  async function browserRoomId(username) {
+    const w = new BrowserWindow({ show: false, width: 1280, height: 900, webPreferences: { partition: 'persist:tiktok', backgroundThrottling: false } });
+    try {
+      w.webContents.setUserAgent(UA);
+      w.webContents.setAudioMuted(true);
+      await Promise.race([w.loadURL('https://www.tiktok.com/@' + encodeURIComponent(username) + '/live', { userAgent: UA }).catch(() => {}), sleep(25000)]);
+      for (let i = 0; i < 30; i++) {
+        const r = await w.webContents.executeJavaScript(`(() => {
+          try { const s = document.getElementById('SIGI_STATE'); if (s) { const j = JSON.parse(s.textContent); const u = j && j.LiveRoom && j.LiveRoom.liveRoomUserInfo; if (u && u.user && u.user.roomId) return { roomId: String(u.user.roomId), status: (u.liveRoom && u.liveRoom.status) || (u.user && u.user.status) || null }; } } catch (e) {}
+          const h = document.documentElement.innerHTML; const m = h.match(/"roomId":"(\\d{6,})"/) || h.match(/room_id=(\\d{6,})/);
+          return m ? { roomId: m[1], status: null } : null; })()`).catch(() => null);
+        if (r && r.roomId) return r;
+        await sleep(700);
+      }
+      return null;
+    } finally { try { w.destroy(); } catch {} }
+  }
+  const detail = (e) => {
+    if (!e) return '';
+    const parts = [e.message || e.info || String(e)];
+    const subs = e.errors || e.requestErrs || (e.config && e.config.requestErrs) || [];
+    if (Array.isArray(subs)) for (const x of subs) parts.push('  · ' + ((x && (x.message || x.info)) || String(x)).slice(0, 220));
+    if (e.exception && e.exception !== e) parts.push('  · ' + (e.exception.message || e.exception));
+    return parts.join('\n');
+  };
   const tk = { conn: null, state: 'idle', username: '', want: false, retry: null, opts: {} };
 
   const status = (state, extra = {}) => { tk.state = state; both('tiktok-status', { state, username: tk.username, ...extra }); };
@@ -72,14 +142,25 @@ module.exports = (ctx) => {
       c.on(ControlEvent ? ControlEvent.DISCONNECTED : 'disconnected', () => { if (tk.conn !== c) return; log('TikTok: mất kết nối', 'warn'); status('disconnected'); scheduleRetry(); });
       if (WebcastEvent.STREAM_END) c.on(WebcastEvent.STREAM_END, () => { log('TikTok: live đã kết thúc', 'warn'); status('ended'); scheduleRetry(); });
       c.on(ControlEvent ? ControlEvent.ERROR : 'error', (e) => { const m = (e && (e.info || e.message)) || String(e); log('TikTok lỗi: ' + m + hint(m), 'error'); });
-      const st = await c.connect();
+      try { const m = mod.RoomIdRouteConfig; if (m) m.skipFetchRoomIdFromEulerRoute = true; } catch {}
+      let roomId = null;
+      try { roomId = await c.fetchRoomId(); } catch (e) {
+        log('Không lấy được Room ID bằng cách thường:\n' + detail(e) + '\n→ thử mở trang live bằng trình duyệt ẩn…', 'warn');
+      }
+      if (!roomId) {
+        const r = await browserRoomId(username);
+        if (!r) throw new Error('Không tìm thấy phòng live của @' + username + '. Kiểm tra kênh đang phát live và username đúng (không có @).');
+        if (r.status === 4) throw new Error("The requested user isn't online");
+        roomId = r.roomId; log('Room ID (qua trình duyệt): ' + roomId);
+      }
+      const st = await c.connect(roomId);
       status('connected', { roomId: st && st.roomId });
       log('Đã kết nối TikTok @' + username + (st && st.roomId ? ' (room ' + st.roomId + ')' : ''));
       return { ok: true };
     } catch (e) {
       const msg = (e && (e.message || e.info)) || String(e);
       const inner = e && e.exception ? ' / ' + (e.exception.message || e.exception) : '';
-      log('Không kết nối được TikTok: ' + msg + inner + hint(msg + inner), 'error');
+      log('Không kết nối được TikTok: ' + detail(e) + hint(msg + inner), 'error');
       status('error', { error: msg });
       scheduleRetry();
       return { ok: false, error: msg + hint(msg + inner) };

@@ -215,17 +215,24 @@ async function fileBuffer(url) {
 function playBuffer(buf, bus) {
   return new Promise((res) => { const s = AC.createBufferSource(); s.buffer = buf; s.connect(bus); s.onended = () => res(); s.start(); cur.src = s; });
 }
+// Giọng Windows chỉ dùng khi có đúng ngôn ngữ; nếu không có thì im lặng (phụ đề vẫn chạy) để không đọc lẫn giọng.
+let fbWarned = '';
 function speakFallback(text) {
   return new Promise((res) => {
+    const lang = (CFG.audio.voice || 'vi-VN').slice(0, 2).toLowerCase();
+    const est = Math.min(20000, 900 + String(text).length * (lang === 'vi' ? 75 : 65));
     try {
+      const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.toLowerCase().startsWith(lang));
+      if (!v || CFG.audio.windowsFallback === false) {
+        if (fbWarned !== lang) { fbWarned = lang; logp('Edge TTS lỗi và máy không có giọng Windows ' + (lang === 'vi' ? 'tiếng Việt' : 'tiếng Anh') + ' — tạm im lặng, phụ đề vẫn chạy.', 'warn'); }
+        setTimeout(res, est); return;
+      }
       const u = new SpeechSynthesisUtterance(text);
-      const lang = CFG.audio.voice.slice(0, 5);
-      const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.replace('_', '-').toLowerCase().startsWith(lang.toLowerCase()));
-      if (v) u.voice = v; u.lang = lang; u.rate = 0.9; u.pitch = 0.85; u.volume = clamp(CFG.audio.sermonVolume * (ducked ? 0.3 : 1), 0, 1);
+      u.voice = v; u.lang = v.lang; u.rate = 0.9; u.pitch = 0.85; u.volume = clamp(CFG.audio.sermonVolume * (ducked ? 0.3 : 1), 0, 1);
       u.onend = () => res(); u.onerror = () => res();
       speechSynthesis.speak(u);
-      setTimeout(res, 60000);
-    } catch { res(); }
+      setTimeout(res, est + 15000);
+    } catch { setTimeout(res, est); }
   });
 }
 let ducked = false;
