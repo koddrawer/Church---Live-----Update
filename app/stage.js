@@ -194,23 +194,21 @@ function chime() {
 const bufCache = new Map();
 // Nhận biết ngôn ngữ của từng câu để luôn đọc bằng giọng đúng ngôn ngữ (không bao giờ lẫn giọng)
 const VI_CHARS = /[ăâđêôơưàáảãạằắẳẵặầấẩẫậèéẻẽẹềếểễệìíỉĩịòóỏõọồốổỗộờớởỡợùúủũụừứửữựỳýỷỹỵ]/i;
-const nameTokens = new Set();
-const normTok = (w) => String(w).toLowerCase().replace(/[^a-zà-ỹ0-9_]/gi, '');
-function rememberName(n) { for (const w of String(n || '').split(/\s+/)) { const k = normTok(w); if (k) nameTokens.add(k); } if (nameTokens.size > 3000) nameTokens.clear(); }
+// Đoán ngôn ngữ của MẪU câu (trước khi chèn tên người xem) — tên không làm sai giọng
 function textLang(t) {
-  // bỏ qua tên người xem khi đoán ngôn ngữ (tên Việt trong câu tiếng Anh vẫn đọc giọng Anh)
-  const words = String(t).split(/\s+/).filter((w) => /[a-zA-ZÀ-ỹ]/.test(w) && !nameTokens.has(normTok(w)));
+  const words = String(t).replace(/\{\w+\}/g, ' ').split(/\s+/).filter((w) => /[a-zA-ZÀ-ỹ]/.test(w));
   if (!words.length) return CFG.audio.sermonLang || 'vi';
   const vi = words.filter((w) => VI_CHARS.test(w)).length;
   return vi / words.length >= 0.2 ? 'vi' : 'en';
 }
-function voiceFor(text) {
-  const a = CFG.audio, L = textLang(text);
+function voiceFor(L) {
+  const a = CFG.audio;
   if (L === 'vi') return a.voiceVi || (String(a.voice).startsWith('vi') ? a.voice : 'vi-VN-NamMinhNeural');
   return a.voiceEn || (String(a.voice).startsWith('en') ? a.voice : 'en-US-ChristopherNeural');
 }
-async function ttsBuffer(text) {
-  const a = CFG.audio, voice = voiceFor(text);
+// lang: 'vi' | 'en' — luôn truyền rõ ngôn ngữ, không đoán từ câu đã chèn tên
+async function ttsBuffer(text, lang) {
+  const a = CFG.audio, voice = voiceFor(lang || CFG.audio.sermonLang || 'vi');
   const key = [voice, a.rate, a.pitch, text].join('|');
   if (bufCache.has(key)) return bufCache.get(key);
   const p = (async () => {
@@ -234,9 +232,9 @@ function playBuffer(buf, bus) {
 }
 // Giọng Windows chỉ dùng khi có đúng ngôn ngữ; nếu không có thì im lặng (phụ đề vẫn chạy) để không đọc lẫn giọng.
 let fbWarned = '';
-function speakFallback(text) {
+function speakFallback(text, lang) {
   return new Promise((res) => {
-    const lang = textLang(text);
+    lang = lang || CFG.audio.sermonLang || 'vi';
     const est = Math.min(20000, 900 + String(text).length * (lang === 'vi' ? 75 : 65));
     try {
       const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.toLowerCase().startsWith(lang));
@@ -287,7 +285,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function waitGap(sec, my) { const end = Date.now() + sec * 1000; while (Date.now() < end && sermon.token === my) await sleep(100); }
 async function sayLine(text, my) {
   let buf = null;
-  try { buf = await ttsBuffer(speakable(text)); if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
+  try { buf = await ttsBuffer(speakable(text), (CFG.audio.sermonLang || 'vi')); if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
     if (!sermon.usingFallback) logp('Giọng Edge TTS lỗi (' + e.message + '), dùng giọng Windows thay thế', 'warn');
     sermon.usingFallback = true;
   }
@@ -295,7 +293,7 @@ async function sayLine(text, my) {
   while ((videoPlaying() || blessSpeaking) && sermon.token === my) await sleep(250); // tạm dừng giảng khi chiếu video / cha sứ đang chúc phúc
   if (sermon.token !== my) return;
   sermon.state = 'playing';
-  if (buf) await playBuffer(buf, voiceBus); else await speakFallback(speakable(text));
+  if (buf) await playBuffer(buf, voiceBus); else await speakFallback(speakable(text), (CFG.audio.sermonLang || 'vi'));
 }
 async function sermonLoop() {
   const my = ++sermon.token;
@@ -335,7 +333,7 @@ async function sermonLoop() {
         SUB.sents = sents; SUB.cur = -1; SUB.changed = now(); SUB.scroll = 0;
         for (let k = 0; k < sents.length && sermon.token === my; k++) {
           if (!CFG.audio.sermonEnabled) break;
-          ttsBuffer(speakable(sents[k + 1] || '')).catch(() => {}); // tải trước câu sau
+          if (sents[k + 1]) ttsBuffer(speakable(sents[k + 1]), (CFG.audio.sermonLang || 'vi')).catch(() => {}); // tải trước câu sau
           SUB.cur = k; sermon.line = sents[k]; sermon.state = 'loading';
           await sayLine(sents[k], my);
           await waitGap(CFG.audio.sentenceGap, my);
@@ -352,11 +350,13 @@ function sermonRestart() { sermon.token++; sermonSkip(); setTimeout(sermonLoop, 
 
 let blessChain = Promise.resolve();
 let blessSpeaking = false;
-function speakBlessing(text) {
+function speakBlessing(text, lang) {
+  if (text && typeof text === 'object') { lang = text.lang; text = text.text; }
+  lang = lang || textLang(text);
   blessChain = blessChain.then(async () => {
     blessSpeaking = true; ducked = true; applyAudio();
-    try { const b = await ttsBuffer(speakable(text)); await new Promise((res) => { const s = AC.createBufferSource(); s.buffer = b; s.connect(blessBus); s.onended = res; s.start(); }); }
-    catch { await speakFallback(text); }
+    try { const b = await ttsBuffer(speakable(text), lang); await new Promise((res) => { const s = AC.createBufferSource(); s.buffer = b; s.connect(blessBus); s.onended = res; s.start(); }); }
+    catch { await speakFallback(text, lang); }
     await sleep(400); blessSpeaking = false; ducked = videoPlaying(); applyAudio();
   });
 }
@@ -364,7 +364,7 @@ function blessingLine(o) {
   const d = CFG.donate;
   let list = d.blessSpeeches && d.blessSpeeches.length ? d.blessSpeeches : (CFG.audio.sermonLang === 'en' ? BLESSINGS_EN : BLESSINGS_VI);
   const t = d.blessSpeechMode === 'fixed' || !list.length ? d.blessSpeech : list[Math.floor(Math.random() * list.length)];
-  return fmt(t, o);
+  return { text: fmt(t, o), lang: textLang(t) };
 }
 
 // ================== HÌNH HỌC CẢNH ==================
@@ -728,7 +728,7 @@ function startBlessing(w) {
   chime();
   const ev = w.ev;
   const scw = ev.social && CFG.social ? CFG.social[ev.social] : null;
-  if (scw) { if (scw.speak) socialSpeak(fmt(scw.speech, { name: cleanName(w.person.name) })); }
+  if (scw) { if (scw.speak) socialSpeak({ text: fmt(scw.speech, { name: cleanName(w.person.name) }), lang: textLang(scw.speech) }); }
   else if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
   pushBanner(w, ev);
   for (let i = 0; i < 40; i++) spawnSparkle(w, true);
@@ -747,7 +747,7 @@ function spawnSparkle(w, burst) {
   const h = standH(w.rail), foot = G.footOfRail(w.rail);
   fx.push({ x: w.x + rnd(-h * 0.35, h * 0.35), y: foot - rnd(0, h * 0.9), vx: rnd(-12, 12), vy: burst ? rnd(-90, -20) : rnd(-40, -10), life: rnd(1.2, 2.6), max: 2.6, r: rnd(2, 5.5) });
 }
-function cleanName(n) { n = String(n || '').trim(); rememberName(n); const m = CFG.seating.nameMaxChars; const r = [...n].length > m ? [...n].slice(0, m - 1).join('') + '…' : n; if (r !== n) rememberName(r); return r; }
+function cleanName(n) { n = String(n || '').trim(); const m = CFG.seating.nameMaxChars; return [...n].length > m ? [...n].slice(0, m - 1).join('') + '…' : n; }
 
 // ================== VIDEO CHÚC PHÚC THEO MỨC XU ==================
 function tierFor(total) {
@@ -1350,7 +1350,7 @@ api.onCmd((m) => {
 async function pretts() {
   const all = []; for (const sec of sermonSections()) { if (sec.title && CFG.audio.readTitles) all.push(sec.title); for (const p of sec.paras) all.push(...splitSentences(p)); }
   let ok = 0;
-  for (let i = 0; i < all.length; i++) { try { await ttsBuffer(speakable(all[i])); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: all.length, ok }); }
+  for (let i = 0; i < all.length; i++) { try { await ttsBuffer(speakable(all[i]), (CFG.audio.sermonLang || 'vi')); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: all.length, ok }); }
 }
 // ---- Follow / chia sẻ: chúc phúc ----
 const socialSeen = new Map();
@@ -1376,7 +1376,7 @@ function onSocial(ev) {
   if (p.state === 'seated') p.expires = Math.max(p.expires, t + (c.glowSeconds || 5) + 5);
   p.glowStart = t + 0.4; p.glowUntil = p.glowStart + (c.glowSeconds || 5); p.glowText = fmt(c.floatText || '', { name });
   chime();
-  if (c.speak) socialSpeak(fmt(c.speech, { name }));
+  if (c.speak) socialSpeak({ text: fmt(c.speech, { name }), lang: textLang(c.speech) });
   // vài đốm sáng bay lên
   if (p.slot) for (let i = 0; i < 18; i++) fx.push({ x: p.slot.x + rnd(-40, 40), y: p.slot.headTop + rnd(0, p.slot.cropH * 0.6), vx: rnd(-10, 10), vy: rnd(-70, -15), life: rnd(1.2, 2.4), max: 2.4, r: rnd(2, 4.5) });
 }
@@ -1417,5 +1417,5 @@ document.addEventListener('click', () => AC.resume());
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);
   }
 })();
-window.__church = { textLang: (t) => textLang(t), cleanName: (n) => cleanName(n), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
+window.__church = { textLang: (t) => textLang(t), voiceFor: (l) => voiceFor(l), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
 })();

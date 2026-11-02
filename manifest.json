@@ -1,9 +1,9 @@
 {
-  "version": "1.0.21",
-  "notes": "Mỗi câu tự chọn giọng đúng ngôn ngữ (không còn lẫn giọng), tạm dừng giảng khi cha sứ chúc phúc",
+  "version": "1.0.22",
+  "notes": "Bài giảng luôn đọc đúng một giọng theo ngôn ngữ bài giảng",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T04:33:14.458Z",
+  "date": "2026-11-02T04:37:46.634Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 86311,
-      "sha256": "239e1f66df3e87699f3967d17d0a10c7e2a6db7ac2abb5076d7bb6e8e549e11b"
+      "size": 86458,
+      "sha256": "0e919550c5c862ad25d74941413ae471f659ae7184f95a62a49b5819f3884102"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "8f413f7bc48d1e3f55783b0c6e6431ad4374b0afc9dd197daeb853e79e6d180d"
+      "sha256": "be29e5398032f0c4dc41ec2cb777f4a7efdee2daa8eab09c2a876973860079a7"
     }
   ]
 }
