@@ -50,7 +50,8 @@ function renderFrames() {
   const upd = async (fn) => { const arr = (CFG.donate.frames || []).map((x) => ({ ...x })); fn(arr); arr.sort((a, b) => a.min - b.min); await save('donate.frames', arr); renderFrames(); };
   list.forEach((f, i) => {
     const el = document.createElement('div'); el.className = 'row';
-    el.innerHTML = `<b style="color:var(--gold2);min-width:46px">Mức</b><input type="number" min="1" class="fmin" style="width:80px"> xu trở lên → <select class="fst">${Object.entries(FRAME_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select> <label style="min-width:0;margin-left:10px">Bật</label><input type="checkbox" class="fen"> <button class="b ftest">▶ Thử</button><button class="b d fdel">Xoá</button>`;
+    const opts = Object.entries(FRAME_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + (CFG.donate.customFrames || []).map((c) => `<option value="c:${c.id}">★ ${String(c.name || 'Khung').replace(/</g, '&lt;')}</option>`).join('');
+    el.innerHTML = `<b style="color:var(--gold2);min-width:46px">Mức</b><input type="number" min="1" class="fmin" style="width:80px"> xu trở lên → <select class="fst">${opts}</select> <label style="min-width:0;margin-left:10px">Bật</label><input type="checkbox" class="fen"> <button class="b ftest">▶ Thử</button><button class="b d fdel">Xoá</button>`;
     $('.fmin', el).value = f.min; $('.fst', el).value = f.style; $('.fen', el).checked = f.enabled !== false;
     $('.fmin', el).onchange = (e) => upd((a) => a[i].min = Math.max(1, +e.target.value || 1));
     $('.fst', el).onchange = (e) => upd((a) => a[i].style = e.target.value);
@@ -61,6 +62,75 @@ function renderFrames() {
   });
   const add = document.createElement('button'); add.className = 'b'; add.textContent = '+ Thêm mức';
   add.onclick = () => upd((a) => a.push({ min: ((a[a.length - 1] || {}).min || 0) + 20, style: 'royal', enabled: true }));
+  box.appendChild(add);
+  renderMyFrames();
+}
+const pvImgs = new Map();
+function pvImg(url) { let e = pvImgs.get(url); if (!e) { e = { p: loadFrameImg(decodeURIComponent(url.split('/').pop())) }; pvImgs.set(url, e); e.p.then((im) => { e.img = im; e.auto = im ? frameHole(im) : null; }); } return e; }
+function drawFramePreview(cv, cf) {
+  const e = pvImg('church://user/frames/' + encodeURIComponent(cf.file));
+  const draw = () => {
+    const g = cv.getContext('2d'); g.clearRect(0, 0, cv.width, cv.height);
+    g.fillStyle = '#2a1a0c'; g.fillRect(0, 0, cv.width, cv.height);
+    if (!e.img) { g.fillStyle = '#c99'; g.font = '12px sans-serif'; g.fillText('không mở được ảnh', 8, 20); return; }
+    const hole = cf.hole || e.auto || { x: 0.5, y: 0.5, r: 0.3 };
+    const R = cv.width * 0.22, fW = R / Math.max(0.02, hole.r), fH = fW * e.img.height / e.img.width, cx = cv.width / 2, cy = cv.height * 0.5;
+    const fit = Math.min(1, cv.width * 0.96 / fW, cv.height * 0.96 / fH), r2 = R * fit, w2 = fW * fit, h2 = fH * fit;
+    g.save(); g.beginPath(); g.arc(cx, cy, r2, 0, 7); g.clip(); const gr = g.createLinearGradient(0, cy - r2, 0, cy + r2); gr.addColorStop(0, '#8a8f96'); gr.addColorStop(1, '#4b5058'); g.fillStyle = gr; g.fillRect(cx - r2, cy - r2, r2 * 2, r2 * 2);
+    g.fillStyle = '#dfe3e8'; g.beginPath(); g.arc(cx, cy - r2 * 0.18, r2 * 0.36, 0, 7); g.fill(); g.beginPath(); g.ellipse(cx, cy + r2 * 0.75, r2 * 0.7, r2 * 0.5, 0, 0, 7); g.fill(); g.restore();
+    g.drawImage(e.img, cx - hole.x * w2, cy - hole.y * h2, w2, h2);
+    return hole;
+  };
+  if (e.img !== undefined) return draw();
+  e.p.then(() => setTimeout(draw, 0));
+  return null;
+}
+function renderMyFrames() {
+  const box = $('#myFrames'); if (!box) return; box.innerHTML = '';
+  const list = CFG.donate.customFrames || [];
+  const upd = async (fn, rerender = true) => { const arr = (CFG.donate.customFrames || []).map((x) => ({ ...x, hole: x.hole ? { ...x.hole } : null })); fn(arr); await save('donate.customFrames', arr); if (rerender) renderFrames(); };
+  list.forEach((cf, i) => {
+    const el = document.createElement('div'); el.className = 'card'; el.style.margin = '8px 0'; el.style.background = 'var(--card2)';
+    el.innerHTML = `<div class="row" style="align-items:flex-start;gap:12px"><canvas width="170" height="170" class="pv" style="border-radius:8px;flex:none"></canvas>
+      <div style="flex:1">
+        <div class="row"><label>Tên khung</label><input type="text" class="cname" style="flex:1"></div>
+        <div class="row"><label>Màu chữ tên</label><input type="color" class="ccol"> <label style="min-width:0;margin-left:12px">Hào quang xoay</label><input type="checkbox" class="cglow"></div>
+        <div class="row"><label>Cỡ khung này</label><input type="range" min="0.4" max="2.5" step="0.05" class="csize"><span class="val csv"></span></div>
+        <div class="row"><label>Lỗ avatar</label><label style="min-width:0">Tự dò</label><input type="checkbox" class="cauto"></div>
+        <div class="row"><label>Cỡ lỗ</label><input type="range" min="0.03" max="0.5" step="0.005" class="cr"></div>
+        <div class="row"><label>Lệch ngang</label><input type="range" min="0.1" max="0.9" step="0.005" class="cx"></div>
+        <div class="row"><label>Lệch dọc</label><input type="range" min="0.1" max="0.9" step="0.005" class="cy"></div>
+        <div class="row"><button class="b ctest">▶ Thử khung này</button><button class="b cfile">Đổi ảnh…</button><button class="b d cdel" style="margin-left:auto">Xoá khung</button></div>
+      </div></div>`;
+    $('.cname', el).value = cf.name || ''; $('.ccol', el).value = cf.nameColor || '#ffe08a'; $('.cglow', el).checked = cf.glow !== false; $('.cauto', el).checked = !cf.hole;
+    const pv = $('.pv', el);
+    const setSliders = (h) => { if (!h) return; $('.cr', el).value = h.r; $('.cx', el).value = h.x; $('.cy', el).value = h.y; };
+    const h0 = drawFramePreview(pv, cf); setSliders(cf.hole || h0);
+    if (!h0) pvImg('church://user/frames/' + encodeURIComponent(cf.file)).p.then(() => setTimeout(() => setSliders(cf.hole || drawFramePreview(pv, cf)), 10));
+    $('.csize', el).value = cf.size || 1; $('.csv', el).textContent = (+cf.size || 1).toFixed(2);
+    $('.csize', el).oninput = (e) => { $('.csv', el).textContent = (+e.target.value).toFixed(2); };
+    $('.csize', el).onchange = (e) => upd((a) => a[i].size = +e.target.value, false);
+    $('.cname', el).onchange = (e) => upd((a) => a[i].name = e.target.value);
+    $('.ccol', el).onchange = (e) => upd((a) => a[i].nameColor = e.target.value, false);
+    $('.cglow', el).onchange = (e) => upd((a) => a[i].glow = e.target.checked, false);
+    $('.cauto', el).onchange = (e) => upd((a) => { if (e.target.checked) a[i].hole = null; else a[i].hole = { x: +$('.cx', el).value, y: +$('.cy', el).value, r: +$('.cr', el).value }; });
+    const live = () => { cf.hole = { x: +$('.cx', el).value, y: +$('.cy', el).value, r: +$('.cr', el).value }; $('.cauto', el).checked = false; drawFramePreview(pv, cf); };
+    const commit = () => upd((a) => a[i].hole = { x: +$('.cx', el).value, y: +$('.cy', el).value, r: +$('.cr', el).value }, false);
+    for (const c of ['.cr', '.cx', '.cy']) { $(c, el).oninput = live; $(c, el).onchange = commit; }
+    $('.ctest', el).onclick = () => api.toStage({ type: 'sim-gift', name: $('#simName').value.trim() || undefined, gift: 'Quà thử', count: 1, coins: 1, frame: 'c:' + cf.id });
+    $('.cfile', el).onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'Ảnh khung', extensions: ['png', 'webp', 'gif'] }] }); if (!f) return; const fn = Date.now() + '_' + f.split(/[\\/]/).pop(); await api.copyUserAsset({ src: f, rel: 'frames/' + fn }); upd((a) => { a[i].file = fn; a[i].hole = null; }); };
+    $('.cdel', el).onclick = () => { if (!confirm('Xoá khung "' + (cf.name || '') + '"?')) return; upd((a) => a.splice(i, 1)); const fr = (CFG.donate.frames || []).map((x) => (x.style === 'c:' + cf.id ? { ...x, style: 'gold' } : x)); save('donate.frames', fr); };
+    box.appendChild(el);
+  });
+  const add = document.createElement('button'); add.className = 'b p'; add.textContent = '+ Thêm khung của tôi (ảnh PNG)…';
+  add.onclick = async () => {
+    const fs = await api.pickFile({ multi: true, filters: [{ name: 'Ảnh khung', extensions: ['png', 'webp', 'gif'] }] });
+    const arr0 = Array.isArray(fs) ? fs : (fs ? [fs] : []); if (!arr0.length) return;
+    const added = [];
+    for (const f of arr0) { const base = f.split(/[\\/]/).pop(), fn = Date.now() + '_' + base; await api.copyUserAsset({ src: f, rel: 'frames/' + fn }); added.push({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 6), name: base.replace(/\.[^.]+$/, ''), file: fn, nameColor: '#ffe08a', glow: true, hole: null }); }
+    await upd((a) => a.push(...added));
+    log('Đã thêm ' + added.length + ' khung — chọn khung ở ô mức xu phía trên.');
+  };
   box.appendChild(add);
 }
 function renderTiers() {
@@ -205,7 +275,7 @@ $('#btnPanelLock').onclick = async () => {
   await save('window.panelLocked', on); applyPanelLock(); log(on ? 'Đã khóa bảng điều khiển' : 'Đã mở khóa bảng điều khiển');
 };
 $('#btnLock').onclick = async () => { const on = !CFG.scene.layoutLocked; if (on && editOn) { editOn = false; api.toStage({ type: 'edit-layout', on: false }); } await save('scene.layoutLocked', on); applyLock(); log(on ? 'Đã khóa bố cục' : 'Đã mở khóa bố cục'); };
-api.onConfig((c) => { setTimeout(() => { applyLock(); applyPanelLock(); }, 0); raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
+api.onConfig((c) => { setTimeout(() => { applyLock(); applyPanelLock(); const ae = document.activeElement; if (!(ae && ae.closest && ae.closest('#frames,#myFrames'))) renderFrames(); }, 0); raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v; CFG = deepMerge(CHURCH_DEFAULTS, raw); for (const el of $$('[data-k]')) { if (el === document.activeElement) continue; const v = getK(CFG, el.dataset.k); if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; showVal(el); } });
 $('#btnVideo').onclick = async () => { const f = await api.pickFile({ filters: [{ name: 'Video', extensions: ['mp4', 'webm', 'mov'] }] }); if (f) { await save('scene.videoFile', f); fillInputs(); } };
 $('#btnVideoClear').onclick = async () => { await save('scene.videoFile', ''); fillInputs(); };
 $('#btnGeoReset').onclick = async () => { if (raw.scene) delete raw.scene.geometry; CFG = deepMerge(CHURCH_DEFAULTS, raw); await api.setConfig({ scene: raw.scene || {} }); fillInputs(); };

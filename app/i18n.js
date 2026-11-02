@@ -1,6 +1,12 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Khung của tôi": "My frames",
+"+ Thêm khung của tôi (ảnh PNG)…": "+ Add my frame (PNG image)…",
+"Tên khung": "Frame name", "Màu chữ tên": "Name color", "Hào quang xoay": "Rotating glow", "Lỗ avatar": "Avatar hole", "Tự dò": "Auto-detect",
+"Cỡ lỗ": "Hole size", "Lệch ngang": "Horizontal offset", "Lệch dọc": "Vertical offset", "Cỡ khung này": "This frame's size",
+"▶ Thử khung này": "▶ Test this frame", "Đổi ảnh…": "Change image…", "Xoá khung": "Delete frame",
+"Thêm ảnh PNG nền trong suốt, giữa khung để trống (trong suốt) chỗ đặt avatar — app tự dò lỗ đó để đặt avatar vào. Nếu lệch, kéo các thanh \"Cỡ lỗ / Lệch\" (xem ngay ở ô xem trước). Sau khi thêm, chọn khung ở ô mức xu phía trên.": "Add a transparent PNG with an empty (transparent) area in the middle for the avatar — the app detects that hole automatically. If it's off, drag the \"Hole size / Offset\" sliders (see the preview). Then pick the frame in a coin level above.",
 "Khung avatar theo mức xu": "Avatar frame by coin level",
 "Hiện khung avatar khi chúc phúc": "Show avatar frame when blessed",
 "Thời gian hiện (giây)": "Display time (seconds)",

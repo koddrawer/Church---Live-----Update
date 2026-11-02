@@ -1143,10 +1143,21 @@ const FRAME_STYLES = {
   ruby: { ring: GOLD, name: '#ffd6dc', rays: 0.9, cross: true, laurel: true, gems: ['#ff2a48'] },
   royal: { ring: GOLD, name: '#fff3c4', rays: 1.2, laurel: true, gems: ['#2f7bff', '#c040ff'], crown: true, wings: true }
 };
+function customFrame(style) {
+  if (!/^c:/.test(style || '')) return null;
+  const cf = (CFG.donate.customFrames || []).find((f) => 'c:' + f.id === style); if (!cf || !cf.file) return null;
+  const url = 'church://user/frames/' + encodeURIComponent(cf.file);
+  let e = cfImgs.get(url);
+  if (!e) { e = { img: null }; cfImgs.set(url, e); loadFrameImg(cf.file).then((im) => { e.img = im; e.auto = im ? frameHole(im) : null; }); }
+  if (!e.img) return null;
+  return { cf, img: e.img, hole: cf.hole || e.auto || { x: 0.5, y: 0.5, r: 0.3 } };
+}
+const cfImgs = new Map();
 function frameStyleFor(total) {
   const fs = (CFG.donate.frames || []).filter((f) => f && f.enabled !== false).sort((a, b) => a.min - b.min);
   if (!fs.length) return null;
   let r = fs[0]; for (const f of fs) if (total >= f.min) r = f;
+  if (/^c:/.test(r.style || '')) { customFrame(r.style); return r.style; }
   return FRAME_STYLES[r.style] ? r.style : 'gold';
 }
 function metal(g, x0, y0, x1, y1, cols) { const gr = g.createLinearGradient(x0, y0, x1, y1); cols.forEach((c, i) => gr.addColorStop(i / (cols.length - 1), c)); return gr; }
@@ -1221,7 +1232,7 @@ const RAYS = (() => {
 })();
 let cards = [];
 function pushCard(w, ev, line) {
-  const total = w.total || 1, style = frameStyleFor(total); if (!style) return false;
+  const total = w.total || 1, style = (ev.frame || (w.ev && w.ev.frame)) || frameStyleFor(total); if (!style) return false; customFrame(style);
   const o = { name: cleanName(w.person.name), gift: ev.gift || '', count: w.count };
   const old = cards.find((c) => c.w === w);
   if (old) { old.style = style; old.shownAt != null && (old.until = Math.max(old.until || 0, now() + 3)); return true; }
@@ -1245,7 +1256,9 @@ function drawCards(t) {
   const dur = c.until ? Math.max(cardDur(), c.until - c.shownAt) : cardDur(), el = t - c.shownAt;
   const inA = clamp(el / 0.45, 0, 1), outA = clamp((dur + 0.7 - el) / 0.7, 0, 1), a = Math.min(inA, outA);
   if (a <= 0) return;
-  const st = FRAME_STYLES[c.style], { k, R, cx, cy } = cardGeom();
+  const cus = customFrame(c.style);
+  const st = cus ? { name: cus.cf.nameColor || '#ffe08a', rays: cus.cf.glow === false ? 0 : 0.8 } : (FRAME_STYLES[c.style] || FRAME_STYLES.gold), { k, R: R0, cx, cy } = cardGeom(), R = cus ? R0 * clamp(+cus.cf.size || 1, 0.3, 3) : R0;
+  let fW = 0, fH = 0; if (cus) { fW = R / Math.max(0.02, cus.hole.r); fH = fW * cus.img.height / cus.img.width; }
   const pop = inA < 1 ? 1 + 2.2 * Math.pow(inA - 1, 3) + 1.2 * Math.pow(inA - 1, 2) : 1; // easeOutBack
   ctx.save(); ctx.globalAlpha = a;
   ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.translate(-cx, -cy);
@@ -1262,7 +1275,8 @@ function drawCards(t) {
   else { const g = ctx.createLinearGradient(cx, cy - R, cx, cy + R); g.addColorStop(0, '#7a4a1c'); g.addColorStop(1, '#3a200a'); ctx.fillStyle = g; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
     ctx.fillStyle = '#ffe3a0'; ctx.font = `700 ${R * 1.05}px BeVN, "Segoe UI", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(([...String(c.name || '?').trim()][0] || '?').toUpperCase(), cx, cy + R * 0.05); }
   ctx.restore();
-  const tex = frameTex(c.style, R); ctx.drawImage(tex.cv, cx - tex.S / 2, cy - tex.S / 2);
+  if (cus) ctx.drawImage(cus.img, cx - cus.hole.x * fW, cy - cus.hole.y * fH, fW, fH);
+  else { const tex = frameTex(FRAME_STYLES[c.style] ? c.style : 'gold', R); ctx.drawImage(tex.cv, cx - tex.S / 2, cy - tex.S / 2); }
   // lấp lánh quanh khung
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const n = 6 + Math.round((st.rays || 0) * 8);
@@ -1272,7 +1286,7 @@ function drawCards(t) {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   let fs = 64 * k; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
   while (ctx.measureText(c.name).width > 880 * k && fs > 24) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
-  const ny = cy + R + R * 0.28 + 40 * k;
+  const ny = (cus ? Math.max(cy + R * 1.1, cy + (1 - cus.hole.y) * fH * 0.92) : cy + R + R * 0.28) + 40 * k;
   ctx.shadowColor = 'rgba(255,190,80,0.95)'; ctx.shadowBlur = 20; ctx.fillStyle = st.name; ctx.fillText(c.name, cx, ny);
   ctx.shadowBlur = 8; ctx.shadowColor = 'rgba(0,0,0,0.8)';
   ctx.font = `500 ${32 * k}px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = '#fbe7c2';
@@ -1557,7 +1571,7 @@ api.onCmd((m) => {
     if (m.seated) { const p = people.filter((x) => !x.filler && x.state === 'seated' && !x.leaving)[Math.floor(Math.random() * namedCount())]; if (p) { id = p.id; name = p.name; } }
     if (m.avatar && !findPerson(id)) onJoin({ id, name, avatar: m.avatar });
     const coins = m.coins || 1;
-    onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: coins, total: coins, sim: true });
+    onGift({ id, name, avatar: m.avatar || '', gift: m.gift || 'Hoa hồng', count: m.count || 1, diamonds: coins, total: coins, sim: true, frame: m.frame || undefined });
   }
   if (m.type === 'clear') { for (const p of people) if (!p.filler && p.state === 'seated') removePerson(p, true); queue = []; }
   if (m.type === 'edit-layout') setEditMode(m.on);

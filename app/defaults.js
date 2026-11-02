@@ -164,6 +164,7 @@ window.CHURCH_DEFAULTS = {
       { min: 15, style: 'ruby', enabled: true },
       { min: 30, style: 'royal', enabled: true }
     ],
+    customFrames: [],          // khung của riêng bạn: { id, name, file (trong user-assets/frames), nameColor, glow, hole: {x,y,r} | null = tự dò lỗ trong suốt }
     frameX: 540, frameY: 1490, frameScale: 1, frameSeconds: 6,
     frameText: '',             // để trống = dùng đúng lời chúc cha sứ đọc; có thể dùng {name} {gift} {count}
     walkAfterVideo: true,      // chiếu xong video mới đi lên bục
@@ -278,3 +279,32 @@ window.deepMerge = function deepMerge(base, over) {
   }
   return over === undefined ? base : over;
 };
+
+// Dò "lỗ" trong suốt ở giữa ảnh khung (PNG): trả về tâm và bán kính theo tỉ lệ bề rộng/bề cao ảnh
+window.frameHole = function frameHole(img) {
+  try {
+    const N = 256, sc = N / Math.max(img.width, img.height), w = Math.max(8, Math.round(img.width * sc)), h = Math.max(8, Math.round(img.height * sc));
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d', { willReadFrequently: true });
+    g.drawImage(img, 0, 0, w, h); const a = g.getImageData(0, 0, w, h).data;
+    const clear = (x, y) => a[(y * w + x) * 4 + 3] < 60;
+    let sx = w >> 1, sy = h >> 1;
+    if (!clear(sx, sy)) { let found = false; for (let d = 1; d < Math.min(w, h) / 4 && !found; d++) for (const [dx, dy] of [[d, 0], [-d, 0], [0, d], [0, -d]]) if (clear(sx + dx, sy + dy)) { sx += dx; sy += dy; found = true; break; } if (!found) return null; }
+    const seen = new Uint8Array(w * h), st = [sx + sy * w]; seen[st[0]] = 1;
+    let x0 = sx, x1 = sx, y0 = sy, y1 = sy, edge = false;
+    while (st.length) { const i = st.pop(), x = i % w, y = (i / w) | 0;
+      if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y;
+      if (x === 0 || y === 0 || x === w - 1 || y === h - 1) edge = true;
+      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) if (nx >= 0 && ny >= 0 && nx < w && ny < h) { const j = ny * w + nx; if (!seen[j] && clear(nx, ny)) { seen[j] = 1; st.push(j); } } }
+    if (edge) return null;
+    const r = Math.min(x1 - x0 + 1, y1 - y0 + 1) / 2;
+    return { x: (x0 + x1 + 1) / 2 / w, y: (y0 + y1 + 1) / 2 / h, r: r / w };
+  } catch { return null; }
+};
+
+// Ảnh khung của người dùng: đọc qua file → data URL (tránh lỗi "canvas bị khóa" khi dò lỗ)
+window.loadFrameImg = (() => { const cache = new Map(); let ud = null;
+  return (file) => { if (cache.has(file)) return cache.get(file);
+    const p = (async () => { try { if (!ud) ud = (await window.api.info()).userData; const b64 = await window.api.readFileB64(ud + '/user-assets/frames/' + file);
+      const ext = String(file).split('.').pop().toLowerCase(), mime = ext === 'webp' ? 'image/webp' : ext === 'gif' ? 'image/gif' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png';
+      return await new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = 'data:' + mime + ';base64,' + b64; }); } catch { return null; } })();
+    cache.set(file, p); return p; }; })();

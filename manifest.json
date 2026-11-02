@@ -1,9 +1,9 @@
 {
-  "version": "1.0.30",
-  "notes": "Bỏ video theo mức xu → khung avatar trang trí theo mức (Đồng/Bạc/Vàng/Hồng ngọc/Hoàng kim) kèm tên + lời chúc; camera zoom vào người donate khi đi lên",
+  "version": "1.0.31",
+  "notes": "Thêm khung avatar của riêng bạn (ảnh PNG), tự dò lỗ đặt avatar, chỉnh cỡ/lệch/màu tên",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T09:34:58.688Z",
+  "date": "2026-11-02T10:51:45.853Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 33069,
-      "sha256": "42a48ebc281a092015655005b4432de4a65016ac057f2015c5b0838c4f6e990f"
+      "size": 35751,
+      "sha256": "ae2656e32897c93b27d6ecf6ca9ad98c8a1d86e0f3320eff6673f74888cfe978"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 25697,
-      "sha256": "29484b3d8cda282881948ae9e3d59faadbb20f8511fa5eb366e8e026c00520e5"
+      "size": 26756,
+      "sha256": "98c32e446d9eee651abc2910746ea599fa47305ba985da7107d4bcc314320c41"
     },
     {
       "path": "main-ext.js",
@@ -309,13 +309,13 @@
     },
     {
       "path": "panel.html",
-      "size": 39556,
-      "sha256": "ab51ec003d4b5a925412080fcf755461575300a9f9601c4cca738013fbe7d731"
+      "size": 39961,
+      "sha256": "7c7e2c237aa530a1ae07807b11d8dacba6b6bfd6374b96931cb6ef623e92a3d0"
     },
     {
       "path": "panel.js",
-      "size": 29784,
-      "sha256": "790830c2dc3841f768b437a9d841a900ef3898a6debef4028298cfb0b741f308"
+      "size": 37016,
+      "sha256": "39321e748505d77ea4ed0bee8e403820390e4145b065e2aab5471ff0e919d2fd"
     },
     {
       "path": "sermons_en.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 105786,
-      "sha256": "29a6f6ffadf14947606974ee0600e0c7651ca0695cf4685ba8a4d65849de9b37"
+      "size": 107030,
+      "sha256": "5d203506586b546aed83b88eaafbab4abcdc81907f871d4b783d626c9049ece1"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "b105a9f5b927520d341e32119f2d22068956c20c4dfa17bcae37b66032786348"
+      "sha256": "41fe77a2e18ee10298289348704c6ed34a9d782462a90131f6869dfa80eb35b2"
     }
   ]
 }
