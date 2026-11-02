@@ -1,9 +1,9 @@
 {
-  "version": "1.0.28",
-  "notes": "Thêm sẵn 7 video chúc phúc cho mức 5/10/15/30 xu",
+  "version": "1.0.29",
+  "notes": "TikTok: không kết nối trùng, bị giới hạn lượt thì đợi 2–15 phút mới thử lại — khởi động lại app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T07:20:41.754Z",
+  "date": "2026-11-02T07:27:17.854Z",
   "files": [
     {
       "path": "assets/bless/bless10_1.mp4",
@@ -346,8 +346,8 @@
     },
     {
       "path": "main-ext.js",
-      "size": 16078,
-      "sha256": "c64cba4e81133c05d7cc5032b701a9fa75d2730027362d4fa1d7b2b67a5dc634"
+      "size": 17453,
+      "sha256": "42fb63841de9e869dfc02ac4d55b9a7a6bfb9ae7f2cb57c9fbfb1d9283260859"
     },
     {
       "path": "panel.html",
@@ -382,7 +382,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "cab54997272446a8066fa96404115eca3524a1ce2049f944b89a303b60617514"
+      "sha256": "c09d69aff2a8459a11949994f25dbf3e570cc6cb79ae67a6ee91ad76889f003f"
     }
   ]
 }

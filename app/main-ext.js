@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.27';
+  const EXT_VER = '1.0.29';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -153,27 +153,35 @@ module.exports = (ctx) => {
   };
   const hint = (msg) => {
     if (/Business plan|PremiumFeature|permission from the signature provider/i.test(msg)) return ' → tính năng này cần gói trả phí của Euler Stream; app đã tắt các yêu cầu đó, hãy thử kết nối lại.';
-    if (/rate ?limit|429/i.test(msg)) return ' → máy chủ ký (Euler) đang giới hạn lượt, đợi 1–2 phút hoặc nhập Euler API key miễn phí từ eulerstream.com.';
+    if (/rate ?limit|429/i.test(msg)) return ' → máy chủ ký (Euler) đang giới hạn lượt, lượt miễn phí tính theo giờ. Cách chắc chắn: đăng ký API key miễn phí ở eulerstream.com rồi dán vào ô "Euler Sign API key" (tab Live).';
     if (/offline|isn't online|room id/i.test(msg)) return ' → kênh chưa phát live hoặc sai username.';
     return '';
   };
 
   async function disconnect(user = true) {
-    if (user) tk.want = false;
-    clearTimeout(tk.retry);
+    if (user) { tk.want = false; tk.rl = 0; }
+    clearTimeout(tk.retry); tk.retry = null;
     if (tk.conn) { const c = tk.conn; tk.conn = null; try { c.removeAllListeners && c.removeAllListeners(); await c.disconnect(); } catch {} }
     if (user) status('idle');
   }
-  function scheduleRetry() {
+  function scheduleRetry(rateLimited) {
     clearTimeout(tk.retry);
     const cfg = getConfig() || {};
     if (!tk.want || (cfg.tiktok && cfg.tiktok.autoReconnect === false)) return;
-    tk.retry = setTimeout(() => { if (tk.want) { log('Thử kết nối lại TikTok...'); connect(tk.username, tk.opts); } }, 15000);
+    let ms = 15000;
+    if (rateLimited) { // bị Euler giới hạn lượt: thử lại thưa dần để không đốt thêm lượt (2 → 5 → 10 → 15 phút)
+      tk.rl = (tk.rl || 0) + 1; const mins = [2, 5, 10, 15][Math.min(tk.rl - 1, 3)]; ms = mins * 60000;
+      log('Bị giới hạn lượt kết nối — app sẽ tự thử lại sau ' + mins + ' phút (đừng bấm Kết nối liên tục, mỗi lần bấm đều tốn lượt).', 'warn');
+    }
+    tk.retry = setTimeout(() => { if (tk.want) { log('Thử kết nối lại TikTok...'); connect(tk.username, tk.opts, true); } }, ms);
   }
-  async function connect(username, opts = {}) {
-    await disconnect(false);
+  async function connect(username, opts = {}, auto = false) {
     username = String(username || '').trim().replace(/^@/, '');
     if (!username) return { ok: false, error: 'Chưa nhập username' };
+    // đang kết nối / đã kết nối đúng kênh này thì không mở lại (mỗi lần mở tốn 1 lượt của máy chủ ký)
+    if (tk.conn && tk.username === username && (tk.state === 'connected' || tk.state === 'connecting')) { log('TikTok @' + username + ' đang ' + (tk.state === 'connected' ? 'kết nối sẵn' : 'kết nối') + ' — bỏ qua lần bấm này.'); return { ok: true }; }
+    if (!auto && tk.retry && tk.rl && !opts.signApiKey) { log('Đang chờ hết giới hạn lượt, app sẽ tự thử lại — bỏ qua lần bấm này để không tốn thêm lượt.', 'warn'); return { ok: false, error: 'rate limited, đang chờ' }; }
+    await disconnect(false);
     tk.username = username; tk.want = true; tk.opts = opts;
     status('connecting');
     log('Đang kết nối @' + username + ' (kết nối bản ' + EXT_VER + ', không lấy danh sách quà)…');
@@ -215,6 +223,7 @@ module.exports = (ctx) => {
       }
       const st = await c.connect(roomId);
       status('connected', { roomId: st && st.roomId });
+      tk.rl = 0;
       log('Đã kết nối TikTok @' + username + (st && st.roomId ? ' (room ' + st.roomId + ')' : ''));
       return { ok: true };
     } catch (e) {
@@ -222,7 +231,7 @@ module.exports = (ctx) => {
       const inner = e && e.exception ? ' / ' + (e.exception.message || e.exception) : '';
       log('Không kết nối được TikTok: ' + detail(e) + hint(msg + inner), 'error');
       status('error', { error: msg });
-      scheduleRetry();
+      scheduleRetry(/rate ?limit|429|too many connections/i.test(msg + inner + detail(e)));
       return { ok: false, error: msg + hint(msg + inner) };
     }
   }
