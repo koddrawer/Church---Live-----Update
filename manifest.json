@@ -1,9 +1,9 @@
 {
-  "version": "1.0.22",
-  "notes": "Bài giảng luôn đọc đúng một giọng theo ngôn ngữ bài giảng",
+  "version": "1.0.23",
+  "notes": "Giảng liền mạch: tải trước 5 câu, giọng đọc song song, giảm thời gian chờ khi lỗi — khởi động lại app sau khi cập nhật",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T04:37:46.634Z",
+  "date": "2026-11-02T04:47:39.239Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -304,8 +304,8 @@
     },
     {
       "path": "main-ext.js",
-      "size": 11283,
-      "sha256": "c6c351053a06de5a82b683d5c6fc000c582d7a81c4dd09d143c799d8477858a1"
+      "size": 11556,
+      "sha256": "cdf95cc2823011600efdd8a19ef64df21bfc10dd1f4757f3e2bc51f3715f63d7"
     },
     {
       "path": "panel.html",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 86458,
-      "sha256": "0e919550c5c862ad25d74941413ae471f659ae7184f95a62a49b5819f3884102"
+      "size": 87172,
+      "sha256": "55e25e4017a27799559f4de0349cb06a71079f7523e6c410b743677ce2779b3d"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "be29e5398032f0c4dc41ec2cb777f4a7efdee2daa8eab09c2a876973860079a7"
+      "sha256": "d9bbf42387a7e549738ad7dd34a20f126c0a08a434cac141035bdd107ca1e982"
     }
   ]
 }

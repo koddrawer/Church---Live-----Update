@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.20';
+  const EXT_VER = '1.0.23';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -15,7 +15,13 @@ module.exports = (ctx) => {
 
   // ---------- Giọng đọc Edge TTS: xếp hàng từng câu + thử lại (tránh bị Microsoft chặn khi gửi dồn dập) ----------
   const TTS_DIR = path.join(app.getPath('userData'), 'tts-cache');
-  let ttsChain = Promise.resolve();
+  // tối đa 3 yêu cầu đọc cùng lúc (nhanh hơn xếp hàng từng câu, vẫn không dồn dập)
+  let active = 0; const waiters = [];
+  async function withSlot(fn) {
+    if (active >= 3) await new Promise((r) => waiters.push(r));
+    active++;
+    try { return await fn(); } finally { active--; const n = waiters.shift(); if (n) n(); }
+  }
   const ttsJobs = new Map();
   async function ttsOnce(text, voice, rate, pitch, file) {
     const { MsEdgeTTS, OUTPUT_FORMAT } = req('msedge-tts');
@@ -25,7 +31,7 @@ module.exports = (ctx) => {
     try {
       await t.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_96KBITRATE_MONO_MP3);
       const opt = {}; if (rate) opt.rate = rate; if (pitch) opt.pitch = pitch;
-      const r = await Promise.race([t.toFile(tmp, text, opt), sleep(30000).then(() => { throw new Error('TTS timeout'); })]);
+      const r = await Promise.race([t.toFile(tmp, text, opt), sleep(12000).then(() => { throw new Error('TTS timeout'); })]);
       const st = fs.statSync(r.audioFilePath);
       if (st.size < 800) throw new Error('TTS trả về file rỗng');
       await fsp.rename(r.audioFilePath, file);
@@ -37,15 +43,15 @@ module.exports = (ctx) => {
     const file = path.join(TTS_DIR, key + '.mp3');
     if (fs.existsSync(file) && fs.statSync(file).size > 800) return Promise.resolve({ ok: true, url: 'church://tts/' + key + '.mp3', cached: true });
     if (ttsJobs.has(key)) return ttsJobs.get(key);
-    const job = (ttsChain = ttsChain.catch(() => {}).then(async () => {
+    const job = withSlot(async () => {
       await fsp.mkdir(TTS_DIR, { recursive: true });
       let last;
-      for (let i = 0; i < 3; i++) {
+      for (let i = 0; i < 2; i++) {
         try { await ttsOnce(text, voice, rate, pitch, file); return { ok: true, url: 'church://tts/' + key + '.mp3' }; }
-        catch (e) { last = e; await sleep(800 * (i + 1)); }
+        catch (e) { last = e; await sleep(400); }
       }
       return { ok: false, error: (last && last.message) || 'TTS lỗi' };
-    }).finally(() => ttsJobs.delete(key)));
+    }).finally(() => ttsJobs.delete(key));
     ttsJobs.set(key, job);
     return job;
   }

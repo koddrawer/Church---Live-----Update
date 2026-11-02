@@ -235,7 +235,7 @@ let fbWarned = '';
 function speakFallback(text, lang) {
   return new Promise((res) => {
     lang = lang || CFG.audio.sermonLang || 'vi';
-    const est = Math.min(20000, 900 + String(text).length * (lang === 'vi' ? 75 : 65));
+    const est = Math.min(12000, 600 + String(text).length * 55);
     try {
       const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.toLowerCase().startsWith(lang));
       if (!v || CFG.audio.windowsFallback === false) {
@@ -284,8 +284,8 @@ function speakable(t) {
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 async function waitGap(sec, my) { const end = Date.now() + sec * 1000; while (Date.now() < end && sermon.token === my) await sleep(100); }
 async function sayLine(text, my) {
-  let buf = null;
-  try { buf = await ttsBuffer(speakable(text), (CFG.audio.sermonLang || 'vi')); if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
+  let buf = null; const t0 = performance.now();
+  try { buf = await ttsBuffer(speakable(text), (CFG.audio.sermonLang || 'vi')); if (performance.now() - t0 > 4000 && Date.now() - (window.__slowWarn || 0) > 60000) { window.__slowWarn = Date.now(); logp('Máy chủ giọng đọc phản hồi chậm (' + ((performance.now() - t0) / 1000).toFixed(1) + 's/câu). Bấm “Tạo trước toàn bộ giọng đọc” để đọc mượt từ file đã lưu.', 'warn'); } if (sermon.usingFallback) logp('Giọng Edge TTS đã hoạt động lại'); sermon.usingFallback = false; } catch (e) {
     if (!sermon.usingFallback) logp('Giọng Edge TTS lỗi (' + e.message + '), dùng giọng Windows thay thế', 'warn');
     sermon.usingFallback = true;
   }
@@ -327,13 +327,17 @@ async function sermonLoop() {
       const sec = secs[order[si]]; sermon.idx = order[si] + 1; si++;
       SUB.title = sec.title;
       if (sec.title && CFG.audio.readTitles) { sermon.line = sec.title; SUB.sents = [sec.title]; SUB.cur = 0; SUB.changed = now(); await sayLine(sec.title, my); await waitGap(0.6, my); }
+      // danh sách phẳng mọi câu của mục để tải trước nhiều câu phía sau (kể cả sang đoạn mới)
+      const flat = []; sec.paras.forEach((pp) => splitSentences(pp).forEach((x) => flat.push(x)));
+      let fi = 0;
+      const prefetch = () => { for (let j = fi + 1; j <= fi + (CFG.audio.prefetch || 5) && j < flat.length; j++) ttsBuffer(speakable(flat[j]), (CFG.audio.sermonLang || 'vi')).catch(() => {}); };
       for (const para of sec.paras) {
         if (sermon.token !== my) break;
         const sents = splitSentences(para);
         SUB.sents = sents; SUB.cur = -1; SUB.changed = now(); SUB.scroll = 0;
-        for (let k = 0; k < sents.length && sermon.token === my; k++) {
+        for (let k = 0; k < sents.length && sermon.token === my; k++, fi++) {
           if (!CFG.audio.sermonEnabled) break;
-          if (sents[k + 1]) ttsBuffer(speakable(sents[k + 1]), (CFG.audio.sermonLang || 'vi')).catch(() => {}); // tải trước câu sau
+          prefetch(); // tải trước vài câu tiếp theo
           SUB.cur = k; sermon.line = sents[k]; sermon.state = 'loading';
           await sayLine(sents[k], my);
           await waitGap(CFG.audio.sentenceGap, my);
