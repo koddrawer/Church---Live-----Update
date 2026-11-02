@@ -1,9 +1,9 @@
 {
-  "version": "1.0.18",
-  "notes": "Bài giảng tiếng Việt chỉ còn nội dung, bỏ tên bài và trích dẫn chương/câu",
+  "version": "1.0.19",
+  "notes": "Đổi ngôn ngữ ở bất kỳ ô nào cũng đổi luôn câu chúc và chữ trên màn hình",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T03:50:10.014Z",
+  "date": "2026-11-02T04:12:09.011Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -299,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 23103,
-      "sha256": "ffb255f211c3738df4391cedb614849095cd8187e1cc2761f6f1783a60bae807"
+      "size": 23509,
+      "sha256": "43c4b796879597c17bdaeed7c93ca0cdf9781536cd0ddb945fac837f0038329e"
     },
     {
       "path": "main-ext.js",
@@ -314,8 +314,8 @@
     },
     {
       "path": "panel.js",
-      "size": 25837,
-      "sha256": "dc445c8d8f31b5f62df3cd9a82d3383ba5a32a30646086bbad4b20284da9f9ca"
+      "size": 26656,
+      "sha256": "b77143ed2f3ac9b46791cd7a5ea30e36f71490a313a77d141525c128a634de9c"
     },
     {
       "path": "sermons_en.js",
@@ -340,7 +340,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "30e0ac0e4b0e4799fb8519c852fdcef840826d9249dc62eb45a1d88ddabb7c35"
+      "sha256": "72c54a7f3a19804b6b4b6c93b27f8a38f0e9b582c708f1f774568f0b88be9f7e"
     }
   ]
 }

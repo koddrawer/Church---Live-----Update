@@ -282,11 +282,20 @@ $('#btnResetAll').onclick = async () => { if (!confirm('Khôi phục toàn bộ 
 $('#btnTtsClear').onclick = async () => { await api.ttsClear(); log('Đã xoá cache giọng đọc'); };
 
 // ---- ngôn ngữ ----
-$('#uiLang').onchange = async () => { await save('window.uiLang', $('#uiLang').value); I18N.setLang($('#uiLang').value); };
-$('#btnLiveLang').onclick = async () => {
-  const L = $('#liveLang').value, P = LIVE_PRESETS[L]; if (!P) return;
+const curLive = () => CFG.scene.liveLang || CFG.audio.sermonLang || 'vi';
+async function offerLive(L) {
+  if (curLive() === L && CFG.audio.sermonLang === L) return;
+  const m = L === 'en' ? 'Đổi luôn buổi live (giọng cha sứ, bài giảng, câu chúc, chữ trên màn hình) sang English?' : 'Đổi luôn buổi live (giọng cha sứ, bài giảng, câu chúc, chữ trên màn hình) sang Tiếng Việt?';
+  if (confirm(I18N.t(m))) { $('#liveLang').value = L; await applyLive(L, true); }
+}
+$('#uiLang').onchange = async () => { const L = $('#uiLang').value; await save('window.uiLang', L); I18N.setLang(L); await offerLive(L); };
+$('#liveLang').onchange = () => applyLive($('#liveLang').value);
+$('#btnLiveLang').onclick = () => applyLive($('#liveLang').value);
+document.querySelector('[data-k="audio.sermonLang"]').addEventListener('change', (e) => setTimeout(() => offerLive(e.target.value), 300));
+async function applyLive(L, skipConfirm) {
+  const P = LIVE_PRESETS[L]; if (!P) return;
   const msg = 'Đổi toàn bộ chữ trên màn hình, giọng và bài giảng sang ngôn ngữ này? Các câu chữ bạn đã tự sửa (băng chúc phúc, bảng chào, lời cảm ơn…) sẽ được thay bằng bản mặc định của ngôn ngữ đó.';
-  if (!confirm(I18N.t(msg))) return;
+  if (!skipConfirm && !confirm(I18N.t(msg))) { $('#liveLang').value = curLive(); return; }
   const merge = (top, obj) => { raw[top] = { ...(raw[top] || {}), ...obj }; };
   merge('audio', P.audio);
   const tiers = (CFG.donate.tiers || []).map((t) => ({ ...t, text: P.donate.tierText }));
@@ -299,7 +308,7 @@ $('#btnLiveLang').onclick = async () => {
   CFG = deepMerge(CHURCH_DEFAULTS, raw); fillInputs();
   $('#textLang').value = L; loadTexts();
   log(L === 'en' ? 'Live language: English' : 'Ngôn ngữ buổi live: Tiếng Việt');
-};
+}
 (async () => {
   const c = await api.getConfig();
   raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v;

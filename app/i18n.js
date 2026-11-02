@@ -264,6 +264,8 @@ const EN = {
 "Nhập cấu hình": "Import settings",
 "Xoá cache giọng": "Clear speech cache",
 "Áp dụng": "Apply",
+"Đổi luôn buổi live (giọng cha sứ, bài giảng, câu chúc, chữ trên màn hình) sang English?": "Also switch the LIVE (priest voice, sermons, blessings, on-screen text) to English?",
+"Đổi luôn buổi live (giọng cha sứ, bài giảng, câu chúc, chữ trên màn hình) sang Tiếng Việt?": "Also switch the LIVE (priest voice, sermons, blessings, on-screen text) to Vietnamese?",
 "Đổi giọng cha sứ, bài giảng, phụ đề, lời chúc và mọi chữ trên màn hình sang ngôn ngữ đã chọn.": "Switches the priest voice, sermons, subtitles, blessings and all on-screen text to the chosen language.",
 "Đổi toàn bộ chữ trên màn hình, giọng và bài giảng sang ngôn ngữ này? Các câu chữ bạn đã tự sửa (băng chúc phúc, bảng chào, lời cảm ơn…) sẽ được thay bằng bản mặc định của ngôn ngữ đó.": "Switch all on-screen text, the voice and the sermons to this language? Texts you customized (banner, welcome board, thank-you lines…) will be replaced with that language's defaults.",
 "Đang kiểm tra…": "Checking…",
