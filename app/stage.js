@@ -1312,7 +1312,7 @@ function applyConfig(c, first) {
   if (assetChanged) loadAssets().then(() => { for (const p of people) if (p.sit >= SITTERS.length) p.sit = 0; });
   if (first || prev.scene.videoFile !== CFG.scene.videoFile) loadVideo();
   const voiceChanged = !first && (prev.audio.voice !== CFG.audio.voice || prev.audio.voiceVi !== CFG.audio.voiceVi || prev.audio.voiceEn !== CFG.audio.voiceEn || prev.audio.sermonLang !== CFG.audio.sermonLang || prev.audio.sermonMode !== CFG.audio.sermonMode || prev.audio.rate !== CFG.audio.rate || prev.audio.pitch !== CFG.audio.pitch || JSON.stringify(prev.audio.sermonTextsVi) !== JSON.stringify(CFG.audio.sermonTextsVi) || JSON.stringify(prev.audio.sermonTextsEn) !== JSON.stringify(CFG.audio.sermonTextsEn));
-  if (voiceChanged) { sermon.idx = 0; sermonRestart(); }
+  if (voiceChanged) { sermon.idx = 0; sermonRestart(); if (CFG.audio.autoPretts !== false) setTimeout(() => pretts(false), 3000); }
   if (!first && prev.audio.sermonEnabled && !CFG.audio.sermonEnabled) sermonSkip();
   applyAudio();
   if ((CFG.scene.layoutLocked || (CFG.window && CFG.window.panelLocked)) && editMode) setEditMode(false);
@@ -1349,12 +1349,32 @@ api.onCmd((m) => {
   if (m.type === 'sermon-restart') { sermon.idx = 0; sermonRestart(); }
   if (m.type === 'speak') speakBlessing(m.text);
   if (m.type === 'reload-assets') { imgCache.clear(); loadAssets(); }
-  if (m.type === 'pretts') pretts();
+  if (m.type === 'pretts') pretts(true);
 });
-async function pretts() {
-  const all = []; for (const sec of sermonSections()) { if (sec.title && CFG.audio.readTitles) all.push(sec.title); for (const p of sec.paras) all.push(...splitSentences(p)); }
-  let ok = 0;
-  for (let i = 0; i < all.length; i++) { try { await ttsBuffer(speakable(all[i]), (CFG.audio.sermonLang || 'vi')); ok++; } catch (e) { logp('Tạo giọng lỗi câu ' + (i + 1) + ': ' + e.message, 'error'); } toPanel({ type: 'pretts', done: i + 1, total: all.length, ok }); }
+// Tạo sẵn giọng đọc cho toàn bộ bài giảng (lưu file trên máy) — tự chạy nền khi mở app
+const pre = { token: 0, done: 0, total: 0, ok: 0, running: false };
+async function pretts(manual) {
+  const my = ++pre.token;
+  const lang = CFG.audio.sermonLang || 'vi', a = CFG.audio, voice = voiceFor(lang);
+  const all = []; for (const sec of sermonSections()) { if (sec.title && a.readTitles) all.push(sec.title); for (const p of sec.paras) all.push(...splitSentences(p)); }
+  pre.done = 0; pre.ok = 0; pre.total = all.length; pre.running = true;
+  let fails = 0, i = 0;
+  const worker = async () => {
+    while (i < all.length && pre.token === my) {
+      const k = i++;
+      let r = null;
+      try { r = await api.tts({ text: speakable(all[k]), voice, rate: a.rate, pitch: a.pitch }); } catch (e) { r = { ok: false, error: e.message }; }
+      if (r && r.ok) { pre.ok++; fails = 0; } else {
+        fails++;
+        if (fails === 6) { logp('Chưa tạo được giọng đọc (' + ((r && r.error) || 'lỗi mạng') + '). Sẽ thử lại sau 1 phút.', 'warn'); }
+        if (fails >= 6) { await sleep(60000); fails = 0; i = Math.min(i, k); }
+      }
+      pre.done = Math.min(all.length, pre.done + 1);
+      toPanel({ type: 'pretts', done: pre.done, total: pre.total, ok: pre.ok, auto: !manual });
+    }
+  };
+  await Promise.all([worker(), worker()]);
+  if (pre.token === my) { pre.running = false; if (pre.ok === pre.total) logp('Đã tạo sẵn giọng đọc cho toàn bộ bài giảng (' + pre.total + ' câu, ' + (lang === 'vi' ? 'tiếng Việt' : 'tiếng Anh') + ') — giảng sẽ không còn ngừng chờ.'); }
 }
 // ---- Follow / chia sẻ: chúc phúc ----
 const socialSeen = new Map();
@@ -1416,6 +1436,7 @@ document.addEventListener('click', () => AC.resume());
   if (AC.state !== 'running') AC.resume().catch(() => {});
   requestAnimationFrame(loop);
   setTimeout(sermonLoop, 2500);
+  if (CFG.audio.autoPretts !== false) setTimeout(() => pretts(false), 8000);
   // test mode (headless)
   if (location.hash.includes('demo')) {
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);

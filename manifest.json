@@ -1,9 +1,9 @@
 {
-  "version": "1.0.23",
-  "notes": "Giảng liền mạch: tải trước 5 câu, giọng đọc song song, giảm thời gian chờ khi lỗi — khởi động lại app sau khi cập nhật",
+  "version": "1.0.24",
+  "notes": "Tự tạo sẵn giọng đọc cho toàn bộ bài giảng khi mở app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T04:47:39.239Z",
+  "date": "2026-11-02T04:53:17.859Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32038,
-      "sha256": "8446ff2aea3342956f169b154aa5d3b9c381cda67dd38ee0e730f26180093924"
+      "size": 32143,
+      "sha256": "6a3eeed1ded5d68ba68ab61d02ec4496425de4b296d6eecc3f2bc47bd778f382"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 23829,
-      "sha256": "0343a80ea83b476318452135fab4574445af0c959f3e174961e89fdd31e7e75a"
+      "size": 23953,
+      "sha256": "78dd80b4468b5f843aaa89317b08f8d2e00de2bb5d44c233a9342e50ead86a40"
     },
     {
       "path": "main-ext.js",
@@ -309,13 +309,13 @@
     },
     {
       "path": "panel.html",
-      "size": 38480,
-      "sha256": "f154f4bbddc52c2c833889dbb568c5a278250265b7c971b42154b7c3a2f3df36"
+      "size": 38683,
+      "sha256": "4d9ae878964e838bf1edbd64efa089bf74facb06e1428c1d6c2a85f524d7f469"
     },
     {
       "path": "panel.js",
-      "size": 26656,
-      "sha256": "b77143ed2f3ac9b46791cd7a5ea30e36f71490a313a77d141525c128a634de9c"
+      "size": 26791,
+      "sha256": "6ebb8437b54837a4d57bd160a376e6e24e3e63cf3d980504d15ec15ede195514"
     },
     {
       "path": "sermons_en.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 87172,
-      "sha256": "55e25e4017a27799559f4de0349cb06a71079f7523e6c410b743677ce2779b3d"
+      "size": 88487,
+      "sha256": "2fc87a018f97d63f8864e4da033a8fa3507c51b4c35cf076a17cb89a2080aec1"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "d9bbf42387a7e549738ad7dd34a20f126c0a08a434cac141035bdd107ca1e982"
+      "sha256": "f1406e746bed873f053d1d1edd95eb9fa2fbe9748418b8a27efda725a4177bc8"
     }
   ]
 }

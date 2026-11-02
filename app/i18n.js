@@ -171,6 +171,8 @@ const EN = {
 "Đọc cả tiêu đề bài": "Read section titles",
 "Phát ngẫu nhiên": "Shuffle",
 "Tạo trước toàn bộ giọng đọc": "Pre-generate all speech",
+"Giọng đọc đã tạo sẵn": "Speech ready",
+"Tự tạo sẵn giọng khi mở app": "Pre-generate speech on start",
 "Câu tiếp": "Next line",
 "Giảng lại từ đầu": "Restart sermon",
 "Giọng Edge TTS cần mạng; lần đầu tạo xong sẽ lưu sẵn trên máy. Nếu lỗi, app tự dùng giọng của Windows (không có vang). Chế độ “file ghi âm”: chép mp3 vào thư mục": "Edge TTS needs internet; once generated, audio is cached on this PC. If it fails, the app falls back to a Windows voice (no reverb). “Recordings” mode: copy mp3 files into the folder",
