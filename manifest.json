@@ -1,10 +1,52 @@
 {
-  "version": "1.0.27",
-  "notes": "Sửa đơ khi phát video chúc phúc (phát trực tiếp từng phần), tối ưu mượt: 30 fps, nhẹ hiệu ứng — khởi động lại app",
+  "version": "1.0.28",
+  "notes": "Thêm sẵn 7 video chúc phúc cho mức 5/10/15/30 xu",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T07:13:30.541Z",
+  "date": "2026-11-02T07:20:41.754Z",
   "files": [
+    {
+      "path": "assets/bless/bless10_1.mp4",
+      "size": 5937112,
+      "sha256": "3e86a4b67e66a3a62154bcde810c829830bf2f786eb65c14c91fe9455ee1f45e",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless10_2.mp4",
+      "size": 5842231,
+      "sha256": "0c679760eb003917389e7efb7cc1dee48b2a473964e16ba795109894f7a58343",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless15_1.mp4",
+      "size": 5842231,
+      "sha256": "0c679760eb003917389e7efb7cc1dee48b2a473964e16ba795109894f7a58343",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless30_1.mp4",
+      "size": 6367081,
+      "sha256": "653084d4f10eda60f64a61bb20aeae94b56338a26235b9f4957a9ce1d7814dc4",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless30_2.mp4",
+      "size": 5882311,
+      "sha256": "0ee01ceee96edc2debe8111bcf4f2139c2b2a735a228629ed768218dc5199d76",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless5_1.mp4",
+      "size": 5962060,
+      "sha256": "6133294794ed441d7915778f1a01e9c718fbf48e11b22952abb8d4c82e19fae2",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/bless/bless5_2.mp4",
+      "size": 5851129,
+      "sha256": "8408331dc2f81431931def5eaf27db94bc71f307ec001ad7df43069022b1c39c",
+      "enc": "b64"
+    },
     {
       "path": "assets/faceapi/LICENSE.txt",
       "size": 1067,
@@ -289,8 +331,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32258,
-      "sha256": "9b5106cadae08936a4fb3a73f9cfc2c8882dc336a352bcb6f65585800abbad1f"
+      "size": 32672,
+      "sha256": "f8ccb0825bc9a3ff13a6fc645aadc2387d71f94363032b3536a40ce7a0bdb489"
     },
     {
       "path": "fonts.css",
@@ -314,8 +356,8 @@
     },
     {
       "path": "panel.js",
-      "size": 26950,
-      "sha256": "04ffee49a9658a3d991d20be8d49adc1fda5a08048d0694fcf2cba8c4d855f93"
+      "size": 27750,
+      "sha256": "ecddea27b4842c551d9fb4b0cd12ab4d35981f3b8c3553404e7cd5f3929100ff"
     },
     {
       "path": "sermons_en.js",
@@ -340,7 +382,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "e6ca400f31fd8abc28e2d95545e6b1dd2b87e48afd009f28680c829df759b65a"
+      "sha256": "cab54997272446a8066fa96404115eca3524a1ce2049f944b89a303b60617514"
     }
   ]
 }

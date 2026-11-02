@@ -150,9 +150,10 @@ window.CHURCH_DEFAULTS = {
     blessSpeeches: null,       // null = danh sách lời chúc mặc định (từ tài liệu)
     // video chúc phúc theo mức xu (tổng xu của 1 lần tặng). Thêm file video trong Bảng điều khiển.
     tiers: [
-      { min: 5, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
-      { min: 10, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
-      { min: 30, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true }
+      { min: 5, videos: ['church://app/assets/bless/bless5_1.mp4', 'church://app/assets/bless/bless5_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
+      { min: 10, videos: ['church://app/assets/bless/bless10_1.mp4', 'church://app/assets/bless/bless10_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
+      { min: 15, videos: ['church://app/assets/bless/bless15_1.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
+      { min: 30, videos: ['church://app/assets/bless/bless30_1.mp4', 'church://app/assets/bless/bless30_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true }
     ],
     walkAfterVideo: true,      // chiếu xong video mới đi lên bục
     videoVolume: 1.0, videoFit: 'cover', videoMaxSeconds: 0, videoBarBottom: 230,

@@ -56,7 +56,7 @@ function renderTiers() {
     $('.ttext', el).value = t.text || ''; $('.tsub', el).value = t.sub || '';
     const vids = $('.tvids', el);
     if (!(t.videos || []).length) vids.innerHTML = '<span style="opacity:.6">(chưa có video — mức này chỉ đi lên bục)</span>';
-    (t.videos || []).forEach((v, vi) => { const sp = document.createElement('span'); sp.textContent = v.split(/[\\/]/).pop() + '  ✕'; sp.style.cursor = 'pointer'; sp.title = 'Bấm để bỏ'; sp.onclick = () => upd((x) => x.videos.splice(vi, 1)); vids.appendChild(sp); });
+    (t.videos || []).forEach((v, vi) => { const sp = document.createElement('span'); sp.textContent = (/^church:\/\/app\//.test(v) ? '★ ' : '') + v.split(/[\\/]/).pop() + '  ✕'; sp.style.cursor = 'pointer'; sp.title = 'Bấm để bỏ'; sp.onclick = () => upd((x) => x.videos.splice(vi, 1)); vids.appendChild(sp); });
     const upd = async (fn) => { const arr = (CFG.donate.tiers || []).map((x) => ({ ...x, videos: [...(x.videos || [])] })); fn(arr[i], arr); await save('donate.tiers', arr); renderTiers(); };
     $('.tmin', el).onchange = (e) => upd((x) => x.min = Math.max(1, +e.target.value || 1));
     $('.ten', el).onchange = (e) => upd((x) => x.enabled = e.target.checked);
@@ -313,6 +313,14 @@ async function applyLive(L, skipConfirm) {
   const c = await api.getConfig();
   raw = {}; for (const [k, v] of Object.entries(c || {})) if (!k.startsWith('_')) raw[k] = v;
   CFG = deepMerge(CHURCH_DEFAULTS, raw);
+  // một lần: nạp các video chúc phúc có sẵn vào các mức xu đang trống video, thêm mức 15 xu nếu chưa có
+  if (!(raw._m || {}).bless1 && !(raw.donate || {}).builtinBless1) {
+    const D = CHURCH_DEFAULTS.donate.tiers, arr = (CFG.donate.tiers || []).map((x) => ({ ...x, videos: [...(x.videos || [])] }));
+    for (const d of D) { const t = arr.find((x) => x.min === d.min); if (!t) arr.push({ ...d, text: (arr[0] && arr[0].text) || d.text, videos: [...d.videos] }); else if (!t.videos.length) t.videos = [...d.videos]; }
+    arr.sort((a, b) => a.min - b.min);
+    setK(raw, 'donate.tiers', arr); setK(raw, 'donate.builtinBless1', true); CFG = deepMerge(CHURCH_DEFAULTS, raw);
+    await api.setConfig({ donate: raw.donate });
+  }
   fillInputs();
   $('#uiLang').value = (CFG.window && CFG.window.uiLang) || 'vi'; $('#liveLang').value = CFG.scene.liveLang || CFG.audio.sermonLang || 'vi';
   window.__uiLang = $('#uiLang').value; I18N.start();
