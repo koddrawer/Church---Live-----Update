@@ -43,8 +43,29 @@ function fillInputs() {
   applyLock();
   applyPanelLock();
 }
+const FRAME_NAMES = { bronze: 'Đồng', silver: 'Bạc', gold: 'Vàng + nguyệt quế', ruby: 'Hồng ngọc', royal: 'Hoàng kim: vương miện + cánh' };
+function renderFrames() {
+  const box = $('#frames'); if (!box) return; box.innerHTML = '';
+  const list = CFG.donate.frames || [];
+  const upd = async (fn) => { const arr = (CFG.donate.frames || []).map((x) => ({ ...x })); fn(arr); arr.sort((a, b) => a.min - b.min); await save('donate.frames', arr); renderFrames(); };
+  list.forEach((f, i) => {
+    const el = document.createElement('div'); el.className = 'row';
+    el.innerHTML = `<b style="color:var(--gold2);min-width:46px">Mức</b><input type="number" min="1" class="fmin" style="width:80px"> xu trở lên → <select class="fst">${Object.entries(FRAME_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('')}</select> <label style="min-width:0;margin-left:10px">Bật</label><input type="checkbox" class="fen"> <button class="b ftest">▶ Thử</button><button class="b d fdel">Xoá</button>`;
+    $('.fmin', el).value = f.min; $('.fst', el).value = f.style; $('.fen', el).checked = f.enabled !== false;
+    $('.fmin', el).onchange = (e) => upd((a) => a[i].min = Math.max(1, +e.target.value || 1));
+    $('.fst', el).onchange = (e) => upd((a) => a[i].style = e.target.value);
+    $('.fen', el).onchange = (e) => upd((a) => a[i].enabled = e.target.checked);
+    $('.fdel', el).onclick = () => upd((a) => a.splice(i, 1));
+    $('.ftest', el).onclick = () => api.toStage({ type: 'sim-gift', name: $('#simName').value.trim() || undefined, gift: 'Quà thử', count: 1, coins: f.min });
+    box.appendChild(el);
+  });
+  const add = document.createElement('button'); add.className = 'b'; add.textContent = '+ Thêm mức';
+  add.onclick = () => upd((a) => a.push({ min: ((a[a.length - 1] || {}).min || 0) + 20, style: 'royal', enabled: true }));
+  box.appendChild(add);
+}
 function renderTiers() {
-  const box = $('#tiers'); box.innerHTML = '';
+  renderFrames();
+  const box = $('#tiers'); if (!box) return; box.innerHTML = '';
   const tiers = CFG.donate.tiers || [];
   tiers.forEach((t, i) => {
     const el = document.createElement('div'); el.className = 'card'; el.style.margin = '8px 0'; el.style.background = 'var(--card2)';
@@ -107,6 +128,7 @@ $$('[data-sim]').forEach((b) => b.onclick = () => {
   if (s === 'giftSeated') api.toStage({ type: 'sim-gift', seated: true, gift: 'Nhẫn', count: 1 });
   if (s === 'g5') api.toStage({ type: 'sim-gift', name, gift: 'Kem', count: 1, coins: 5 });
   if (s === 'g10') api.toStage({ type: 'sim-gift', name, gift: 'Nước hoa', count: 1, coins: 10 });
+  if (s === 'g15') api.toStage({ type: 'sim-gift', name, gift: 'Nhẫn', count: 1, coins: 15 });
   if (s === 'g30') api.toStage({ type: 'sim-gift', name, gift: 'Vương miện', count: 1, coins: 30 });
   if (s === 'g1x5') for (let i = 0; i < 5; i++) api.toStage({ type: 'sim-gift', gift: 'Hoa hồng', count: 1, coins: 1 });
   if (s === 'clear') api.toStage({ type: 'clear' });

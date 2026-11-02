@@ -150,11 +150,22 @@ window.CHURCH_DEFAULTS = {
     blessSpeeches: null,       // null = danh sách lời chúc mặc định (từ tài liệu)
     // video chúc phúc theo mức xu (tổng xu của 1 lần tặng). Thêm file video trong Bảng điều khiển.
     tiers: [
-      { min: 5, videos: ['church://app/assets/bless/bless5_1.mp4', 'church://app/assets/bless/bless5_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
-      { min: 10, videos: ['church://app/assets/bless/bless10_1.mp4', 'church://app/assets/bless/bless10_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
-      { min: 15, videos: ['church://app/assets/bless/bless15_1.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
-      { min: 30, videos: ['church://app/assets/bless/bless30_1.mp4', 'church://app/assets/bless/bless30_2.mp4'], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true }
+      { min: 5, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
+      { min: 10, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true },
+      { min: 30, videos: [], text: '{name} đã được chúc phúc', sub: '', walk: true, speak: false, enabled: true }
     ],
+    tierVideos: false,         // tắt video theo mức xu (thay bằng khung avatar)
+    // khung trang trí avatar theo mức xu (tổng xu của 1 lần tặng): hiện khi người donate được chúc phúc
+    frameEnabled: true,
+    frames: [
+      { min: 1, style: 'bronze', enabled: true },
+      { min: 5, style: 'silver', enabled: true },
+      { min: 10, style: 'gold', enabled: true },
+      { min: 15, style: 'ruby', enabled: true },
+      { min: 30, style: 'royal', enabled: true }
+    ],
+    frameX: 540, frameY: 1490, frameScale: 1, frameSeconds: 6,
+    frameText: '',             // để trống = dùng đúng lời chúc cha sứ đọc; có thể dùng {name} {gift} {count}
     walkAfterVideo: true,      // chiếu xong video mới đi lên bục
     videoVolume: 1.0, videoFit: 'cover', videoMaxSeconds: 0, videoBarBottom: 230,
     banner: '{name} đã được chúc phúc',
@@ -194,6 +205,8 @@ window.CHURCH_DEFAULTS = {
     layoutLocked: false,
     liveLang: 'vi',         // ngôn ngữ chữ trên màn hình (vi/en)    // khóa bố cục: không kéo thả/chỉnh vị trí, cỡ các bảng
     title: '', showTitle: false,
+    camZoom: true, camScale: 1.8, camHold: 1,   // camera zoom vào người donate khi đứng dậy đi lên
+
     geometry: {
       // vị trí mép trên lưng ghế (px, khung 1080x1920) đo từ video, hàng 0 sát bục
       rows: [1369, 1376, 1383, 1392, 1402, 1412, 1423, 1437, 1450, 1465, 1481, 1498, 1516, 1536, 1559, 1585, 1615, 1648, 1686, 1728, 1775, 1827, 1885],

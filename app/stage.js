@@ -608,10 +608,10 @@ function onGift(ev) {
   const ex = findPerson(ev.id);
   if (ex && !ex.avatar && ev.avatar) { ex.avatar = ev.avatar; enrichPerson(ex); }
   const w = walkers.find((x) => x.person.id === ev.id && !x.done);
-  if (w) { w.gifts.push(ev); w.count += ev.count || 1; if (w.phase === 'bless') { w.blessEnd += 3; pushBanner(w, ev); } return; }
+  if (w) { w.gifts.push(ev); w.count += ev.count || 1; w.total = (w.total || 0) + total; if (w.phase === 'bless') { w.blessEnd += 3; if (!(CFG.donate.frameEnabled !== false && !ev.social && pushCard(w, ev))) pushBanner(w, ev); } return; }
   const q = queue.find((x) => x.id === ev.id);
-  if (q) { q.count += ev.count || 1; if (hold) q.holdVideo = true; return; }
-  queue.push({ ...ev, count: ev.count || 1, at: now(), seq: ++giftSeq, holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
+  if (q) { q.count += ev.count || 1; q.total = (q.total || 0) + total; if (hold) q.holdVideo = true; return; }
+  queue.push({ ...ev, total, count: ev.count || 1, at: now(), seq: ++giftSeq, holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
 }
 function altarSpots() {
   const g = G.g, s = g.altarSpread; return [g.centerX, g.centerX - s, g.centerX + s, g.centerX - 2 * s, g.centerX + 2 * s];
@@ -672,8 +672,9 @@ function startWalker(p, ev, spot, delay) {
   walkers.push({
     person: p, set: setName, ev, gifts: [ev], count: ev.count || 1, spot, dir,
     phase: 'wait', t0: now() + delay, tStand, tTurn, tSide: tRest * sideFrac, tUp: tRest * (1 - sideFrac),
-    x: s.x, rail: s.y, endX, u0, altarX, done: false, alpha: 1, frameT: 0, inPew: true, reveal: 0, rise: 0
+    x: s.x, rail: s.y, endX, u0, altarX, done: false, alpha: 1, frameT: 0, inPew: true, reveal: 0, rise: 0, total: ev.total || 0
   });
+  if (!ev.social) camFor(walkers[walkers.length - 1]);
 }
 // ================== VÒNG LẶP ==================
 let last = now();
@@ -760,8 +761,9 @@ function startBlessing(w) {
   const ev = w.ev;
   const scw = ev.social && CFG.social ? CFG.social[ev.social] : null;
   if (scw) { if (scw.speak) socialSpeak({ text: fmt(scw.speech, { name: cleanName(w.person.name) }), lang: textLang(scw.speech) }); }
-  else if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }));
-  pushBanner(w, ev);
+  let line = null;
+  if (!scw) { line = blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }); if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(line); }
+  if (!(CFG.donate.frameEnabled !== false && !scw && !ev.social && pushCard(w, ev, line))) pushBanner(w, ev);
   for (let i = 0; i < 40; i++) spawnSparkle(w, true);
   toPanel({ type: 'blessed', name: w.person.name, gift: ev.gift, count: w.count });
 }
@@ -782,6 +784,7 @@ function cleanName(n) { n = String(n || '').trim(); const m = CFG.seating.nameMa
 
 // ================== VIDEO CHÚC PHÚC THEO MỨC XU ==================
 function tierFor(total) {
+  if (!CFG.donate.tierVideos) return null;
   const ts = (CFG.donate.tiers || []).filter((t) => t && t.enabled !== false && (t.videos || []).length && total >= t.min);
   ts.sort((a, b) => b.min - a.min);
   return ts[0] || null;
@@ -1131,6 +1134,167 @@ function drawBanners(t) {
     ctx.restore();
   });
 }
+// ================== KHUNG AVATAR THEO MỨC XU ==================
+const GOLD = ['#5e3a0c', '#d9a440', '#fff2b8', '#b07a22', '#6b4310'];
+const FRAME_STYLES = {
+  bronze: { ring: ['#4a2810', '#b8753a', '#f3c48a', '#8a5326', '#4a2810'], name: '#f6cf98', rays: 0, cross: true },
+  silver: { ring: ['#3c434b', '#b9c3cd', '#ffffff', '#8a949e', '#3c434b'], name: '#eef3f8', rays: 0.45, cross: true, pearls: true },
+  gold: { ring: GOLD, name: '#ffe08a', rays: 0.7, cross: true, laurel: true },
+  ruby: { ring: GOLD, name: '#ffd6dc', rays: 0.9, cross: true, laurel: true, gems: ['#ff2a48'] },
+  royal: { ring: GOLD, name: '#fff3c4', rays: 1.2, laurel: true, gems: ['#2f7bff', '#c040ff'], crown: true, wings: true }
+};
+function frameStyleFor(total) {
+  const fs = (CFG.donate.frames || []).filter((f) => f && f.enabled !== false).sort((a, b) => a.min - b.min);
+  if (!fs.length) return null;
+  let r = fs[0]; for (const f of fs) if (total >= f.min) r = f;
+  return FRAME_STYLES[r.style] ? r.style : 'gold';
+}
+function metal(g, x0, y0, x1, y1, cols) { const gr = g.createLinearGradient(x0, y0, x1, y1); cols.forEach((c, i) => gr.addColorStop(i / (cols.length - 1), c)); return gr; }
+function gem(g, x, y, r, col) {
+  const gr = g.createRadialGradient(x - r * 0.3, y - r * 0.3, r * 0.1, x, y, r);
+  gr.addColorStop(0, '#ffffff'); gr.addColorStop(0.25, col); gr.addColorStop(1, '#10051a');
+  g.fillStyle = metal(g, x - r, y - r, x + r, y + r, GOLD); g.beginPath(); g.arc(x, y, r * 1.35, 0, 7); g.fill();
+  g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, 7); g.fill();
+}
+const frameTexCache = new Map();
+function frameTex(style, R) {
+  const key = style + '|' + Math.round(R); if (frameTexCache.has(key)) return frameTexCache.get(key);
+  if (frameTexCache.size > 12) frameTexCache.clear();
+  const st = FRAME_STYLES[style], S = Math.ceil(R * 5), c = S / 2, rw = R * 0.16;
+  const cv2 = document.createElement('canvas'); cv2.width = cv2.height = S; const g = cv2.getContext('2d');
+  // cánh thiên thần
+  if (st.wings) for (const sd of [-1, 1]) {
+    for (let i = 0; i < 9; i++) {
+      const a = (-0.95 + i * 0.2), len = R * (1.25 - Math.abs(i - 3) * 0.08), bx = c + sd * R * 0.95, by = c - R * 0.05;
+      g.save(); g.translate(bx, by); g.scale(sd, 1); g.rotate(a);
+      const gr = g.createLinearGradient(0, 0, len, 0); gr.addColorStop(0, '#fff7de'); gr.addColorStop(0.7, '#ffe6a6'); gr.addColorStop(1, 'rgba(255,214,130,0.7)');
+      g.fillStyle = gr; g.strokeStyle = 'rgba(176,122,34,0.8)'; g.lineWidth = 1.5;
+      g.beginPath(); g.ellipse(len * 0.55, 0, len * 0.55, R * 0.11, 0, 0, 7); g.fill(); g.stroke(); g.restore();
+    }
+  }
+  // vòng nguyệt quế
+  if (st.laurel) for (const sd of [-1, 1]) {
+    for (let i = 0; i < 11; i++) {
+      const a = Math.PI / 2 + sd * (0.34 + i * 0.2), rr = R + rw * 1.55;
+      const px = c + Math.cos(a) * rr, py = c + Math.sin(a) * rr;
+      for (const off of [-1, 1]) {
+        g.save(); g.translate(px + Math.cos(a) * off * R * 0.07, py + Math.sin(a) * off * R * 0.07);
+        g.rotate(a + Math.PI / 2 * sd * -1 + off * 0.55 * sd);
+        g.fillStyle = metal(g, -R * 0.12, -R * 0.05, R * 0.12, R * 0.05, ['#7a5214', '#f6d77a', '#a8741f']);
+        g.beginPath(); g.ellipse(0, 0, R * 0.2, R * 0.075, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(70,40,5,0.7)'; g.lineWidth = 1.2; g.stroke(); g.restore();
+      }
+    }
+  }
+  // viền kim loại
+  g.lineWidth = rw; g.strokeStyle = metal(g, c - R, c - R, c + R, c + R, st.ring); g.beginPath(); g.arc(c, c, R + rw / 2, 0, 7); g.stroke();
+  g.lineWidth = 2; g.strokeStyle = 'rgba(255,255,255,0.55)'; g.beginPath(); g.arc(c, c, R + 1, 0, 7); g.stroke();
+  g.strokeStyle = 'rgba(40,20,0,0.6)'; g.beginPath(); g.arc(c, c, R + rw, 0, 7); g.stroke();
+  g.lineWidth = rw * 0.18; g.strokeStyle = metal(g, c + R, c - R, c - R, c + R, st.ring); g.beginPath(); g.arc(c, c, R + rw * 1.35, 0, 7); g.stroke();
+  if (st.pearls) for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, x = c + Math.cos(a) * (R + rw / 2), y = c + Math.sin(a) * (R + rw / 2); const gr = g.createRadialGradient(x - 2, y - 2, 1, x, y, rw * 0.32); gr.addColorStop(0, '#fff'); gr.addColorStop(1, '#9aa4ae'); g.fillStyle = gr; g.beginPath(); g.arc(x, y, rw * 0.3, 0, 7); g.fill(); }
+  if (st.gems) { const n = st.gems.length > 1 ? 8 : 6; for (let i = 0; i < n; i++) { const a = i / n * Math.PI * 2 + Math.PI / 2; gem(g, c + Math.cos(a) * (R + rw / 2), c + Math.sin(a) * (R + rw / 2), rw * 0.36, st.gems[i % st.gems.length]); } }
+  // thánh giá / vương miện trên đỉnh
+  const top = c - R - rw * 1.3;
+  if (st.crown) {
+    const cw = R * 0.95, ch = R * 0.55, by = top + rw * 0.4;
+    g.fillStyle = metal(g, c - cw / 2, by - ch, c + cw / 2, by, GOLD); g.strokeStyle = '#5e3a0c'; g.lineWidth = 2;
+    g.beginPath(); g.moveTo(c - cw / 2, by); g.lineTo(c - cw / 2, by - ch * 0.55); g.lineTo(c - cw * 0.27, by - ch * 0.3); g.lineTo(c - cw * 0.2, by - ch * 0.85); g.lineTo(c, by - ch * 0.42);
+    g.lineTo(c + cw * 0.2, by - ch * 0.85); g.lineTo(c + cw * 0.27, by - ch * 0.3); g.lineTo(c + cw / 2, by - ch * 0.55); g.lineTo(c + cw / 2, by); g.closePath(); g.fill(); g.stroke();
+    gem(g, c, by - ch * 0.2, rw * 0.3, '#ff2a48'); gem(g, c - cw * 0.3, by - ch * 0.15, rw * 0.22, '#2f7bff'); gem(g, c + cw * 0.3, by - ch * 0.15, rw * 0.22, '#2f7bff');
+    for (const x of [c - cw / 2, c - cw * 0.2, c + cw * 0.2, c + cw / 2]) { g.fillStyle = '#fff6d0'; g.beginPath(); g.arc(x, by - ch * (x === c - cw / 2 || x === c + cw / 2 ? 0.55 : 0.85), rw * 0.14, 0, 7); g.fill(); }
+    const cy = by - ch * 0.42 - R * 0.42; g.fillStyle = metal(g, c - 10, cy, c + 10, cy + R * 0.4, GOLD);
+    g.fillRect(c - R * 0.04, cy, R * 0.08, R * 0.36); g.fillRect(c - R * 0.13, cy + R * 0.09, R * 0.26, R * 0.07);
+  } else if (st.cross) {
+    const h = R * 0.62, cy = top - h * 0.8;
+    g.shadowColor = 'rgba(255,220,140,0.9)'; g.shadowBlur = 14;
+    g.fillStyle = metal(g, c - h * 0.3, cy, c + h * 0.3, cy + h, st.ring);
+    g.fillRect(c - h * 0.09, cy, h * 0.18, h); g.fillRect(c - h * 0.32, cy + h * 0.24, h * 0.64, h * 0.16); g.shadowBlur = 0;
+  }
+  const o = { cv: cv2, S }; frameTexCache.set(key, o); return o;
+}
+const RAYS = (() => {
+  const S = 512, c = S / 2, cv2 = document.createElement('canvas'); cv2.width = cv2.height = S; const g = cv2.getContext('2d');
+  const gr = g.createRadialGradient(c, c, 0, c, c, c); gr.addColorStop(0, 'rgba(255,236,170,0.95)'); gr.addColorStop(0.4, 'rgba(255,214,120,0.45)'); gr.addColorStop(1, 'rgba(255,200,90,0)');
+  g.fillStyle = gr;
+  for (let i = 0; i < 18; i++) { const a = i / 18 * Math.PI * 2; g.beginPath(); g.moveTo(c, c); g.arc(c, c, c, a - 0.07, a + 0.07); g.closePath(); g.fill(); }
+  const gl = g.createRadialGradient(c, c, 0, c, c, c * 0.6); gl.addColorStop(0, 'rgba(255,240,190,0.8)'); gl.addColorStop(1, 'rgba(255,220,140,0)'); g.fillStyle = gl; g.fillRect(0, 0, S, S);
+  return cv2;
+})();
+let cards = [];
+function pushCard(w, ev, line) {
+  const total = w.total || 1, style = frameStyleFor(total); if (!style) return false;
+  const o = { name: cleanName(w.person.name), gift: ev.gift || '', count: w.count };
+  const old = cards.find((c) => c.w === w);
+  if (old) { old.style = style; old.shownAt != null && (old.until = Math.max(old.until || 0, now() + 3)); return true; }
+  const txt = CFG.donate.frameText ? fmt(CFG.donate.frameText, o) : (line && line.text) || '';
+  cards.push({ w, style, name: o.name, text: txt, shownAt: null });
+  return true;
+}
+const cardDur = () => Math.max(2, CFG.donate.frameSeconds || 6);
+function wrapLines(text, maxW, maxLines) {
+  const words = String(text || '').split(/\s+/).filter(Boolean), out = []; let line = '';
+  for (const wd of words) { const tst = line ? line + ' ' + wd : wd; if (ctx.measureText(tst).width > maxW && line) { out.push(line); line = wd; } else line = tst; }
+  if (line) out.push(line);
+  if (out.length > maxLines) { out.length = maxLines; out[maxLines - 1] = out[maxLines - 1].replace(/\s*\S*$/, '') + '…'; }
+  return out;
+}
+function cardGeom() { const d = CFG.donate, k = d.frameScale || 1, R = 108 * k; return { k, R, cx: d.frameX ?? W / 2, cy: d.frameY ?? 1490, w: 940 * k, top: (d.frameY ?? 1490) - R * 1.75, h: R * 1.75 + R + 250 * k }; }
+function drawCards(t) {
+  cards = cards.filter((c) => c.shownAt == null || t < c.shownAt + (c.until ? Math.max(cardDur(), c.until - c.shownAt) : cardDur()) + 0.7);
+  const c = cards[0]; if (!c) return;
+  if (c.shownAt == null) c.shownAt = t;
+  const dur = c.until ? Math.max(cardDur(), c.until - c.shownAt) : cardDur(), el = t - c.shownAt;
+  const inA = clamp(el / 0.45, 0, 1), outA = clamp((dur + 0.7 - el) / 0.7, 0, 1), a = Math.min(inA, outA);
+  if (a <= 0) return;
+  const st = FRAME_STYLES[c.style], { k, R, cx, cy } = cardGeom();
+  const pop = inA < 1 ? 1 + 2.2 * Math.pow(inA - 1, 3) + 1.2 * Math.pow(inA - 1, 2) : 1; // easeOutBack
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.translate(cx, cy); ctx.scale(pop, pop); ctx.translate(-cx, -cy);
+  // nền mờ cho chữ
+  const tg = ctx.createLinearGradient(cx - 470 * k, 0, cx + 470 * k, 0);
+  tg.addColorStop(0, 'rgba(30,14,2,0)'); tg.addColorStop(0.15, 'rgba(30,14,2,0.72)'); tg.addColorStop(0.85, 'rgba(30,14,2,0.72)'); tg.addColorStop(1, 'rgba(30,14,2,0)');
+  ctx.fillStyle = tg; ctx.fillRect(cx - 470 * k, cy + R * 0.55, 940 * k, R * 0.45 + 250 * k);
+  // hào quang xoay
+  if (st.rays) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = a * Math.min(1, st.rays) * (0.75 + 0.25 * Math.sin(t * 2)); ctx.translate(cx, cy); ctx.rotate(t * 0.25); const rs = R * (2.6 + st.rays * 0.6); ctx.drawImage(RAYS, -rs, -rs, rs * 2, rs * 2); ctx.restore(); }
+  // avatar
+  ctx.save(); ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.clip();
+  const p = c.w.person;
+  if (p.avatarImg) { const im = p.avatarImg, s = Math.min(im.width, im.height); ctx.drawImage(im, (im.width - s) / 2, (im.height - s) / 2, s, s, cx - R, cy - R, R * 2, R * 2); }
+  else { const g = ctx.createLinearGradient(cx, cy - R, cx, cy + R); g.addColorStop(0, '#7a4a1c'); g.addColorStop(1, '#3a200a'); ctx.fillStyle = g; ctx.fillRect(cx - R, cy - R, R * 2, R * 2);
+    ctx.fillStyle = '#ffe3a0'; ctx.font = `700 ${R * 1.05}px BeVN, "Segoe UI", sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(([...String(c.name || '?').trim()][0] || '?').toUpperCase(), cx, cy + R * 0.05); }
+  ctx.restore();
+  const tex = frameTex(c.style, R); ctx.drawImage(tex.cv, cx - tex.S / 2, cy - tex.S / 2);
+  // lấp lánh quanh khung
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const n = 6 + Math.round((st.rays || 0) * 8);
+  for (let i = 0; i < n; i++) { const ang = i / n * Math.PI * 2 + t * 0.6, rr = R * (1.35 + 0.12 * Math.sin(t * 3 + i)), sz = R * (0.14 + 0.08 * Math.sin(t * 5 + i * 1.7)); ctx.globalAlpha = a * (0.5 + 0.5 * Math.sin(t * 4 + i)); ctx.drawImage(SPARK, cx + Math.cos(ang) * rr - sz, cy + Math.sin(ang) * rr - sz, sz * 2, sz * 2); }
+  ctx.restore();
+  // tên + lời chúc
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  let fs = 64 * k; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`;
+  while (ctx.measureText(c.name).width > 880 * k && fs > 24) { fs -= 2; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; }
+  const ny = cy + R + R * 0.28 + 40 * k;
+  ctx.shadowColor = 'rgba(255,190,80,0.95)'; ctx.shadowBlur = 20; ctx.fillStyle = st.name; ctx.fillText(c.name, cx, ny);
+  ctx.shadowBlur = 8; ctx.shadowColor = 'rgba(0,0,0,0.8)';
+  ctx.font = `500 ${32 * k}px BeVN, "Segoe UI", sans-serif`; ctx.fillStyle = '#fbe7c2';
+  wrapLines(c.text, 860 * k, 3).forEach((ln, i) => ctx.fillText(ln, cx, ny + 58 * k + i * 42 * k));
+  ctx.restore();
+}
+
+// ================== CAMERA ZOOM VÀO NGƯỜI DONATE ==================
+let cam = null; const camQ = [];
+function camFor(w) { if (!CFG.scene.camZoom) return; if (!cam) cam = { w, start: w.t0 }; else camQ.push(w); }
+function camView(t) {
+  if (!cam && camQ.length) { const w = camQ.shift(); if (!w.done && APPROACH.includes(w.phase) && walkProgress(w) < 0.5) cam = { w, start: Math.max(t, w.t0) }; }
+  if (!cam || !CFG.scene.camZoom) return null;
+  const inS = 0.45, outS = 0.6, hold = clamp(CFG.scene.camHold ?? 1, 0, 10), dt = t - cam.start;
+  if (dt < 0) return null;
+  if (dt > inS + hold + outS) { cam = null; return null; }
+  const e = dt < inS ? ease(dt / inS) : dt < inS + hold ? 1 : 1 - ease((dt - inS - hold) / outS);
+  const w = cam.w, h = standH(w.rail), fx = w.x, fy = G.footOfRail(w.rail) - h * 0.6;
+  const s = 1 + (clamp(CFG.scene.camScale || 1.8, 1, 4) - 1) * e;
+  const vx = clamp(lerp(W / 2, fx, e), W / (2 * s), W - W / (2 * s)), vy = clamp(lerp(H / 2, fy, e), H / (2 * s), H - H / (2 * s));
+  return { s, vx, vy };
+}
 // ================== BẢNG CHÀO NGƯỜI VÀO LIVE ==================
 const greets = [];
 function addGreet(ev) {
@@ -1222,8 +1386,10 @@ function render() {
   const t = now();
   // video chúc phúc đang phủ kín màn → chỉ vẽ video (không vẽ nhà thờ phía dưới) cho nhẹ
   if (vcur && videoOpaque(t)) { drawVideo(t); drawEdit(); return; }
+  const cv0 = G ? camView(t) : null;
+  if (cv0) { ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(cv0.s, cv0.s); ctx.translate(-cv0.vx, -cv0.vy); }
   drawBG();
-  if (!G) return;
+  if (!G) { if (cv0) ctx.restore(); return; }
   drawBeams(t);
   // vẽ theo chiều sâu: xa (y nhỏ) trước
   const items = [];
@@ -1234,9 +1400,11 @@ function render() {
   for (const it of items) it.f();
   drawFX();
   drawNames();
+  if (cv0) ctx.restore();
   drawSubtitles(t);
   drawGreet(t);
   drawBanners(t);
+  drawCards(t);
   drawTitle();
   drawGuides();
   drawVideo(t);
@@ -1263,6 +1431,7 @@ function editItems() {
   if (CFG.greet) items.push({ id: 'greet', label: 'Bảng chào', color: '#7dff9a', rect: greetRect() });
   const k = d.bannerScale || 1, gw = Math.min(W, d.bannerWidth || 900), gh = 116 * k;
   items.push({ id: 'banner', label: 'Băng chúc phúc', color: '#ffd23f', rect: { x: W / 2 - gw / 2, y: (d.bannerY ?? 110) - gh / 2, w: gw, h: gh } });
+  if (d.frameEnabled !== false) { const cg = cardGeom(); items.push({ id: 'card', label: 'Khung avatar donate', color: '#ff9f43', rect: { x: cg.cx - cg.w / 2, y: cg.top, w: cg.w, h: cg.h } }); }
   (d.avoidZones || []).forEach((z, i) => items.push({ id: 'zone' + i, zi: i, label: i === 0 ? 'Vùng hình Chúa (băng chữ tránh)' : 'Vùng tránh ' + (i + 1), color: '#ff5a5a', rect: { ...z } }));
   return items;
 }
@@ -1273,6 +1442,8 @@ function applyEdit(it, r, final) {
     c.x = Math.round(r.x); c.y = Math.round(r.y); c.w = Math.round(Math.max(120, r.w) / k); c.h = Math.round(Math.max(90, r.h) / k);
   } else if (it.id === 'banner') {
     d.bannerY = Math.round(r.y + r.h / 2); d.bannerWidth = Math.round(clamp(r.w, 300, W)); d.bannerScale = +clamp(r.h / 116, 0.4, 2).toFixed(2);
+  } else if (it.id === 'card') {
+    const k = +clamp(r.w / 940, 0.4, 2).toFixed(2), R = 108 * k; d.frameScale = k; d.frameX = Math.round(r.x + r.w / 2); d.frameY = Math.round(r.y + R * 1.75);
   } else if (it.zi != null) {
     d.avoidZones = (d.avoidZones || []).map((z, i) => i === it.zi ? { x: Math.round(r.x), y: Math.round(r.y), w: Math.round(Math.max(20, r.w)), h: Math.round(Math.max(20, r.h)) } : z);
   }
@@ -1285,6 +1456,7 @@ async function saveEdit(it) {
   if (it.id === 'sub') await pick('subtitles', ['x', 'y', 'w', 'h', 'scale', 'fontSize']);
   else if (it.id === 'greet') await pick('greet', ['x', 'y', 'w', 'h', 'scale', 'fontSize']);
   else if (it.id === 'banner') await pick('donate', ['bannerY', 'bannerWidth', 'bannerScale']);
+  else if (it.id === 'card') await pick('donate', ['frameX', 'frameY', 'frameScale']);
   else await pick('donate', ['avoidZones']);
 }
 function canvasXY(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height }; }
@@ -1483,5 +1655,5 @@ document.addEventListener('click', () => AC.resume());
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);
   }
 })();
-window.__church = { textLang: (t) => textLang(t), voiceFor: (l) => voiceFor(l), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG };
+window.__church = { textLang: (t) => textLang(t), voiceFor: (l) => voiceFor(l), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG, get cards() { return cards; }, get cam() { return cam; } };
 })();

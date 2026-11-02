@@ -1,6 +1,23 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Khung avatar theo mức xu": "Avatar frame by coin level",
+"Hiện khung avatar khi chúc phúc": "Show avatar frame when blessed",
+"Thời gian hiện (giây)": "Display time (seconds)",
+"Cỡ khung": "Frame size",
+"Vị trí ngang (X)": "Horizontal position (X)",
+"Vị trí dọc (Y, tâm avatar)": "Vertical position (Y, avatar center)",
+"Lời chúc dưới tên": "Blessing under the name",
+"Camera zoom vào người đi lên": "Camera zooms in on the walker",
+"Mức zoom": "Zoom amount",
+"Giữ zoom (giây)": "Hold zoom (seconds)",
+"Donate 15 xu": "Gift 15 coins",
+"Đồng": "Bronze", "Bạc": "Silver", "Vàng + nguyệt quế": "Gold + laurel", "Hồng ngọc": "Ruby", "Hoàng kim: vương miện + cánh": "Royal: crown + wings",
+"+ Thêm mức": "+ Add level",
+"xu trở lên →": "coins and up →",
+"Xoá": "Delete",
+"Khung avatar donate": "Donor avatar frame",
+"Tổng xu của 1 lần tặng (gồm cả combo) ≥ mức nào thì dùng khung của mức cao nhất đạt được. Khung hiện lúc người donate được chúc phúc ở bục, kèm tên và lời chúc phúc bên dưới; mỗi lần 1 khung, khung sau chờ lượt. Có thể kéo thả/đổi cỡ khung bằng nút \"Chỉnh bố cục\". Biến: {name} {gift} {count}.": "The highest level reached by one gift's total coins (combos included) picks the frame. It appears when the donor is blessed at the altar, with the name and blessing below; one at a time, others wait. Drag/resize it with \"Edit layout\". Variables: {name} {gift} {count}.",
 "Khóa toàn bộ bảng điều khiển": "Lock the whole control panel",
 "🔓 Khóa bảng điều khiển": "🔓 Lock control panel",
 "🔒 Mở khóa": "🔒 Unlock",

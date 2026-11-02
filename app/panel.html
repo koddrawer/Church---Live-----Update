@@ -107,6 +107,7 @@ body.plocked main{opacity:.72}
       <div class="row">
         <button class="b p" data-sim="g5">Donate 5 xu</button>
         <button class="b p" data-sim="g10">Donate 10 xu</button>
+        <button class="b p" data-sim="g15">Donate 15 xu</button>
         <button class="b p" data-sim="g30">Donate 30 xu</button>
         <button class="b" data-sim="g1x5">5 người donate liên tiếp</button>
       </div>
@@ -177,6 +178,9 @@ body.plocked main{opacity:.72}
     </div>
     <div class="card">
       <h3>Chúc phúc</h3>
+      <div class="row"><label>Camera zoom vào người đi lên</label><input type="checkbox" data-k="scene.camZoom"></div>
+      <div class="row"><label>Mức zoom</label><input type="range" min="1.2" max="3" step="0.05" data-k="scene.camScale"><span class="val"></span></div>
+      <div class="row"><label>Giữ zoom (giây)</label><input type="range" min="0.3" max="5" step="0.1" data-k="scene.camHold"><span class="val"></span></div>
       <div class="row"><label>Thời gian chúc phúc (giây)</label><input type="range" min="2" max="40" step="0.5" data-k="donate.blessSeconds"><span class="val"></span></div>
       <div class="row"><label>Tư thế</label><select data-k="characters.blessPose"><option value="kneel">Quỳ cầu nguyện</option><option value="bow">Đứng cúi đầu</option></select></div>
       <div class="row"><label>Sau khi chúc phúc</label><select data-k="donate.afterBless"><option value="return">Quay về ghế</option><option value="vanish">Tan vào ánh sáng</option></select></div>
@@ -249,13 +253,15 @@ body.plocked main{opacity:.72}
       <p class="hint">Mỗi người chỉ được chúc phúc follow 1 lần. Khi nhiều người follow/chia sẻ dồn dập, ánh sáng vẫn hiện cho từng người nhưng cha sứ chỉ đọc lời cảm ơn cách quãng để không ngắt bài giảng liên tục. Biến: {name}.</p>
     </div>
     <div class="card" style="grid-column:1/-1">
-      <h3>Video chúc phúc theo mức xu</h3>
-      <div id="tiers"></div>
-      <div class="row"><label>Chiếu video xong mới đi lên bục</label><input type="checkbox" data-k="donate.walkAfterVideo"></div>
-      <div class="row"><label>Âm lượng video</label><input type="range" min="0" max="2" step="0.05" data-k="donate.videoVolume"><span class="val"></span></div>
-      <div class="row"><label>Khung video</label><select data-k="donate.videoFit"><option value="cover">Phủ kín màn 9:16</option><option value="contain">Giữ nguyên khung (viền đen)</option></select></div>
-      <div class="row"><label>Vị trí dòng tên (cách đáy, px)</label><input type="range" min="80" max="900" step="5" data-k="donate.videoBarBottom"><span class="val"></span></div>
-      <p class="hint">Tổng xu của 1 lần tặng (gồm cả combo) ≥ mức nào thì chiếu video mức cao nhất đạt được. Mức chưa có video thì chỉ đi lên bục như 1 xu. Nhiều video trong 1 mức sẽ phát ngẫu nhiên kiểu rút thăm: phát lần lượt hết các video rồi mới lặp lại, không phát trùng 2 lần liền. Có thể chọn nhiều file cùng lúc (Ctrl+A trong hộp chọn file). Biến: {name} {gift} {count}.</p>
+      <h3>Khung avatar theo mức xu</h3>
+      <div class="row"><label>Hiện khung avatar khi chúc phúc</label><input type="checkbox" data-k="donate.frameEnabled"></div>
+      <div id="frames"></div>
+      <div class="row"><label>Thời gian hiện (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="donate.frameSeconds"><span class="val"></span></div>
+      <div class="row"><label>Cỡ khung</label><input type="range" min="0.5" max="1.6" step="0.02" data-k="donate.frameScale"><span class="val"></span></div>
+      <div class="row"><label>Vị trí ngang (X)</label><input type="range" min="200" max="880" step="2" data-k="donate.frameX"><span class="val"></span></div>
+      <div class="row"><label>Vị trí dọc (Y, tâm avatar)</label><input type="range" min="250" max="1800" step="2" data-k="donate.frameY"><span class="val"></span></div>
+      <div class="row"><label>Lời chúc dưới tên</label><input type="text" data-k="donate.frameText" style="flex:1" placeholder="để trống = đúng lời chúc cha sứ đọc"></div>
+      <p class="hint">Tổng xu của 1 lần tặng (gồm cả combo) ≥ mức nào thì dùng khung của mức cao nhất đạt được. Khung hiện lúc người donate được chúc phúc ở bục, kèm tên và lời chúc phúc bên dưới; mỗi lần 1 khung, khung sau chờ lượt. Có thể kéo thả/đổi cỡ khung bằng nút "Chỉnh bố cục". Biến: {name} {gift} {count}.</p>
     </div>
   </div>
 </section>

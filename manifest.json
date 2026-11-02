@@ -1,52 +1,10 @@
 {
-  "version": "1.0.29",
-  "notes": "TikTok: không kết nối trùng, bị giới hạn lượt thì đợi 2–15 phút mới thử lại — khởi động lại app",
+  "version": "1.0.30",
+  "notes": "Bỏ video theo mức xu → khung avatar trang trí theo mức (Đồng/Bạc/Vàng/Hồng ngọc/Hoàng kim) kèm tên + lời chúc; camera zoom vào người donate khi đi lên",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T07:27:17.854Z",
+  "date": "2026-11-02T09:34:58.688Z",
   "files": [
-    {
-      "path": "assets/bless/bless10_1.mp4",
-      "size": 5937112,
-      "sha256": "3e86a4b67e66a3a62154bcde810c829830bf2f786eb65c14c91fe9455ee1f45e",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless10_2.mp4",
-      "size": 5842231,
-      "sha256": "0c679760eb003917389e7efb7cc1dee48b2a473964e16ba795109894f7a58343",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless15_1.mp4",
-      "size": 5842231,
-      "sha256": "0c679760eb003917389e7efb7cc1dee48b2a473964e16ba795109894f7a58343",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless30_1.mp4",
-      "size": 6367081,
-      "sha256": "653084d4f10eda60f64a61bb20aeae94b56338a26235b9f4957a9ce1d7814dc4",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless30_2.mp4",
-      "size": 5882311,
-      "sha256": "0ee01ceee96edc2debe8111bcf4f2139c2b2a735a228629ed768218dc5199d76",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless5_1.mp4",
-      "size": 5962060,
-      "sha256": "6133294794ed441d7915778f1a01e9c718fbf48e11b22952abb8d4c82e19fae2",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/bless/bless5_2.mp4",
-      "size": 5851129,
-      "sha256": "8408331dc2f81431931def5eaf27db94bc71f307ec001ad7df43069022b1c39c",
-      "enc": "b64"
-    },
     {
       "path": "assets/faceapi/LICENSE.txt",
       "size": 1067,
@@ -331,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 32672,
-      "sha256": "f8ccb0825bc9a3ff13a6fc645aadc2387d71f94363032b3536a40ce7a0bdb489"
+      "size": 33069,
+      "sha256": "42a48ebc281a092015655005b4432de4a65016ac057f2015c5b0838c4f6e990f"
     },
     {
       "path": "fonts.css",
@@ -341,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 24152,
-      "sha256": "31a78f8aba83b96f56a06a3df5cbc1fa3ca5fb6f030d9879850f194a2574e6c8"
+      "size": 25697,
+      "sha256": "29484b3d8cda282881948ae9e3d59faadbb20f8511fa5eb366e8e026c00520e5"
     },
     {
       "path": "main-ext.js",
@@ -351,13 +309,13 @@
     },
     {
       "path": "panel.html",
-      "size": 38835,
-      "sha256": "6d24e08b0a963907d745d38ef7221e8dcd86ec7f690e94745519844491459ea7"
+      "size": 39556,
+      "sha256": "ab51ec003d4b5a925412080fcf755461575300a9f9601c4cca738013fbe7d731"
     },
     {
       "path": "panel.js",
-      "size": 27750,
-      "sha256": "ecddea27b4842c551d9fb4b0cd12ab4d35981f3b8c3553404e7cd5f3929100ff"
+      "size": 29784,
+      "sha256": "790830c2dc3841f768b437a9d841a900ef3898a6debef4028298cfb0b741f308"
     },
     {
       "path": "sermons_en.js",
@@ -376,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 91943,
-      "sha256": "8a80c919dcad7f89ebd46ba5e3294023044be7d21422bacd1877846171df0eab"
+      "size": 105786,
+      "sha256": "29a6f6ffadf14947606974ee0600e0c7651ca0695cf4685ba8a4d65849de9b37"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "c09d69aff2a8459a11949994f25dbf3e570cc6cb79ae67a6ee91ad76889f003f"
+      "sha256": "b105a9f5b927520d341e32119f2d22068956c20c4dfa17bcae37b66032786348"
     }
   ]
 }
