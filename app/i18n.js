@@ -172,6 +172,7 @@ const EN = {
 "Phát ngẫu nhiên": "Shuffle",
 "Tạo trước toàn bộ giọng đọc": "Pre-generate all speech",
 "Giọng đọc đã tạo sẵn": "Speech ready",
+"máy chủ chưa trả lời, thử lại sau": "server not responding, retrying in",
 "Tự tạo sẵn giọng khi mở app": "Pre-generate speech on start",
 "Câu tiếp": "Next line",
 "Giảng lại từ đầu": "Restart sermon",

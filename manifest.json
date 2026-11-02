@@ -1,9 +1,9 @@
 {
-  "version": "1.0.24",
-  "notes": "Tự tạo sẵn giọng đọc cho toàn bộ bài giảng khi mở app",
+  "version": "1.0.25",
+  "notes": "Tạo sẵn giọng đọc không còn bị đơ: chạy chậm, nhường câu đang giảng, tự nghỉ và thử lại khi máy chủ từ chối — khởi động lại app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T04:53:17.859Z",
+  "date": "2026-11-02T05:15:51.168Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -299,13 +299,13 @@
     },
     {
       "path": "i18n.js",
-      "size": 23953,
-      "sha256": "78dd80b4468b5f843aaa89317b08f8d2e00de2bb5d44c233a9342e50ead86a40"
+      "size": 24040,
+      "sha256": "6d3483ea5ba0be15742ce17f82ef6f8173dbc09917bdcf79c97c5731a5c56975"
     },
     {
       "path": "main-ext.js",
-      "size": 11556,
-      "sha256": "cdf95cc2823011600efdd8a19ef64df21bfc10dd1f4757f3e2bc51f3715f63d7"
+      "size": 12597,
+      "sha256": "a7bc9955c056021faff2115ce05e21ce439254e96d91d2aa24860550a58bc8a5"
     },
     {
       "path": "panel.html",
@@ -314,8 +314,8 @@
     },
     {
       "path": "panel.js",
-      "size": 26791,
-      "sha256": "6ebb8437b54837a4d57bd160a376e6e24e3e63cf3d980504d15ec15ede195514"
+      "size": 26950,
+      "sha256": "04ffee49a9658a3d991d20be8d49adc1fda5a08048d0694fcf2cba8c4d855f93"
     },
     {
       "path": "sermons_en.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 88487,
-      "sha256": "2fc87a018f97d63f8864e4da033a8fa3507c51b4c35cf076a17cb89a2080aec1"
+      "size": 88490,
+      "sha256": "d54dc200453dbdd94a74634a25b88d524d1476bf9ed6a6ba22915b3b26bde9af"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "f1406e746bed873f053d1d1edd95eb9fa2fbe9748418b8a27efda725a4177bc8"
+      "sha256": "be3abcfa0204a5c3eb285ab1e42c0e1b197585beadc89b9e37d98f7c572a9ba7"
     }
   ]
 }

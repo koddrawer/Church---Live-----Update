@@ -1357,24 +1357,20 @@ async function pretts(manual) {
   const my = ++pre.token;
   const lang = CFG.audio.sermonLang || 'vi', a = CFG.audio, voice = voiceFor(lang);
   const all = []; for (const sec of sermonSections()) { if (sec.title && a.readTitles) all.push(sec.title); for (const p of sec.paras) all.push(...splitSentences(p)); }
-  pre.done = 0; pre.ok = 0; pre.total = all.length; pre.running = true;
-  let fails = 0, i = 0;
-  const worker = async () => {
-    while (i < all.length && pre.token === my) {
-      const k = i++;
-      let r = null;
-      try { r = await api.tts({ text: speakable(all[k]), voice, rate: a.rate, pitch: a.pitch }); } catch (e) { r = { ok: false, error: e.message }; }
-      if (r && r.ok) { pre.ok++; fails = 0; } else {
-        fails++;
-        if (fails === 6) { logp('Chưa tạo được giọng đọc (' + ((r && r.error) || 'lỗi mạng') + '). Sẽ thử lại sau 1 phút.', 'warn'); }
-        if (fails >= 6) { await sleep(60000); fails = 0; i = Math.min(i, k); }
-      }
-      pre.done = Math.min(all.length, pre.done + 1);
-      toPanel({ type: 'pretts', done: pre.done, total: pre.total, ok: pre.ok, auto: !manual });
-    }
-  };
-  await Promise.all([worker(), worker()]);
-  if (pre.token === my) { pre.running = false; if (pre.ok === pre.total) logp('Đã tạo sẵn giọng đọc cho toàn bộ bài giảng (' + pre.total + ' câu, ' + (lang === 'vi' ? 'tiếng Việt' : 'tiếng Anh') + ') — giảng sẽ không còn ngừng chờ.'); }
+  pre.ok = 0; pre.total = all.length; pre.running = true;
+  const send = (extra) => toPanel({ type: 'pretts', done: pre.ok, total: pre.total, ok: pre.ok, auto: !manual, ...extra });
+  let backoff = 0;
+  // tạo lần lượt từng câu (chạy nền, nhường cho câu đang giảng); câu lỗi thì chờ rồi thử lại đúng câu đó
+  for (let k = 0; k < all.length && pre.token === my; ) {
+    let r = null;
+    try { r = await api.tts({ text: speakable(all[k]), voice, rate: a.rate, pitch: a.pitch, bg: true }); } catch (e) { r = { ok: false, error: e.message }; }
+    if (pre.token !== my) return;
+    if (r && r.ok) { pre.ok++; k++; backoff = 0; send(); if (!r.cached) await sleep(250); continue; }
+    backoff = Math.min(60, backoff ? backoff * 2 : 5);
+    send({ waiting: backoff, error: (r && r.error) || 'lỗi mạng' });
+    await sleep(backoff * 1000);
+  }
+  if (pre.token === my) { pre.running = false; send(); if (pre.ok === pre.total) logp('Đã tạo sẵn giọng đọc cho toàn bộ bài giảng (' + pre.total + ' câu, ' + (lang === 'vi' ? 'tiếng Việt' : 'tiếng Anh') + ') — giảng sẽ không còn ngừng chờ.'); }
 }
 // ---- Follow / chia sẻ: chúc phúc ----
 const socialSeen = new Map();
