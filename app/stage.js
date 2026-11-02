@@ -219,7 +219,7 @@ async function ttsBuffer(text, lang) {
   })();
   bufCache.set(key, p);
   p.catch(() => bufCache.delete(key));
-  if (bufCache.size > 80) bufCache.delete(bufCache.keys().next().value);
+  while (bufCache.size > 24) bufCache.delete(bufCache.keys().next().value);
   return p;
 }
 async function fileBuffer(url) {
@@ -690,7 +690,7 @@ function update(dt) {
   stepVideo();
   for (const w of walkers) stepWalker(w, t, dt);
   walkers = walkers.filter((w) => !w.done);
-  fx = fx.filter((f) => (f.life -= dt) > 0);
+  fx = fx.filter((f) => (f.life -= dt) > 0); if (fx.length > 400) fx.splice(0, fx.length - 400);
   for (const f of fx) { f.x += f.vx * dt; f.y += f.vy * dt; f.vy -= 8 * dt; }
   banners = banners.filter((b) => (b.shownAt == null ? t - b.start < 90 : t < b.shownAt + bannerDur(b) + 1));
 }
@@ -792,6 +792,7 @@ try { AC.createMediaElementSource(vidEl).connect(vidGain); } catch {}
 let vq = [], vcur = null;
 const videoBags = new Map(), lastVideo = new Map();
 const videoPlaying = () => !!vcur;
+function videoOpaque(t) { return t - vcur.start > 0.65 && !vcur.ending && vidEl.readyState >= 2; }
 let giftSeq = 0;
 function enqueueVideo(ev, tier, seq) {
   const it = { seq, ev, tier, name: cleanName(ev.name), avatar: ev.avatar, count: ev.count || 1 };
@@ -810,6 +811,8 @@ async function stepVideo() {
     if (vcur.ending && t - vcur.ending > 0.7) {
       try { vidEl.pause(); } catch {}
       const done = vcur; vcur = null; ducked = false; applyAudio();
+      try { vidEl.removeAttribute('src'); vidEl.load(); } catch {}
+      if (videoOK) video.play().catch(() => {});
       const q = queue.find((x) => x.id === done.ev.id); if (q && !vq.some((v) => v.ev.id === done.ev.id)) q.holdVideo = false;
     }
     return;
@@ -833,9 +836,10 @@ async function stepVideo() {
   vq.loading = true;
   vidEl.src = absUrl(f); vidEl.currentTime = 0; vidEl.loop = false;
   vidGain.gain.value = clamp(CFG.donate.videoVolume ?? 1, 0, 2);
-  try { await vidEl.play(); } catch (e) { logp('Không phát được video ' + f + ': ' + e.message, 'error'); vq.loading = false; const q = queue.find((x) => x.id === it.ev.id); if (q) q.holdVideo = false; return; }
+  try { await Promise.race([vidEl.play(), sleep(10000).then(() => { throw new Error('video tải quá lâu'); })]); } catch (e) { logp('Không phát được video ' + f + ': ' + e.message, 'error'); vq.loading = false; const q = queue.find((x) => x.id === it.ev.id); if (q) q.holdVideo = false; return; }
   vq.loading = false;
   vcur = { ...it, start: now() };
+  setTimeout(() => { if (vcur && videoOK) try { video.pause(); } catch {} }, 800); // nghỉ giải mã video nền khi đang chiếu video chúc phúc
   if (!it.avatarImg && it.person && it.person.avatarImg) vcur.avatarImg = it.person.avatarImg;
   ducked = true; applyAudio(); chime();
   try { cur.src && sermon.state === 'playing' && 0; } catch {}
@@ -919,18 +923,28 @@ function drawSubtitles(t) {
   let want = 0;
   if (curLine >= 0) { const total = lines.length * lh; want = clamp(curLine * lh - areaH * 0.3, 0, Math.max(0, total - areaH)); }
   subLayout.scroll += (want - subLayout.scroll) * 0.08;
+  // chữ được vẽ sẵn lên 1 lớp riêng, chỉ vẽ lại khi đổi câu (đỡ tốn hiệu ứng phát sáng mỗi khung hình)
+  const tkey = key + '|' + SUB.cur + '|' + c.readAlpha + '|' + c.dimAlpha;
+  if (!subLayout.tex || subLayout.tkey !== tkey) {
+    const cw = Math.ceil(w), ch = Math.ceil(Math.max(lh, lines.length * lh) + 24);
+    const oc = subLayout.tex && subLayout.tex.width === cw && subLayout.tex.height === ch ? subLayout.tex : document.createElement('canvas');
+    oc.width = cw; oc.height = ch;
+    const g2 = oc.getContext('2d'); g2.clearRect(0, 0, cw, ch);
+    g2.font = font; g2.textAlign = 'left'; g2.textBaseline = 'top';
+    lines.forEach((L2, li) => {
+      const ly = 8 + li * lh;
+      for (const wd of L2) {
+        const curS = wd.si === SUB.cur, read = wd.si < SUB.cur;
+        if (curS) { g2.shadowColor = 'rgba(255,190,70,0.95)'; g2.shadowBlur = 16; g2.fillStyle = '#ffe39a'; }
+        else { g2.shadowBlur = 0; g2.fillStyle = read ? `rgba(255,240,215,${c.readAlpha})` : `rgba(255,240,215,${c.dimAlpha})`; }
+        g2.fillText(wd.word, pad + wd.x, ly);
+      }
+    });
+    subLayout.tex = oc; subLayout.tkey = tkey;
+  }
   ctx.beginPath(); ctx.rect(x, top - 4, w, areaH + 8); ctx.clip();
-  ctx.font = font; ctx.textAlign = 'left'; ctx.textBaseline = 'top';
-  lines.forEach((L, li) => {
-    const ly = top + li * lh - subLayout.scroll;
-    if (ly < top - lh || ly > top + areaH) return;
-    for (const wd of L) {
-      const curS = wd.si === SUB.cur, read = wd.si < SUB.cur;
-      if (curS) { ctx.shadowColor = 'rgba(255,190,70,0.95)'; ctx.shadowBlur = 16; ctx.fillStyle = '#ffe39a'; }
-      else { ctx.shadowBlur = 0; ctx.fillStyle = read ? `rgba(255,240,215,${c.readAlpha})` : `rgba(255,240,215,${c.dimAlpha})`; }
-      ctx.globalAlpha = fadeIn; ctx.fillText(wd.word, x + pad + wd.x, ly);
-    }
-  });
+  ctx.globalAlpha = fadeIn;
+  ctx.drawImage(subLayout.tex, x, top - 8 - subLayout.scroll);
   ctx.restore();
 }
 
@@ -1015,14 +1029,11 @@ function drawBeams(t) {
     ctx.restore();
   }
 }
+const SPARK = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const g = c.getContext('2d'); const gr = g.createRadialGradient(32, 32, 0, 32, 32, 32); gr.addColorStop(0, 'rgba(255,250,215,1)'); gr.addColorStop(1, 'rgba(255,200,80,0)'); g.fillStyle = gr; g.fillRect(0, 0, 64, 64); return c; })();
 function drawFX() {
+  if (!fx.length) return;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
-  for (const f of fx) {
-    const a = clamp(f.life / f.max, 0, 1);
-    const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, f.r * 3);
-    g.addColorStop(0, `rgba(255,250,215,${a})`); g.addColorStop(1, 'rgba(255,200,80,0)');
-    ctx.fillStyle = g; ctx.fillRect(f.x - f.r * 3, f.y - f.r * 3, f.r * 6, f.r * 6);
-  }
+  for (const f of fx) { ctx.globalAlpha = clamp(f.life / f.max, 0, 1); const r = f.r * 3; ctx.drawImage(SPARK, f.x - r, f.y - r, r * 2, r * 2); }
   ctx.restore();
 }
 function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
@@ -1209,6 +1220,8 @@ function drawGuides() {
 }
 function render() {
   const t = now();
+  // video chúc phúc đang phủ kín màn → chỉ vẽ video (không vẽ nhà thờ phía dưới) cho nhẹ
+  if (vcur && videoOpaque(t)) { drawVideo(t); drawEdit(); return; }
   drawBG();
   if (!G) return;
   drawBeams(t);
@@ -1229,11 +1242,16 @@ function render() {
   drawVideo(t);
   drawEdit();
 }
-function loop() {
+let lastFrame = 0;
+function loop(ts) {
+  requestAnimationFrame(loop);
+  // giới hạn khung hình (mặc định 30 fps = đúng tốc độ TikTok LIVE) để giảm tải CPU/GPU
+  const fps = CFG.scene.fps || 30, minDt = 1000 / fps - 2;
+  if (ts && ts - lastFrame < minDt) return;
+  lastFrame = ts || performance.now();
   const t = now(); const dt = Math.min(0.1, t - last); last = t;
   if (assetsReady && G) update(dt);
-  render();
-  requestAnimationFrame(loop);
+  try { render(); } catch (e) { if (!window.__renderErr) { window.__renderErr = 1; logp('Lỗi vẽ: ' + e.message, 'error'); } }
 }
 
 // ================== CHỈNH BỐ CỤC BẰNG CHUỘT ==================

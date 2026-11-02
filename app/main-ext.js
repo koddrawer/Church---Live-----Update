@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.26';
+  const EXT_VER = '1.0.27';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -68,6 +68,49 @@ module.exports = (ctx) => {
   }
   try { ipcMain.removeHandler('tts'); } catch {}
   ipcMain.handle('tts', (e, a) => tts(a));
+
+  // ---------- Giao thức church:// phát trực tiếp (stream) + hỗ trợ tua (Range) ----------
+  // Bản cũ đọc cả file video vào bộ nhớ mỗi lần phát → video lớn làm app đơ. Bản này đọc từng phần.
+  try {
+    const { protocol } = require('electron');
+    const { Readable } = require('stream');
+    const BUNDLED = path.join(app.getAppPath(), 'app');
+    const appRoot = ctx.appRoot || BUNDLED;
+    const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.png': 'image/png', '.webp': 'image/webp', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.gif': 'image/gif', '.mp4': 'video/mp4', '.m4v': 'video/mp4', '.webm': 'video/webm', '.mov': 'video/quicktime', '.mkv': 'video/x-matroska', '.mp3': 'audio/mpeg', '.wav': 'audio/wav', '.ogg': 'audio/ogg', '.m4a': 'audio/mp4', '.woff2': 'font/woff2', '.txt': 'text/plain; charset=utf-8', '.bin': 'application/octet-stream' };
+    const resolve = (urlStr) => {
+      const u = new URL(urlStr);
+      const p = decodeURIComponent(u.pathname.replace(/^\/+/, ''));
+      if (u.host === 'app') { const a = path.join(appRoot, p); return fs.existsSync(a) ? a : path.join(BUNDLED, p); }
+      if (u.host === 'user') return path.join(app.getPath('userData'), 'user-assets', p);
+      if (u.host === 'tts') return path.join(app.getPath('userData'), 'tts-cache', path.basename(p));
+      if (u.host === 'abs') return /^[A-Za-z]:/.test(p) ? p : '/' + p;
+      return null;
+    };
+    protocol.unhandle('church');
+    protocol.handle('church', async (req) => {
+      try {
+        const f = resolve(req.url);
+        if (!f) return new Response('not found', { status: 404 });
+        const st = await fsp.stat(f).catch(() => null);
+        if (!st || !st.isFile()) return new Response('not found', { status: 404 });
+        const type = MIME[path.extname(f).toLowerCase()] || 'application/octet-stream';
+        const size = st.size;
+        const range = req.headers.get('range');
+        const base = { 'Content-Type': type, 'Accept-Ranges': 'bytes', 'Cache-Control': 'no-cache' };
+        if (range) {
+          const m = /bytes=(\d*)-(\d*)/.exec(range) || [];
+          let start = m[1] ? parseInt(m[1], 10) : 0, end = m[2] ? parseInt(m[2], 10) : size - 1;
+          if (!m[1] && m[2]) { start = Math.max(0, size - parseInt(m[2], 10)); end = size - 1; }
+          end = Math.min(end, size - 1);
+          if (start >= size || start > end) return new Response(null, { status: 416, headers: { 'Content-Range': 'bytes */' + size } });
+          const stream = Readable.toWeb(fs.createReadStream(f, { start, end, highWaterMark: 1 << 20 }));
+          return new Response(stream, { status: 206, headers: { ...base, 'Content-Length': String(end - start + 1), 'Content-Range': `bytes ${start}-${end}/${size}` } });
+        }
+        if (size < 4 * 1024 * 1024) return new Response(await fsp.readFile(f), { status: 200, headers: { ...base, 'Content-Length': String(size) } });
+        return new Response(Readable.toWeb(fs.createReadStream(f, { highWaterMark: 1 << 20 })), { status: 200, headers: { ...base, 'Content-Length': String(size) } });
+      } catch (e) { return new Response('error: ' + e.message, { status: 500 }); }
+    });
+  } catch (e) { log('Không nạp được bộ phát stream: ' + e.message, 'warn'); }
 
   // ---------- Lấy Room ID bằng trình duyệt ẩn (khi cách thường bị TikTok chặn) ----------
   const UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36';

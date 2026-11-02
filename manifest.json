@@ -1,9 +1,9 @@
 {
-  "version": "1.0.26",
-  "notes": "Câu chưa có giọng đọc → giảng lại từ đầu ngay, không ngừng chờ — khởi động lại app",
+  "version": "1.0.27",
+  "notes": "Sửa đơ khi phát video chúc phúc (phát trực tiếp từng phần), tối ưu mượt: 30 fps, nhẹ hiệu ứng — khởi động lại app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T05:20:18.898Z",
+  "date": "2026-11-02T07:13:30.541Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -304,8 +304,8 @@
     },
     {
       "path": "main-ext.js",
-      "size": 12684,
-      "sha256": "c3f29fb779d43852e209c3400527f2f655f5805238c1fcb3e658bb65f40d8061"
+      "size": 16078,
+      "sha256": "c64cba4e81133c05d7cc5032b701a9fa75d2730027362d4fa1d7b2b67a5dc634"
     },
     {
       "path": "panel.html",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 90032,
-      "sha256": "dc1714c8fe457f0566cd13d3d91cbda7a18946815a334321cfb2cd0a011b05bb"
+      "size": 91943,
+      "sha256": "8a80c919dcad7f89ebd46ba5e3294023044be7d21422bacd1877846171df0eab"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "63e84f2f9bf5fc74a64768cc5ca4da802230569e2d3397982253c11b7083accc"
+      "sha256": "e6ca400f31fd8abc28e2d95545e6b1dd2b87e48afd009f28680c829df759b65a"
     }
   ]
 }
