@@ -1,9 +1,9 @@
 {
-  "version": "1.0.17",
-  "notes": "Tùy chọn chúc phúc cho người mới vào live",
+  "version": "1.0.18",
+  "notes": "Bài giảng tiếng Việt chỉ còn nội dung, bỏ tên bài và trích dẫn chương/câu",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T02:35:02.720Z",
+  "date": "2026-11-02T03:50:10.014Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 34402,
-      "sha256": "3d41fee851d8ffdcf9e761eb8e3f8f4f077b1910e4a77b707ba9218b228d7234"
+      "size": 31920,
+      "sha256": "6b238bf48806bcba401c6d2f6df2bcfa42549e95f55a6f5ea5e7e79e9125a435"
     },
     {
       "path": "fonts.css",
@@ -340,7 +340,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "b694d834a3320ae43c2cef4da58ac3bfe8334b0573af55851294acf39aead183"
+      "sha256": "30e0ac0e4b0e4799fb8519c852fdcef840826d9249dc62eb45a1d88ddabb7c35"
     }
   ]
 }
