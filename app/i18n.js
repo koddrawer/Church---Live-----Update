@@ -1,6 +1,7 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Đợi phòng live mới…": "Waiting for a new LIVE room…",
 "Người thả tim cũng được ngồi": "People who tap likes also get a seat",
 "Người vào ẩn danh cũng được ngồi": "Anonymous joiners also get a seat",
 "Tên khi TikTok không gửi tên": "Name when TikTok sends none",

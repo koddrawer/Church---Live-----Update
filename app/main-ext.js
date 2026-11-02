@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.32';
+  const EXT_VER = '1.0.33';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -159,16 +159,16 @@ module.exports = (ctx) => {
   };
 
   async function disconnect(user = true) {
-    if (user) { tk.want = false; tk.rl = 0; }
+    if (user) { tk.want = false; tk.rl = 0; tk.endN = 0; tk.endedRoom = null; }
     clearTimeout(tk.retry); tk.retry = null;
     clearInterval(tk.statT); if (tk.conn) { const c = tk.conn; tk.conn = null; try { c.removeAllListeners && c.removeAllListeners(); await c.disconnect(); } catch {} }
     if (user) status('idle');
   }
-  function scheduleRetry(rateLimited) {
+  function scheduleRetry(rateLimited, waitMs) {
     clearTimeout(tk.retry);
     const cfg = getConfig() || {};
     if (!tk.want || (cfg.tiktok && cfg.tiktok.autoReconnect === false)) return;
-    let ms = 15000;
+    let ms = waitMs || 15000;
     if (rateLimited) { // bị Euler giới hạn lượt: thử lại thưa dần để không đốt thêm lượt (2 → 5 → 10 → 15 phút)
       tk.rl = (tk.rl || 0) + 1; const mins = [2, 5, 10, 15][Math.min(tk.rl - 1, 3)]; ms = mins * 60000;
       log('Bị giới hạn lượt kết nối — app sẽ tự thử lại sau ' + mins + ' phút (đừng bấm Kết nối liên tục, mỗi lần bấm đều tốn lượt).', 'warn');
@@ -215,7 +215,14 @@ module.exports = (ctx) => {
         both('live-event', { type: 'gift', ...pickUser(d.user), gift: g.giftName || g.name || d.giftName || 'quà', count, diamonds, total: diamonds * count });
       });
       c.on(ControlEvent ? ControlEvent.DISCONNECTED : 'disconnected', () => { if (tk.conn !== c) return; log('TikTok: mất kết nối', 'warn'); status('disconnected'); scheduleRetry(); });
-      if (WebcastEvent.STREAM_END) c.on(WebcastEvent.STREAM_END, () => { log('TikTok: live đã kết thúc', 'warn'); status('ended'); scheduleRetry(); });
+      if (WebcastEvent.STREAM_END) c.on(WebcastEvent.STREAM_END, () => {
+        if (tk.conn !== c) return;
+        const quick = Date.now() - (tk.connAt || 0) < 20000;
+        tk.endedRoom = tk.roomId; tk.endN = (tk.endN || 0) + 1;
+        log(quick ? 'TikTok báo phòng ' + tk.roomId + ' đã kết thúc ngay khi vừa vào → đây là phòng live CŨ. Kiểm tra kênh @' + username + ' có đang phát live không; app sẽ đợi phòng live mới.' : 'TikTok: live đã kết thúc', 'warn');
+        status('ended'); tk.conn = null; try { c.removeAllListeners && c.removeAllListeners(); c.disconnect(); } catch {}
+        scheduleRetry(false, Math.min(120000, 20000 * tk.endN));
+      });
       c.on(ControlEvent ? ControlEvent.ERROR : 'error', (e) => { const m = (e && (e.info || e.message)) || String(e); log('TikTok lỗi: ' + m + hint(m), 'error'); });
       try { const m = mod.RoomIdRouteConfig; if (m) m.skipFetchRoomIdFromEulerRoute = true; } catch {}
       let roomId = null;
@@ -228,9 +235,17 @@ module.exports = (ctx) => {
         if (r.status === 4) throw new Error("The requested user isn't online");
         roomId = r.roomId; log('Room ID (qua trình duyệt): ' + roomId);
       }
+      if (roomId && String(roomId) === String(tk.endedRoom || '')) {
+        log('Room ID ' + roomId + ' vẫn là phòng đã kết thúc → thử lấy lại bằng trình duyệt ẩn…', 'warn');
+        const r = await browserRoomId(username);
+        if (r && r.roomId && String(r.roomId) !== String(tk.endedRoom) && r.status !== 4) roomId = r.roomId;
+        else { tk.conn = null; status('waiting'); log('Chưa có phòng live mới của @' + username + ' — app không kết nối vào phòng cũ (đỡ tốn lượt), sẽ kiểm tra lại sau.', 'warn'); scheduleRetry(false, Math.min(120000, 20000 * (tk.endN || 1))); return { ok: false, error: 'chưa có phòng live mới' }; }
+      }
+      tk.roomId = String(roomId);
       const st = await c.connect(roomId);
+      tk.connAt = Date.now();
       status('connected', { roomId: st && st.roomId });
-      tk.rl = 0;
+      tk.rl = 0; tk.endN = 0;
       log('Đã kết nối TikTok @' + username + (st && st.roomId ? ' (room ' + st.roomId + ')' : ''));
       return { ok: true };
     } catch (e) {

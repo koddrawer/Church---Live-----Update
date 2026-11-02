@@ -1,9 +1,9 @@
 {
-  "version": "1.0.32",
-  "notes": "Người vào ẩn danh, bình luận, thả tim đều được ngồi; nhật ký đếm sự kiện TikTok mỗi phút — khởi động lại app",
+  "version": "1.0.33",
+  "notes": "Không kết nối lặp vào phòng live đã kết thúc; đợi phòng live mới — KHỞI ĐỘNG LẠI APP",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T13:32:16.006Z",
+  "date": "2026-11-02T13:36:56.113Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -299,13 +299,13 @@
     },
     {
       "path": "i18n.js",
-      "size": 27478,
-      "sha256": "66cdea1979411966b6a09ff4d3f73a0d42d49a5b0205e821a4ed830e498bf35d"
+      "size": 27543,
+      "sha256": "0591a85b2780e599d6eea2a24b189832734a91b7d89f69140eb9adcc08ea76dd"
     },
     {
       "path": "main-ext.js",
-      "size": 18944,
-      "sha256": "cf3793d542543a6ec8061f332c87b57c7ea98378d9119d3cae4dd639c1ff10bc"
+      "size": 20321,
+      "sha256": "493eda848222a33895d03e821643d02db821c19bffd51c50190cb4b41f0f75f5"
     },
     {
       "path": "panel.html",
@@ -314,8 +314,8 @@
     },
     {
       "path": "panel.js",
-      "size": 37016,
-      "sha256": "39321e748505d77ea4ed0bee8e403820390e4145b065e2aab5471ff0e919d2fd"
+      "size": 37066,
+      "sha256": "a42e998f8f0bd6e18b4cb423b867364de02a5a19921062e12b4be81e6af1429d"
     },
     {
       "path": "sermons_en.js",
@@ -340,7 +340,7 @@
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "b553989c23e49c1bb121aa54d50bcd52ad25096a8823c54004c5e978421aa55d"
+      "sha256": "9699483b6e33d9df49d7782e3457b8af7a7a96c2d06a49a1dd80d768ff6ea053"
     }
   ]
 }

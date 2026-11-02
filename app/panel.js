@@ -183,7 +183,7 @@ $('#btnConnect').onclick = async () => {
 };
 $('#btnDisconnect').onclick = () => api.tiktokDisconnect();
 function setTk(s) {
-  const map = { idle: ['', 'Chưa kết nối'], connecting: ['warn', 'Đang kết nối…'], connected: ['ok', 'Đã kết nối @' + s.username], disconnected: ['err', 'Mất kết nối'], ended: ['warn', 'Live đã kết thúc'], error: ['err', 'Lỗi kết nối'] };
+  const map = { idle: ['', 'Chưa kết nối'], connecting: ['warn', 'Đang kết nối…'], connected: ['ok', 'Đã kết nối @' + s.username], disconnected: ['err', 'Mất kết nối'], ended: ['warn', 'Live đã kết thúc'], waiting: ['warn', 'Đợi phòng live mới…'], error: ['err', 'Lỗi kết nối'] };
   const [c, t] = map[s.state] || ['', s.state];
   $('#tkdot').className = 'dot ' + c; $('#tktxt').textContent = t;
 }
