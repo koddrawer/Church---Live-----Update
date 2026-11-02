@@ -268,17 +268,20 @@ body.plocked main{opacity:.72}
       <div class="row"><label>Bật giảng</label><input type="checkbox" data-k="audio.sermonEnabled"></div>
       <div class="row"><label>Nguồn</label><select data-k="audio.sermonMode"><option value="tts">Máy đọc bài giảng (Edge TTS)</option><option value="files">File ghi âm của tôi (mp3)</option></select></div>
       <div class="row"><label>Ngôn ngữ bài giảng</label><select data-k="audio.sermonLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select></div>
-      <div class="row"><label>Giọng</label><select data-k="audio.voice">
+      <div class="row"><label>Giọng tiếng Việt</label><select data-k="audio.voiceVi">
         <option value="vi-VN-NamMinhNeural">vi-VN Nam Minh (nam)</option>
         <option value="vi-VN-HoaiMyNeural">vi-VN Hoài My (nữ)</option>
-        <option value="en-US-GuyNeural">en-US Guy</option>
+      </select></div>
+      <div class="row"><label>Giọng tiếng Anh</label><select data-k="audio.voiceEn">
         <option value="en-US-ChristopherNeural">en-US Christopher</option>
+        <option value="en-US-GuyNeural">en-US Guy</option>
         <option value="en-US-EricNeural">en-US Eric</option>
         <option value="en-US-AndrewNeural">en-US Andrew</option>
         <option value="en-US-BrianNeural">en-US Brian</option>
         <option value="en-GB-RyanNeural">en-GB Ryan</option>
         <option value="en-GB-ThomasNeural">en-GB Thomas</option>
       </select></div>
+      <p class="hint">App tự nhận biết từng câu là tiếng Việt hay tiếng Anh và đọc bằng đúng giọng của ngôn ngữ đó.</p>
       <div class="row"><label>Tốc độ</label><select data-k="audio.rate"><option>-20%</option><option>-15%</option><option>-10%</option><option>-5%</option><option>+0%</option><option>+5%</option><option>+10%</option></select></div>
       <div class="row"><label>Cao độ</label><select data-k="audio.pitch"><option>-12Hz</option><option>-8Hz</option><option>-6Hz</option><option>-3Hz</option><option>+0Hz</option><option>+3Hz</option></select></div>
       <div class="row"><label>Độ vang nhà thờ</label><input type="range" min="0" max="1" step="0.02" data-k="audio.reverb"><span class="val"></span></div>

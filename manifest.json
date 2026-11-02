@@ -1,9 +1,9 @@
 {
-  "version": "1.0.20",
-  "notes": "Sửa giọng đọc lẫn lộn, kết nối TikTok bằng trình duyệt ẩn khi bị chặn — cần KHỞI ĐỘNG LẠI app",
+  "version": "1.0.21",
+  "notes": "Mỗi câu tự chọn giọng đúng ngôn ngữ (không còn lẫn giọng), tạm dừng giảng khi cha sứ chúc phúc",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T04:22:09.090Z",
+  "date": "2026-11-02T04:33:14.458Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 31920,
-      "sha256": "6b238bf48806bcba401c6d2f6df2bcfa42549e95f55a6f5ea5e7e79e9125a435"
+      "size": 32038,
+      "sha256": "8446ff2aea3342956f169b154aa5d3b9c381cda67dd38ee0e730f26180093924"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 23509,
-      "sha256": "43c4b796879597c17bdaeed7c93ca0cdf9781536cd0ddb945fac837f0038329e"
+      "size": 23829,
+      "sha256": "0343a80ea83b476318452135fab4574445af0c959f3e174961e89fdd31e7e75a"
     },
     {
       "path": "main-ext.js",
@@ -309,8 +309,8 @@
     },
     {
       "path": "panel.html",
-      "size": 38199,
-      "sha256": "7c0ec67cc962d85c26496bd3e4b92ea0c4a68e66001a398350a514ebcb782204"
+      "size": 38480,
+      "sha256": "f154f4bbddc52c2c833889dbb568c5a278250265b7c971b42154b7c3a2f3df36"
     },
     {
       "path": "panel.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 84703,
-      "sha256": "81d433c937463a20dd796bb9bd88fd5bddaedf0df99cf72dd33c7f5eb3265958"
+      "size": 86311,
+      "sha256": "239e1f66df3e87699f3967d17d0a10c7e2a6db7ac2abb5076d7bb6e8e549e11b"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "5fef1531aedca03ff489603bfeae89645871f2fd6be18e3f7e70ca5e00bff679"
+      "sha256": "8f413f7bc48d1e3f55783b0c6e6431ad4374b0afc9dd197daeb853e79e6d180d"
     }
   ]
 }

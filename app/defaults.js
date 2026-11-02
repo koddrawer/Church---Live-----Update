@@ -177,6 +177,7 @@ window.CHURCH_DEFAULTS = {
     sermonMode: 'tts',      // 'tts' = máy đọc văn bản, 'files' = phát file mp3 trong thư mục sermon-audio
     sermonLang: 'vi',
     voice: 'vi-VN-NamMinhNeural', rate: '-10%', pitch: '-6Hz',
+    voiceVi: 'vi-VN-NamMinhNeural', voiceEn: 'en-US-ChristopherNeural', // giọng theo ngôn ngữ của từng câu
     gapSeconds: 1.2, sentenceGap: 0.35, sectionGap: 4, readTitles: true, shuffle: false,
     sermonTextsVi: null, sermonTextsEn: null,  // null = dùng mặc định
     musicFile: '', musicVolume: 0.2,
