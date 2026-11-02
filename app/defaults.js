@@ -185,7 +185,13 @@ window.CHURCH_DEFAULTS = {
     // vùng băng chữ không được che: hình Chúa Giêsu (cả vầng hào quang) và tượng thánh giá
     avoidZones: [{ x: 300, y: 214, w: 480, h: 600 }, { x: 470, y: 950, w: 140, h: 185 }],
     beamTopY: 800,          // tia sáng chúc phúc bắt đầu từ dưới chân Chúa
-    seatAfterSeconds: 20
+    seatAfterSeconds: 20,
+    // khi rảnh (không ai donate) tự cho người lên bục chúc phúc, tên tự nhiên
+    idleEnabled: true,
+    idleAfter: 30,            // không có donate bao lâu (giây) thì bắt đầu
+    idleMin: 25, idleMax: 60, // mỗi lượt cách nhau ngẫu nhiên (giây)
+    idleMaxCoins: 5,          // mức khung cao nhất cho lượt tự động (1 = luôn khung 1 xu)
+    idleSpeak: true           // cha sứ đọc lời chúc cho lượt tự động
   },
   audio: {
     master: 1.0, videoVolume: 0.5,

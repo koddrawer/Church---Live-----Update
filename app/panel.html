@@ -255,6 +255,16 @@ body.plocked main{opacity:.72}
       <div class="row"><label>Cha sứ đọc cảm ơn cách nhau ít nhất (giây)</label><input type="number" min="0" max="120" data-k="social.speakCooldown"></div>
       <p class="hint">Mỗi người chỉ được chúc phúc follow 1 lần. Khi nhiều người follow/chia sẻ dồn dập, ánh sáng vẫn hiện cho từng người nhưng cha sứ chỉ đọc lời cảm ơn cách quãng để không ngắt bài giảng liên tục. Biến: {name}.</p>
     </div>
+    <div class="card">
+      <h3>Tự chúc phúc khi rảnh</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="donate.idleEnabled"></div>
+      <div class="row"><label>Không có donate bao lâu thì bắt đầu (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleAfter"></div>
+      <div class="row"><label>Mỗi lượt cách nhau ít nhất (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleMin"></div>
+      <div class="row"><label>… và nhiều nhất (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleMax"></div>
+      <div class="row"><label>Mức khung cao nhất</label><select data-k="donate.idleMaxCoins"><option value="1">1 xu</option><option value="5">5 xu</option><option value="10">10 xu</option><option value="15">15 xu</option><option value="30">30 xu</option></select></div>
+      <div class="row"><label>Cha sứ đọc lời chúc</label><input type="checkbox" data-k="donate.idleSpeak"></div>
+      <p class="hint">Khi không có ai donate, app tự cho một người (tên ngẫu nhiên, tự nhiên như tên người xem TikTok, theo ngôn ngữ buổi live) đứng dậy đi lên bục chúc phúc. Có donate thật thì tạm dừng và người donate thật luôn được ưu tiên.</p>
+    </div>
     <div class="card" style="grid-column:1/-1">
       <h3>Khung avatar theo mức xu</h3>
       <div class="row"><label>Hiện khung avatar khi chúc phúc</label><input type="checkbox" data-k="donate.frameEnabled"></div>

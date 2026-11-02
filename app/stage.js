@@ -599,6 +599,7 @@ function onJoin(ev) {
 }
 function onGift(ev) {
   if (!assetsReady) return;
+  if (!ev.idle && !ev.sim) lastRealGift = now();
   const total = ev.total ?? (ev.diamonds || 0) * (ev.count || 1);
   if (total < CFG.donate.minDiamonds && !ev.sim && !ev.social) return;
   const tier = ev.social ? null : tierFor(total);
@@ -611,7 +612,7 @@ function onGift(ev) {
   if (w) { w.gifts.push(ev); w.count += ev.count || 1; w.total = (w.total || 0) + total; if (w.phase === 'bless') { w.blessEnd += 3; if (!(CFG.donate.frameEnabled !== false && !ev.social && pushCard(w, ev))) pushBanner(w, ev); } return; }
   const q = queue.find((x) => x.id === ev.id);
   if (q) { q.count += ev.count || 1; q.total = (q.total || 0) + total; if (hold) q.holdVideo = true; return; }
-  queue.push({ ...ev, total, count: ev.count || 1, at: now(), seq: ++giftSeq, holdVideo: hold, noSpeech: !!(tier && !tier.speak) });
+  queue.push({ ...ev, total, count: ev.count || 1, at: now(), seq: ++giftSeq, holdVideo: hold, noSpeech: !!(tier && !tier.speak) || !!ev.noSpeech });
 }
 function altarSpots() {
   const g = G.g, s = g.altarSpread; return [g.centerX, g.centerX - s, g.centerX + s, g.centerX - 2 * s, g.centerX + 2 * s];
@@ -765,7 +766,7 @@ function startBlessing(w) {
   if (!scw) { line = blessingLine({ name: cleanName(w.person.name), gift: ev.gift || '', count: w.count }); if (CFG.donate.speakBlessing && !w.noSpeech) speakBlessing(line); }
   if (!(CFG.donate.frameEnabled !== false && !scw && !ev.social && pushCard(w, ev, line))) pushBanner(w, ev);
   for (let i = 0; i < 40; i++) spawnSparkle(w, true);
-  toPanel({ type: 'blessed', name: w.person.name, gift: ev.gift, count: w.count });
+  toPanel({ type: 'blessed', name: w.person.name, gift: ev.gift, count: w.count, idle: !!ev.idle });
 }
 function pushBanner(w, ev) {
   if (!CFG.donate.showBanner) return;
@@ -1309,6 +1310,66 @@ function camView(t) {
   const vx = clamp(lerp(W / 2, fx, e), W / (2 * s), W - W / (2 * s)), vy = clamp(lerp(H / 2, fy, e), H / (2 * s), H - H / (2 * s));
   return { s, vx, vy };
 }
+
+// ================== TỰ CHÚC PHÚC KHI RẢNH ==================
+const NAMES = (() => {
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+  const VI = {
+    m: { saint: ['Giuse', 'Phêrô', 'Phaolô', 'Gioan', 'Matthêu', 'Antôn', 'Đaminh', 'Micae', 'Vinh Sơn', 'Phanxicô', 'Giacôbê', 'Anrê', 'Tôma', 'Luca'], dem: ['Văn', 'Minh', 'Đức', 'Quốc', 'Hữu', 'Thanh', 'Gia', 'Bảo', 'Công', 'Trọng', 'Xuân', 'Quang'],
+      ten: ['Hùng', 'Tuấn', 'Nam', 'Dũng', 'Phúc', 'Khoa', 'Hiếu', 'Long', 'Quân', 'Sơn', 'Bình', 'Huy', 'Kiên', 'Tú', 'Thắng', 'Hải', 'Toàn', 'Đạt', 'Trung', 'Vinh', 'Lộc', 'Tài', 'Phong', 'Tâm', 'An', 'Khang'], nick: ['anh', 'chú', 'ông', 'bác', 'cu'] },
+    f: { saint: ['Maria', 'Anna', 'Têrêsa', 'Lucia', 'Martha', 'Rosa', 'Catarina', 'Agnes', 'Monica', 'Cecilia', 'Maria Goretti', 'Elizabeth', 'Agata', 'Clara'], dem: ['Thị', 'Ngọc', 'Thu', 'Kim', 'Thùy', 'Mỹ', 'Phương', 'Hoài', 'Thanh', 'Bảo', 'Diệu', 'Minh'],
+      ten: ['Lan', 'Mai', 'Hoa', 'Linh', 'Trang', 'Hương', 'Hạnh', 'Thảo', 'Ngân', 'Vy', 'Yến', 'Thủy', 'Hằng', 'Nhung', 'Duyên', 'Loan', 'Trinh', 'Châu', 'Giang', 'Hà', 'Liên', 'Nga', 'Oanh', 'Quyên', 'Thắm', 'Uyên', 'Vân', 'Anh', 'Hân', 'Nhi', 'Diễm', 'My'], nick: ['bé', 'chị', 'cô', 'mẹ', 'bà', 'dì'] },
+    ho: ['Nguyễn', 'Trần', 'Lê', 'Phạm', 'Hoàng', 'Huỳnh', 'Phan', 'Vũ', 'Võ', 'Đặng', 'Bùi', 'Đỗ', 'Hồ', 'Ngô', 'Dương', 'Lý', 'Đinh', 'Trương'],
+    emo: ['🌸', '🙏', '❤️', '✨', '🌷', '💐', '🕊️', '🌻', '💖', '☘️']
+  };
+  const EN = {
+    first: ['Mary', 'John', 'Grace', 'Michael', 'Sarah', 'David', 'Emily', 'James', 'Hannah', 'Joseph', 'Faith', 'Daniel', 'Rachel', 'Peter', 'Ruth', 'Matthew', 'Joy', 'Paul', 'Esther', 'Luke', 'Hope', 'Anna', 'Samuel', 'Rebecca', 'Abigail', 'Andrew', 'Lydia', 'Mark', 'Naomi', 'Elijah', 'Chloe', 'Isaac'],
+    last: ['Smith', 'Johnson', 'Brown', 'Garcia', 'Miller', 'Davis', 'Lopez', 'Wilson', 'Taylor', 'Moore', 'Martin', 'Lee', 'Walker', 'Hall', 'Young', 'King', 'Wright', 'Scott', 'Green', 'Adams', 'Baker', 'Nelson', 'Carter', 'Reyes', 'Cruz', 'Santos', 'Rivera'],
+    emo: ['🙏', '✝️', '❤️', '✨', '🕊️', '🌸', '💛', '🌿']
+  };
+  const strip = (t) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D').replace(/\s+/g, '');
+  const yr = () => pick(['', '', String(70 + Math.floor(Math.random() * 30)), String(1975 + Math.floor(Math.random() * 30)), String(Math.floor(Math.random() * 99)).padStart(2, '0')]);
+  const vi = () => {
+    const G = Math.random() < 0.55 ? VI.f : VI.m, ten = pick(G.ten), r = Math.random();
+    if (r < 0.2) return pick(G.saint) + ' ' + ten;                                   // Maria Lan
+    if (r < 0.36) return pick(VI.ho) + ' ' + pick(G.dem) + ' ' + ten;                 // Nguyễn Thị Lan
+    if (r < 0.5) return pick(G.dem) + ' ' + ten + (Math.random() < 0.5 ? ' ' + pick(VI.emo) : '');   // Ngọc Hân 🌸
+    if (r < 0.6) return ten + ' ' + pick(VI.ho);                                       // Lan Nguyễn
+    if (r < 0.68) return pick(G.nick) + ' ' + ten + (Math.random() < 0.4 ? ' ' + pick(VI.emo) : ''); // mẹ Hằng
+    if (r < 0.8) { const b = strip((Math.random() < 0.5 ? pick(G.dem) : '') + ten).toLowerCase(), h = Math.random() < 0.5 ? strip(pick(VI.ho)).toLowerCase() : '', y = yr(); return b + (h || y ? pick(['', '.', '_']) : '') + h + y; } // thuytrang.92
+    if (r < 0.9) return strip(ten) + ' ' + strip(pick(VI.ho));                         // Huong Pham
+    return pick(G.saint) + ' ' + pick(VI.ho) + ' ' + ten;                             // Têrêsa Trần Mai
+  };
+  const en = () => {
+    const f = pick(EN.first), l = pick(EN.last), r = Math.random();
+    if (r < 0.35) return f + ' ' + l;
+    if (r < 0.5) return f + ' ' + l[0] + '.';
+    if (r < 0.65) return f + ' ' + pick(EN.emo);
+    if (r < 0.85) { const y = yr(), ll = Math.random() < 0.5 ? l : ''; return (f + (ll || y ? pick(['', '.', '_']) : '') + ll).toLowerCase() + y; }
+    return pick(['blessed', 'faithful', 'pray', 'grace', 'jesus.loves']) + pick(['_', '.', '']) + f.toLowerCase() + yr();
+  };
+  const recent = [];
+  return (lang) => { let n = ''; for (let i = 0; i < 8; i++) { n = lang === 'en' ? en() : vi(); if (!recent.includes(n) && !people.some((p) => p.name === n)) break; } recent.push(n); if (recent.length > 60) recent.shift(); return n; };
+})();
+let lastRealGift = now(), nextIdleAt = 0;
+function idleTick() {
+  const d = CFG.donate, t = now();
+  if (!d.idleEnabled || !assetsReady || !G) { nextIdleAt = 0; return; }
+  const busy = walkers.some((w) => !w.done) || queue.length || cards.length || vq.length || vcur;
+  if (busy) { if (nextIdleAt && nextIdleAt < t + 4) nextIdleAt = t + 4; return; }
+  if (t - lastRealGift < (d.idleAfter ?? 30)) return;
+  if (!nextIdleAt) { nextIdleAt = t + rnd(2, 6); return; }
+  if (t < nextIdleAt) return;
+  nextIdleAt = t + rnd(d.idleMin ?? 25, Math.max(d.idleMin ?? 25, d.idleMax ?? 60));
+  const lang = CFG.scene.liveLang || CFG.audio.sermonLang || 'vi';
+  const r = Math.random(), maxC = d.idleMaxCoins ?? 5;
+  const coins = [r < 0.06 && maxC >= 30 ? 30 : 0, r < 0.1 && maxC >= 15 ? 15 : 0, r < 0.18 && maxC >= 10 ? 10 : 0, r < 0.4 && maxC >= 5 ? 5 : 0, 1].find((x) => x);
+  const gifts = lang === 'en' ? ['Rose', 'Heart', 'Candle', 'Flower'] : ['Hoa hồng', 'Trái tim', 'Nến', 'Bông hoa'];
+  const id = 'idle' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name = NAMES(lang);
+  onJoin({ id, name, avatar: '', noGreet: Math.random() < 0.5 });
+  setTimeout(() => onGift({ id, name, avatar: '', gift: gifts[Math.floor(Math.random() * gifts.length)], count: 1, diamonds: coins, total: coins, sim: true, idle: true, noSpeech: !d.idleSpeak }), rnd(1500, 4000));
+}
+setInterval(idleTick, 1000);
 // ================== BẢNG CHÀO NGƯỜI VÀO LIVE ==================
 const greets = [];
 function addGreet(ev) {

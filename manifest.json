@@ -1,9 +1,9 @@
 {
-  "version": "1.0.33",
-  "notes": "Không kết nối lặp vào phòng live đã kết thúc; đợi phòng live mới — KHỞI ĐỘNG LẠI APP",
+  "version": "1.0.34",
+  "notes": "Tự chúc phúc khi rảnh: tự cho người (tên tự nhiên) đi lên bục khi không có donate",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T13:36:56.113Z",
+  "date": "2026-11-02T14:00:59.028Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 36009,
-      "sha256": "972a760224a8855fafcb4e8b3e2b3a7cc7fc7a8e966c87d457f5bf377fdc3ab3"
+      "size": 36485,
+      "sha256": "46204e4c19cb74006477fae7bc930e6187f5966e74947ccad7227d4b37ad0084"
     },
     {
       "path": "fonts.css",
@@ -299,8 +299,8 @@
     },
     {
       "path": "i18n.js",
-      "size": 27543,
-      "sha256": "0591a85b2780e599d6eea2a24b189832734a91b7d89f69140eb9adcc08ea76dd"
+      "size": 28379,
+      "sha256": "cb67c144c07a4561b605eb914ce205106fd17acc2a61968fd1279f14d71fc2b7"
     },
     {
       "path": "main-ext.js",
@@ -309,13 +309,13 @@
     },
     {
       "path": "panel.html",
-      "size": 40675,
-      "sha256": "d090e493abe0d3ab8ae3408bac5905ba87adaaf0ead44206240450bee25edd44"
+      "size": 42007,
+      "sha256": "462f2fd6b65574d9e36e320f12a9c497a8258e33b0feded879e8971542256f55"
     },
     {
       "path": "panel.js",
-      "size": 37066,
-      "sha256": "a42e998f8f0bd6e18b4cb423b867364de02a5a19921062e12b4be81e6af1429d"
+      "size": 37104,
+      "sha256": "dce9f44db0af34eaa8ea6c144e38344ce9f087453bcf9845c689e14865aaf951"
     },
     {
       "path": "sermons_en.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 107291,
-      "sha256": "d3f93cbae97ccc347b0f9298d8000a247acf74b207c99e8674840c6b644ed7b9"
+      "size": 113270,
+      "sha256": "f7d7ef6208b6cd0c7b586f3b20375c2a3c3644c545ac97bb3eeab1a14e6efeb6"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "9699483b6e33d9df49d7782e3457b8af7a7a96c2d06a49a1dd80d768ff6ea053"
+      "sha256": "a3b4262bb2f537bb2fb86a0b10d2022958ff6f5226d7bd2905f413218230a6e0"
     }
   ]
 }

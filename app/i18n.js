@@ -1,6 +1,12 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Tự chúc phúc khi rảnh": "Auto-blessing when idle",
+"Không có donate bao lâu thì bắt đầu (giây)": "Start after no gifts for (seconds)",
+"Mỗi lượt cách nhau ít nhất (giây)": "At least this long between turns (seconds)",
+"… và nhiều nhất (giây)": "… and at most (seconds)",
+"Mức khung cao nhất": "Highest frame level",
+"Khi không có ai donate, app tự cho một người (tên ngẫu nhiên, tự nhiên như tên người xem TikTok, theo ngôn ngữ buổi live) đứng dậy đi lên bục chúc phúc. Có donate thật thì tạm dừng và người donate thật luôn được ưu tiên.": "When nobody is gifting, the app has someone (random natural TikTok-style name, in the LIVE language) stand up and walk to the altar for a blessing. Real gifts pause it and always take priority.",
 "Đợi phòng live mới…": "Waiting for a new LIVE room…",
 "Người thả tim cũng được ngồi": "People who tap likes also get a seat",
 "Người vào ẩn danh cũng được ngồi": "Anonymous joiners also get a seat",

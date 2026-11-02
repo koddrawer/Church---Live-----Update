@@ -216,7 +216,7 @@ api.onStageMsg((m) => {
   if (!m) return;
   if (m.type === 'log') log('[màn hình] ' + m.msg, m.level);
   if (m.type === 'edit-mode') { editOn = m.on; $('#btnEdit').textContent = m.on ? '✓ Xong — thoát chỉnh bố cục' : '✥ Chỉnh bố cục bằng chuột trên màn hình'; }
-  if (m.type === 'blessed') log('✝ Chúc phúc ' + m.name + ' (' + (m.gift || '') + ' ×' + m.count + ')');
+  if (m.type === 'blessed') log('✝ Chúc phúc ' + m.name + ' (' + (m.gift || '') + ' ×' + m.count + ')' + (m.idle ? ' — tự động' : ''));
   if (m.type === 'pretts') { $('#prettsBar').style.width = (100 * m.done / m.total) + '%'; const el = $('#prettsInfo'); if (el) el.textContent = I18N.t('Giọng đọc đã tạo sẵn') + ': ' + m.ok + '/' + m.total + (m.waiting ? ' — ' + I18N.t('máy chủ chưa trả lời, thử lại sau') + ' ' + m.waiting + 's (' + m.error + ')' : (m.ok === m.total ? ' ✓' : '')); if (m.done === m.total && !m.auto) log(`Đã tạo giọng ${m.ok}/${m.total} câu`); }
   if (m.type === 'status') {
     $('#sSeated').textContent = m.seated; $('#sWalk').textContent = m.walking; $('#sQueue').textContent = m.queue; $('#sSlots').textContent = m.slots;
