@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = '1.0.29';
+  const EXT_VER = '1.0.32';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -161,7 +161,7 @@ module.exports = (ctx) => {
   async function disconnect(user = true) {
     if (user) { tk.want = false; tk.rl = 0; }
     clearTimeout(tk.retry); tk.retry = null;
-    if (tk.conn) { const c = tk.conn; tk.conn = null; try { c.removeAllListeners && c.removeAllListeners(); await c.disconnect(); } catch {} }
+    clearInterval(tk.statT); if (tk.conn) { const c = tk.conn; tk.conn = null; try { c.removeAllListeners && c.removeAllListeners(); await c.disconnect(); } catch {} }
     if (user) status('idle');
   }
   function scheduleRetry(rateLimited) {
@@ -194,15 +194,22 @@ module.exports = (ctx) => {
       if (opts.signApiKey) o.signApiKey = opts.signApiKey;
       const c = new TikTokLiveConnection(username, o);
       tk.conn = c;
-      c.on(WebcastEvent.MEMBER, (d) => both('live-event', { type: 'join', ...pickUser(d.user) }));
-      c.on(WebcastEvent.CHAT, (d) => both('live-event', { type: 'chat', ...pickUser(d.user), text: d.comment || d.content || '' }));
-      if (WebcastEvent.FOLLOW) c.on(WebcastEvent.FOLLOW, (d) => both('live-event', { type: 'follow', ...pickUser(d.user) }));
-      c.on(WebcastEvent.SHARE || 'share', (d) => both('live-event', { type: 'share', ...pickUser(d.user) }));
+      const cnt = { join: 0, anon: 0, chat: 0, like: 0, gift: 0, follow: 0, share: 0 }; let firstEv = true;
+      const tally = (k) => { cnt[k]++; if (firstEv) { firstEv = false; log('Đã nhận sự kiện đầu tiên từ TikTok (' + k + ') — kết nối hoạt động.'); } };
+      clearInterval(tk.statT); tk.statT = setInterval(() => { if (tk.conn !== c) { clearInterval(tk.statT); return; } const t = Object.values(cnt).reduce((a, b) => a + b, 0); log('TikTok 60s qua: vào ' + cnt.join + ', vào ẩn danh ' + cnt.anon + ', bình luận ' + cnt.chat + ', thả tim ' + cnt.like + ', quà ' + cnt.gift + ', follow ' + cnt.follow + ', share ' + cnt.share + (t ? '' : ' — chưa nhận được sự kiện nào')); for (const k in cnt) cnt[k] = 0; }, 60000);
+      c.on(WebcastEvent.MEMBER, (d) => { tally('join'); both('live-event', { type: 'join', ...pickUser(d.user) }); });
+      // TikTok ẩn danh tính nhiều người xem khi vào: chỉ gửi tên che (vd "u***") qua sự kiện riêng
+      if (WebcastEvent.UNAUTHORIZED_MEMBER) c.on(WebcastEvent.UNAUTHORIZED_MEMBER, (d) => { tally('anon'); const nm = String((d && d.nickName) || '').trim(); both('live-event', { type: 'join', anon: true, id: 'anon:' + (nm || '') + ':' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), name: nm || '', avatar: '' }); });
+      if (WebcastEvent.LIKE) c.on(WebcastEvent.LIKE, (d) => { tally('like'); both('live-event', { type: 'like', ...pickUser(d.user) }); });
+      c.on(WebcastEvent.CHAT, (d) => tally('chat') || both('live-event', { type: 'chat', ...pickUser(d.user), text: d.comment || d.content || '' }));
+      if (WebcastEvent.FOLLOW) c.on(WebcastEvent.FOLLOW, (d) => tally('follow') || both('live-event', { type: 'follow', ...pickUser(d.user) }));
+      c.on(WebcastEvent.SHARE || 'share', (d) => tally('share') || both('live-event', { type: 'share', ...pickUser(d.user) }));
       c.on(WebcastEvent.GIFT, (d) => {
         const g = d.giftDetails || d.gift || {};
         const giftType = g.giftType ?? g.type ?? d.giftType ?? 0;
         const combo = g.combo ?? (giftType === 1);
         if (combo && !d.repeatEnd) return; // đợi kết thúc chuỗi combo
+        tally('gift');
         const diamonds = Number(g.diamondCount ?? d.diamondCount ?? 0);
         const count = Number(d.repeatCount || d.comboCount || d.groupCount || 1);
         both('live-event', { type: 'gift', ...pickUser(d.user), gift: g.giftName || g.name || d.giftName || 'quà', count, diamonds, total: diamonds * count });

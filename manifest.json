@@ -1,9 +1,9 @@
 {
-  "version": "1.0.31",
-  "notes": "Thêm khung avatar của riêng bạn (ảnh PNG), tự dò lỗ đặt avatar, chỉnh cỡ/lệch/màu tên",
+  "version": "1.0.32",
+  "notes": "Người vào ẩn danh, bình luận, thả tim đều được ngồi; nhật ký đếm sự kiện TikTok mỗi phút — khởi động lại app",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-02T10:51:45.853Z",
+  "date": "2026-11-02T13:32:16.006Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -289,8 +289,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 35751,
-      "sha256": "ae2656e32897c93b27d6ecf6ca9ad98c8a1d86e0f3320eff6673f74888cfe978"
+      "size": 36009,
+      "sha256": "972a760224a8855fafcb4e8b3e2b3a7cc7fc7a8e966c87d457f5bf377fdc3ab3"
     },
     {
       "path": "fonts.css",
@@ -299,18 +299,18 @@
     },
     {
       "path": "i18n.js",
-      "size": 26756,
-      "sha256": "98c32e446d9eee651abc2910746ea599fa47305ba985da7107d4bcc314320c41"
+      "size": 27478,
+      "sha256": "66cdea1979411966b6a09ff4d3f73a0d42d49a5b0205e821a4ed830e498bf35d"
     },
     {
       "path": "main-ext.js",
-      "size": 17453,
-      "sha256": "42fb63841de9e869dfc02ac4d55b9a7a6bfb9ae7f2cb57c9fbfb1d9283260859"
+      "size": 18944,
+      "sha256": "cf3793d542543a6ec8061f332c87b57c7ea98378d9119d3cae4dd639c1ff10bc"
     },
     {
       "path": "panel.html",
-      "size": 39961,
-      "sha256": "7c7e2c237aa530a1ae07807b11d8dacba6b6bfd6374b96931cb6ef623e92a3d0"
+      "size": 40675,
+      "sha256": "d090e493abe0d3ab8ae3408bac5905ba87adaaf0ead44206240450bee25edd44"
     },
     {
       "path": "panel.js",
@@ -334,13 +334,13 @@
     },
     {
       "path": "stage.js",
-      "size": 107030,
-      "sha256": "5d203506586b546aed83b88eaafbab4abcdc81907f871d4b783d626c9049ece1"
+      "size": 107291,
+      "sha256": "d3f93cbae97ccc347b0f9298d8000a247acf74b207c99e8674840c6b644ed7b9"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "41fe77a2e18ee10298289348704c6ed34a9d782462a90131f6869dfa80eb35b2"
+      "sha256": "b553989c23e49c1bb121aa54d50bcd52ad25096a8823c54004c5e978421aa55d"
     }
   ]
 }

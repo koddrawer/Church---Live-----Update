@@ -1641,8 +1641,9 @@ function handleJoin(ev) {
 api.onLiveEvent((ev) => {
   if (!ev) return;
   if (ev.type === 'follow' || ev.type === 'share') { onSocial(ev); return; }
-  if (ev.type === 'join') handleJoin(ev);
-  else if (ev.type === 'chat' && CFG.seating.chatAlsoSeats) onJoin(ev);
+  if (ev.type === 'join') { if (ev.anon) { if (CFG.seating.anonSeats === false) return; ev = { ...ev, name: ev.name || CFG.seating.anonName || 'Khách' }; } handleJoin(ev); }
+  else if (ev.type === 'chat' && CFG.seating.chatAlsoSeats) { if (!findPerson(ev.id)) onJoin(ev); }
+  else if (ev.type === 'like' && CFG.seating.likeAlsoSeats) { if (!findPerson(ev.id)) onJoin(ev); }
   else if (ev.type === 'gift') { onJoin(ev); onGift(ev); }
 });
 api.onConfig((c) => applyConfig(c, false));

@@ -125,7 +125,10 @@ window.CHURCH_DEFAULTS = {
     seatSeconds: 20,        // mỗi người vào live ngồi bao lâu
     maxSeated: 40,          // tối đa người ngồi có tên
     fillerCount: 6,         // số người ngồi sẵn không tên (cho nhà thờ đỡ trống)
-    chatAlsoSeats: false,   // người bình luận cũng được ngồi
+    chatAlsoSeats: true,    // người bình luận cũng được ngồi
+    likeAlsoSeats: true,    // người thả tim cũng được ngồi
+    anonSeats: true,        // người vào bị TikTok ẩn danh tính (tên che "u***") vẫn được ngồi
+    anonName: 'Khách',      // tên hiện khi TikTok không gửi tên
     firstRow: 6, lastRow: 22,
     torsoScale: 1.0,        // độ to người ngồi
     cropFrac: 0.56,         // tỉ lệ cắt nửa thân trên (0.4–0.8)

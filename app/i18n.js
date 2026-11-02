@@ -1,6 +1,10 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Người thả tim cũng được ngồi": "People who tap likes also get a seat",
+"Người vào ẩn danh cũng được ngồi": "Anonymous joiners also get a seat",
+"Tên khi TikTok không gửi tên": "Name when TikTok sends none",
+"TikTok hiện ẩn danh tính nhiều người xem lúc vào live (chỉ gửi tên che như \"u***\" hoặc không có tên, không có avatar). Bật các ô trên để người bình luận / thả tim cũng hiện lên ghế với tên và avatar thật.": "TikTok now hides many viewers' identity when they join (masked name like \"u***\" or none, no avatar). Turn on the boxes above so people who comment / tap likes also appear in the pews with their real name and avatar.",
 "Khung của tôi": "My frames",
 "+ Thêm khung của tôi (ảnh PNG)…": "+ Add my frame (PNG image)…",
 "Tên khung": "Frame name", "Màu chữ tên": "Name color", "Hào quang xoay": "Rotating glow", "Lỗ avatar": "Avatar hole", "Tự dò": "Auto-detect",

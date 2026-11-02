@@ -143,6 +143,9 @@ body.plocked main{opacity:.72}
       <div class="row"><label>Tối đa người có tên</label><input type="number" min="1" max="200" data-k="seating.maxSeated"></div>
       <div class="row"><label>Người ngồi sẵn (không tên)</label><input type="number" min="0" max="80" data-k="seating.fillerCount"></div>
       <div class="row"><label>Người bình luận cũng được ngồi</label><input type="checkbox" data-k="seating.chatAlsoSeats"></div>
+      <div class="row"><label>Người thả tim cũng được ngồi</label><input type="checkbox" data-k="seating.likeAlsoSeats"></div>
+      <div class="row"><label>Người vào ẩn danh cũng được ngồi</label><input type="checkbox" data-k="seating.anonSeats"> <label style="min-width:0;margin-left:12px">Tên khi TikTok không gửi tên</label><input type="text" data-k="seating.anonName" style="width:140px"></div>
+      <p class="hint">TikTok hiện ẩn danh tính nhiều người xem lúc vào live (chỉ gửi tên che như "u***" hoặc không có tên, không có avatar). Bật các ô trên để người bình luận / thả tim cũng hiện lên ghế với tên và avatar thật.</p>
       <div class="row"><label>Hiện mờ dần (giây)</label><input type="range" min="0.2" max="4" step="0.1" data-k="seating.fadeSeconds"><span class="val"></span></div>
     </div>
     <div class="card">
