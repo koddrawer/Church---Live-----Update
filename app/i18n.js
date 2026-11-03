@@ -1,6 +1,16 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Huy hiệu avatar trên đầu": "Avatar badge above the head",
+"Chế độ cảnh 2D / 3D": "Scene mode 2D / 3D",
+"Chế độ cảnh": "Scene mode",
+"2D — video nhà thờ + ảnh người cầu nguyện": "2D — church video + praying people images",
+"3D — nhà thờ 3D + nhân vật chibi 3D": "3D — 3D church + 3D chibi characters",
+"Cỡ nhân vật 3D": "3D character size",
+"Cha sứ 3D ở bàn thờ": "3D priest at the altar",
+"Chúa Giêsu 3D": "3D Jesus",
+"Thiên thần bay": "Flying angels",
+"Chế độ 3D: người vào live thành nhân vật chibi mặt tròn gắn avatar, ngồi trong ghế; người donate đứng dậy đi lên bục quỳ, cha sứ ban phép lành, có chùm sáng từ trên chiếu xuống. Cha sứ cử động giảng khi đang đọc bài giảng. Đổi chế độ thì màn hình tự tải lại.": "3D mode: viewers become round-faced chibi characters with their avatar, seated in the pews; donors stand up, walk to the altar and kneel while the priest blesses them under a beam of light. The priest gestures while the sermon is read. Changing mode reloads the screen.",
 "Tự chúc phúc khi rảnh": "Auto-blessing when idle",
 "Không có donate bao lâu thì bắt đầu (giây)": "Start after no gifts for (seconds)",
 "Mỗi lượt cách nhau ít nhất (giây)": "At least this long between turns (seconds)",

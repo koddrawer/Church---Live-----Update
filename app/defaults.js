@@ -215,6 +215,8 @@ window.CHURCH_DEFAULTS = {
     layoutLocked: false,
     liveLang: 'vi',         // ngôn ngữ chữ trên màn hình (vi/en)    // khóa bố cục: không kéo thả/chỉnh vị trí, cỡ các bảng
     title: '', showTitle: false,
+    mode: '2d',               // '2d' = video nhà thờ + ảnh người, '3d' = nhà thờ 3D + nhân vật chibi 3D
+    char3dScale: 1.5, badge3d: true, priest3d: true, jesus3d: true, angels3d: true,
     camZoom: true, camScale: 1.8, camHold: 1,   // camera zoom vào người donate khi đứng dậy đi lên
 
     geometry: {

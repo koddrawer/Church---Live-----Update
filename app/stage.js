@@ -1058,8 +1058,8 @@ function drawNames() {
   if (!CFG.seating.showNames) return;
   const ns = CFG.seating.nameScale;
   const tags = [];
-  for (const p of people) if (!p.filler && p.state === 'seated' && p._head && p.alpha > 0.02) tags.push({ txt: cleanName(p.name), x: p._head.x, y: p._head.y - 4, size: clamp(p.slot.ppm * 0.12, 13, 24) * ns, a: p.alpha, gold: !!p.donated, z: p.slot.y });
-  for (const w of walkers) if (w._head && w.phase !== 'wait') tags.push({ txt: cleanName(w.person.name), x: w._head.x, y: w._head.y - 6, size: clamp(G.ppm(w.rail) * 0.16, 18, 30) * ns, a: clamp(w.alpha, 0, 1), gold: true, z: 1e6 });
+  for (const p of people) if (!p.filler && p.state === 'seated' && p._head && p.alpha > 0.02) tags.push({ txt: cleanName(p.name), x: p._head.x, y: p._head.y - 4, size: (p._nameSize || clamp(p.slot.ppm * 0.12, 13, 24)) * ns, a: p.alpha, gold: !!p.donated, z: p.slot.y });
+  for (const w of walkers) if (w._head && w.phase !== 'wait') tags.push({ txt: cleanName(w.person.name), x: w._head.x, y: w._head.y - 6, size: (w._nameSize || clamp(G.ppm(w.rail) * 0.16, 18, 30)) * ns, a: clamp(w.alpha, 0, 1), gold: true, z: 1e6 });
   // gần (z lớn) được ưu tiên giữ chỗ; tên xa bị đè thì đẩy lên, vẫn vướng thì mờ đi
   tags.sort((a, b) => b.z - a.z);
   const placed = [];
@@ -1080,7 +1080,7 @@ function drawNames() {
   for (const p of people) {
     if (!p._glow || !p._head || !p.glowText) continue;
     const k = clamp((now_ - p.glowStart) / (p.glowUntil - p.glowStart), 0, 1);
-    const fs = clamp(p.slot.ppm * 0.16, 18, 34) * CFG.seating.nameScale;
+    const fs = (p._nameSize ? p._nameSize * 1.3 : clamp(p.slot.ppm * 0.16, 18, 34)) * CFG.seating.nameScale;
     ctx.save(); ctx.globalAlpha = p._glow; ctx.font = `700 ${fs}px Cormorant, Georgia, serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     ctx.shadowColor = 'rgba(255,190,70,0.95)'; ctx.shadowBlur = 14; ctx.fillStyle = '#ffe39a';
     ctx.fillText(p.glowText, clamp(p._head.x, 120, W - 120), p._head.y - fs * 1.9 - k * 40);
@@ -1296,15 +1296,19 @@ function drawCards(t) {
 }
 
 // ================== CAMERA ZOOM VÀO NGƯỜI DONATE ==================
-let cam = null; const camQ = [];
+let cam = null, CAMI = null; const camQ = [];
+const MODE3D = () => CFG.scene.mode === '3d';
 function camFor(w) { if (!CFG.scene.camZoom) return; if (!cam) cam = { w, start: w.t0 }; else camQ.push(w); }
 function camView(t) {
   if (!cam && camQ.length) { const w = camQ.shift(); if (!w.done && APPROACH.includes(w.phase) && walkProgress(w) < 0.5) cam = { w, start: Math.max(t, w.t0) }; }
+  CAMI = null;
   if (!cam || !CFG.scene.camZoom) return null;
   const inS = 0.45, outS = 0.6, hold = clamp(CFG.scene.camHold ?? 1, 0, 10), dt = t - cam.start;
   if (dt < 0) return null;
   if (dt > inS + hold + outS) { cam = null; return null; }
   const e = dt < inS ? ease(dt / inS) : dt < inS + hold ? 1 : 1 - ease((dt - inS - hold) / outS);
+  CAMI = { w: cam.w, e, scale: clamp(CFG.scene.camScale || 1.8, 1, 4) };
+  if (MODE3D()) return null;
   const w = cam.w, h = standH(w.rail), fx = w.x, fy = G.footOfRail(w.rail) - h * 0.6;
   const s = 1 + (clamp(CFG.scene.camScale || 1.8, 1, 4) - 1) * e;
   const vx = clamp(lerp(W / 2, fx, e), W / (2 * s), W - W / (2 * s)), vy = clamp(lerp(H / 2, fy, e), H / (2 * s), H - H / (2 * s));
@@ -1461,6 +1465,14 @@ function render() {
   const t = now();
   // video chúc phúc đang phủ kín màn → chỉ vẽ video (không vẽ nhà thờ phía dưới) cho nhẹ
   if (vcur && videoOpaque(t)) { drawVideo(t); drawEdit(); return; }
+  if (MODE3D() && window.__3d && window.__3d.ready && G) {
+    camView(t);
+    if (videoOK && !video.paused) try { video.pause(); } catch {}
+    ctx.clearRect(0, 0, W, H);
+    try { window.__3d.render(t, CAMI); } catch (e) { if (!window.__err3d) { window.__err3d = 1; logp('Lỗi 3D: ' + e.message, 'error'); } }
+    drawNames(); drawSubtitles(t); drawGreet(t); drawBanners(t); drawCards(t); drawTitle(); drawEdit();
+    return;
+  }
   const cv0 = G ? camView(t) : null;
   if (cv0) { ctx.save(); ctx.translate(W / 2, H / 2); ctx.scale(cv0.s, cv0.s); ctx.translate(-cv0.vx, -cv0.vy); }
   drawBG();
@@ -1602,6 +1614,7 @@ function applyConfig(c, first) {
   const assetChanged = first || prev.seating.cropFrac !== CFG.seating.cropFrac || prev.scene.warmTint !== CFG.scene.warmTint || JSON.stringify(prev.characters) !== JSON.stringify(CFG.characters);
   if (geoChanged) { buildGeometry(); reseatAll(); }
   if (assetChanged) loadAssets().then(() => { for (const p of people) if (p.sit >= SITTERS.length) p.sit = 0; });
+  if (!first && (prev.scene.mode || '2d') !== (CFG.scene.mode || '2d')) { location.reload(); return; }
   if (first || prev.scene.videoFile !== CFG.scene.videoFile) loadVideo();
   const voiceChanged = !first && (prev.audio.voice !== CFG.audio.voice || prev.audio.voiceVi !== CFG.audio.voiceVi || prev.audio.voiceEn !== CFG.audio.voiceEn || prev.audio.sermonLang !== CFG.audio.sermonLang || prev.audio.sermonMode !== CFG.audio.sermonMode || prev.audio.rate !== CFG.audio.rate || prev.audio.pitch !== CFG.audio.pitch || JSON.stringify(prev.audio.sermonTextsVi) !== JSON.stringify(CFG.audio.sermonTextsVi) || JSON.stringify(prev.audio.sermonTextsEn) !== JSON.stringify(CFG.audio.sermonTextsEn));
   if (voiceChanged) { sermon.idx = 0; sermonRestart(); if (CFG.audio.autoPretts !== false) setTimeout(() => pretts(false), 3000); }
@@ -1731,5 +1744,5 @@ document.addEventListener('click', () => AC.resume());
     setTimeout(() => { for (let i = 0; i < 18; i++) onJoin({ id: 'd' + i, name: simName() }); }, 1500);
   }
 })();
-window.__church = { textLang: (t) => textLang(t), voiceFor: (l) => voiceFor(l), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG, get cards() { return cards; }, get cam() { return cam; } };
+window.__church = { textLang: (t) => textLang(t), voiceFor: (l) => voiceFor(l), SUB, stopSermon: () => { sermon.token++; }, loadFaceApi: () => loadFaceApi(), detect: async (u) => { const i = await loadAvatar(u); if (!i) return 'noimg'; await loadFaceApi(); try { const r = await faceapi.detectSingleFace(i, new faceapi.TinyFaceDetectorOptions({ inputSize: 224, scoreThreshold: 0.3 })).withAgeAndGender(); return r ? [r.gender, r.genderProbability, r.detection.score] : 'noface'; } catch (e) { return 'err ' + e.message; } }, guess: (n) => guessGenderFromName(n), laneHalf: (r) => laneHalf(r), standH: (r) => standH(r), get G() { return G; }, onJoin, onGift, get people() { return people; }, get walkers() { return walkers; }, CFG: () => CFG, get cards() { return cards; }, get cam() { return cam; }, get sermon() { return sermon; }, get blessSpeaking() { return blessSpeaking; }, now, logp, AC, get W() { return W; }, get H() { return H; } };
 })();

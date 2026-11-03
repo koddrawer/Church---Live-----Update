@@ -342,6 +342,14 @@ body.plocked main{opacity:.72}
 <!-- SCENE -->
 <section class="tab" id="t-scene">
   <div class="grid">
+    <div class="card" style="grid-column:1/-1">
+      <h3>Chế độ cảnh 2D / 3D</h3>
+      <div class="row"><label>Chế độ cảnh</label><select data-k="scene.mode"><option value="2d">2D — video nhà thờ + ảnh người cầu nguyện</option><option value="3d">3D — nhà thờ 3D + nhân vật chibi 3D</option></select></div>
+      <div class="row"><label>Cỡ nhân vật 3D</label><input type="range" min="0.8" max="2.6" step="0.05" data-k="scene.char3dScale"><span class="val"></span></div>
+      <div class="row"><label>Cha sứ 3D ở bàn thờ</label><input type="checkbox" data-k="scene.priest3d"> <label style="min-width:0;margin-left:12px">Chúa Giêsu 3D</label><input type="checkbox" data-k="scene.jesus3d"> <label style="min-width:0;margin-left:12px">Thiên thần bay</label><input type="checkbox" data-k="scene.angels3d"></div>
+      <div class="row"><label>Huy hiệu avatar trên đầu</label><input type="checkbox" data-k="scene.badge3d"></div>
+      <p class="hint">Chế độ 3D: người vào live thành nhân vật chibi mặt tròn gắn avatar, ngồi trong ghế; người donate đứng dậy đi lên bục quỳ, cha sứ ban phép lành, có chùm sáng từ trên chiếu xuống. Cha sứ cử động giảng khi đang đọc bài giảng. Đổi chế độ thì màn hình tự tải lại.</p>
+    </div>
     <div class="card">
       <h3>Bối cảnh</h3>
       <div class="row"><button class="b p" id="btnEdit">✥ Chỉnh bố cục bằng chuột trên màn hình</button><button class="b" id="btnLock">🔓 Khóa bố cục</button></div>
