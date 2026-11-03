@@ -342,24 +342,6 @@ body.plocked main{opacity:.72}
 <!-- SCENE -->
 <section class="tab" id="t-scene">
   <div class="grid">
-    <div class="card" style="grid-column:1/-1">
-      <h3>Chế độ cảnh 2D / 3D</h3>
-      <div class="row"><label>Chế độ cảnh</label><select data-k="scene.mode"><option value="2d">2D — video nhà thờ + ảnh người cầu nguyện</option><option value="3d">3D — nhà thờ 3D + nhân vật chibi 3D</option></select></div>
-      <div class="row"><label>Cỡ nhân vật 3D</label><input type="range" min="0.8" max="2.6" step="0.05" data-k="scene.char3dScale"><span class="val"></span></div>
-      <div class="row"><label>Cha sứ 3D ở bàn thờ</label><input type="checkbox" data-k="scene.priest3d"> <label style="min-width:0;margin-left:12px">Chúa Giêsu 3D</label><input type="checkbox" data-k="scene.jesus3d"> <label style="min-width:0;margin-left:12px">Thiên thần bay</label><input type="checkbox" data-k="scene.angels3d"></div>
-      <div class="row"><label>Huy hiệu avatar trên đầu</label><input type="checkbox" data-k="scene.badge3d"></div>
-      <div class="row"><label>Nền 3D</label><select data-k="scene.bg3d"><option value="plate">Ảnh render sẵn — đẹp nhất, camera cố định (chỉ zoom)</option><option value="model">Mô hình 3D thời gian thực — xoay camera tự do</option></select></div>
-      <div class="row"><label>Cỡ hình Chúa</label><input type="range" min="3" max="20" step="0.5" data-k="scene.jesusSize"><span class="val"></span> <label style="min-width:0;margin-left:12px">Độ cao</label><input type="range" min="3" max="20" step="0.25" data-k="scene.jesusZ"><span class="val"></span></div>
-      <h3 style="margin-top:12px">Camera 3D</h3>
-      <div class="row"><button class="b p" data-cam="main">🎥 Chỉnh góc chính</button><button class="b p" data-cam="donate">🎥 Chỉnh góc khi donate</button><button class="b p" data-cam="join">🎥 Chỉnh góc khi vào phòng</button></div>
-      <div class="row"><label>Góc rộng (FOV)</label><input type="range" min="15" max="110" step="1" id="camFov"><span class="val" id="camFovV"></span></div>
-      <div class="row"><button class="b ok" id="camSave">💾 Lưu góc đang chỉnh</button><button class="b" id="camOff">✓ Thoát chỉnh</button><button class="b" id="camReset">↺ Góc đang chỉnh về mặc định</button></div>
-      <div class="row"><button class="b" data-campv="donate">▶ Xem thử góc donate</button><button class="b" data-campv="join">▶ Xem thử góc vào phòng</button></div>
-      <div class="row"><label>Camera quay tới người mới vào phòng</label><input type="checkbox" data-k="scene.camJoin"> <label style="min-width:0;margin-left:12px">Giữ (giây)</label><input type="range" min="0.5" max="6" step="0.1" data-k="scene.camJoinHold"><span class="val"></span></div>
-      <div class="row"><label>Mỗi lần cách nhau ít nhất (giây)</label><input type="number" min="2" max="600" data-k="scene.camJoinCooldown"></div>
-      <p class="hint">Bấm một nút "Chỉnh góc…" rồi dùng chuột trên cửa sổ 9:16: chuột trái xoay, chuột phải dời, lăn chuột tiến/lùi; chỉnh xong bấm "Lưu góc đang chỉnh". Góc khi donate / vào phòng được lưu tương đối so với người đó (người ngồi bên phải thì tự lật đối xứng). Xoay góc tự do cần nền "Mô hình 3D thời gian thực" (app tự chuyển khi bấm chỉnh). Thời gian giữ góc donate chỉnh ở tab Donate.</p>
-      <p class="hint">Chế độ 3D: người vào live thành nhân vật chibi mặt tròn gắn avatar, ngồi trong ghế; người donate đứng dậy đi lên bục quỳ, cha sứ ban phép lành, có chùm sáng từ trên chiếu xuống. Cha sứ cử động giảng khi đang đọc bài giảng. Đổi chế độ thì màn hình tự tải lại.</p>
-    </div>
     <div class="card">
       <h3>Bối cảnh</h3>
       <div class="row"><button class="b p" id="btnEdit">✥ Chỉnh bố cục bằng chuột trên màn hình</button><button class="b" id="btnLock">🔓 Khóa bố cục</button></div>

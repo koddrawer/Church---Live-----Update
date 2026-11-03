@@ -1,105 +1,10 @@
 {
-  "version": "1.0.36",
-  "notes": "3D: hình Chúa 2D tỏa sáng lấp lánh; 4 khung donate mới; chỉnh & lưu góc camera chính / khi donate / khi vào phòng; nền mô hình 3D thời gian thực",
+  "version": "1.0.37",
+  "notes": "Bản 2D: tách phần 3D sang app riêng Church Live 3D",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-03T19:29:12.396Z",
+  "date": "2026-11-03T20:11:40.694Z",
   "files": [
-    {
-      "path": "assets/3d/Ba.glb",
-      "size": 116548,
-      "sha256": "eda6d486c20b8ffa83065f96ebfdc49e49b04d41bd98ae66a5e0786066ddf51e",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Be_gai_ruoc_le.glb",
-      "size": 142832,
-      "sha256": "a83ca206e9112781fed6c39e3b396da647faf202ffa6650d721ee1428540da68",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Be_trai.glb",
-      "size": 115872,
-      "sha256": "7f096d1e62d62887445080381d39f30838aed7ba823236ff273ea6275f8cb805",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Cha_su.glb",
-      "size": 140344,
-      "sha256": "17e65bb4cf9a24a0171d7c2db7890a18ddb4948165043c6ab9a1a14dfbb7a16c",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Chua_Giesu.glb",
-      "size": 125660,
-      "sha256": "dcc3cc2427680f4cbbd33a29ae567aee7c3c0ced289e8d19ccc6737863aecf7f",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Nam_vest.glb",
-      "size": 106724,
-      "sha256": "897070ad0ee69d43c9aef00add5350fbd490e53bd16cefd3c943fcc92dbb30d8",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Nu_ao_dai.glb",
-      "size": 114672,
-      "sha256": "efaa1f5d6d9584621e24da78a3caf4be7a68a05e92c737fab99db2de2a4cae99",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Nu_vay_khan_ren.glb",
-      "size": 114940,
-      "sha256": "f856d9b34a134c56517d233ff647da312421f92241317b6c3a8cec3a90a8bc12",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Ong.glb",
-      "size": 104488,
-      "sha256": "9d1ac40508993f762895d2c1f83790ff1fa551b13aea3881d61a19875e666be3",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/Thien_than.glb",
-      "size": 122732,
-      "sha256": "499250610afb7ada591e3fca30ff769bb06371e95a5d9bb8a25499492fd1ceb6",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/camera3d.json",
-      "size": 198,
-      "sha256": "7b082f063d84c0209c4a3460e875695e6616efbc954bee9efda6ed4e3c93ab24"
-    },
-    {
-      "path": "assets/3d/church_model.glb",
-      "size": 7352600,
-      "sha256": "d6f85da86b6716a4e4b6938a96fed054abfbe07d897de39167460a8c57b4b961",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/church_plate.jpg",
-      "size": 353944,
-      "sha256": "1db6935b5d555ee6acf6e632f646283bf028c52e4f0e3bb3c7924ca85b0d8406",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/jesus.png",
-      "size": 932392,
-      "sha256": "b633e787b949dbeb0fd82aeaf257eb0d056e7c1d721dbdd20715f01ca956dfe6",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/jesus_glow.jpg",
-      "size": 35840,
-      "sha256": "ced1ac13225b51a703646cb1ec54e776df00434c03ea2a3f44d2c86db571c160",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/3d/occluder.glb",
-      "size": 1555444,
-      "sha256": "6debf1c6ac5c2790b677c3bc118c306d63cab9e9ea45f184282a8a847df18a34",
-      "enc": "b64"
-    },
     {
       "path": "assets/faceapi/LICENSE.txt",
       "size": 1067,
@@ -422,49 +327,19 @@
       "sha256": "20bb122c5dd4630cdff804a1a0d4ca417c6603a4c7ff244a8103f6bedf1656c2"
     },
     {
-      "path": "lib/jsm/controls/OrbitControls.js",
-      "size": 29868,
-      "sha256": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064"
-    },
-    {
-      "path": "lib/jsm/loaders/GLTFLoader.js",
-      "size": 108522,
-      "sha256": "d073b438e6a07e1359741dd5d6c76c953420cc0d4fd84eb1bdde94315540e6a3"
-    },
-    {
-      "path": "lib/jsm/utils/BufferGeometryUtils.js",
-      "size": 31906,
-      "sha256": "9be041e96308775d00e2695cc607645b9a9b64fd7c0e759dd8f7c00a8d92becb"
-    },
-    {
-      "path": "lib/jsm/utils/SkeletonUtils.js",
-      "size": 8007,
-      "sha256": "83748c5072a5ce96e9d68d8efda908a1f1a06c0b5fd2618edc3e54a361a8fd5b"
-    },
-    {
-      "path": "lib/three.module.min.js",
-      "size": 670681,
-      "sha256": "3e690ac7d180b0aadf0891bea39eec643e29e2d3e75c99b18689518665f69ba6"
-    },
-    {
       "path": "main-ext.js",
       "size": 20321,
       "sha256": "493eda848222a33895d03e821643d02db821c19bffd51c50190cb4b41f0f75f5"
     },
     {
       "path": "panel.html",
-      "size": 45816,
-      "sha256": "a0a72e93c3715c5ed99376eaa5d75fdd5ad360bccde5419eb1124e6fe75d14e4"
+      "size": 42007,
+      "sha256": "462f2fd6b65574d9e36e320f12a9c497a8258e33b0feded879e8971542256f55"
     },
     {
       "path": "panel.js",
       "size": 38687,
       "sha256": "933553f55280c1bc9c65863a615acf9d4b28292d7c04fcb62602049f381dd7d9"
-    },
-    {
-      "path": "scene3d.js",
-      "size": 34358,
-      "sha256": "931692cc71559764a6345bc4ec06affc289d3758742c87e31594fd7610fd1058"
     },
     {
       "path": "sermons_en.js",
@@ -478,18 +353,18 @@
     },
     {
       "path": "stage.html",
-      "size": 1093,
-      "sha256": "594e25c31897483e7361e51cea8aae5378e0f3141e85ba58bc0801f0aab5e306"
+      "size": 903,
+      "sha256": "a901d278c708bd56abe65d3a2a195741841f6f99a4deee692b1e1903d7393c71"
     },
     {
       "path": "stage.js",
-      "size": 114716,
-      "sha256": "1a934953bfff11d2d98a94d0c9c235cbe6b63b834ecf3fae73db7574589ee70e"
+      "size": 114655,
+      "sha256": "22b6efcc85fea88fd50ca1729bade952a2bd610d654c909413679e7e84dee2e7"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "b1ad962ee5a3f40520a2fb9f282367c5701c4738c3787a734058ffca13731394"
+      "sha256": "7492fd4c4c54d6555f4d30d6c840fc1f83cabca4dfcb79bdca7b64d28d7dc72e"
     }
   ]
 }

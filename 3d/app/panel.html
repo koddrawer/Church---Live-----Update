@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<title>Church Live 3D — Bảng điều khiển</title>
+<link rel="stylesheet" href="fonts.css">
+<style>
+:root{--bg:#14110f;--card:#1f1915;--card2:#2a221c;--line:#3a2f26;--text:#f3e9dc;--mut:#b5a48f;--gold:#e8b85c;--gold2:#ffd98a;--ok:#5fcf8a;--warn:#f0b04a;--err:#ff6b5b}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:14px BeVN,"Segoe UI",sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:linear-gradient(90deg,#241a12,#14110f)}
+header h1{font:700 26px Cormorant,Georgia,serif;margin:0;color:var(--gold2);letter-spacing:.5px}
+header .ver{color:var(--mut);font-size:12px}
+header .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:99px;background:var(--card2);border:1px solid var(--line);font-size:12px}
+.dot{width:8px;height:8px;border-radius:50%;background:#777}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.err{background:var(--err)}
+nav{display:flex;gap:2px;padding:0 12px;border-bottom:1px solid var(--line);background:#181310;overflow-x:auto}
+nav button{background:none;border:0;color:var(--mut);padding:11px 14px;font:inherit;cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap}
+nav button.on{color:var(--gold2);border-bottom-color:var(--gold)}
+main{padding:14px 16px 40px}
+.tab{display:none}.tab.on{display:block}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.card h3{margin:0 0 10px;font:700 18px Cormorant,Georgia,serif;color:var(--gold2)}
+.row{display:flex;align-items:center;gap:8px;margin:7px 0;flex-wrap:wrap}
+.row>label{min-width:150px;color:var(--mut)}
+.row .val{min-width:44px;text-align:right;color:var(--gold2);font-variant-numeric:tabular-nums}
+input[type=text],input[type=number],input[type=password],select,textarea{background:#110d0b;color:var(--text);border:1px solid var(--line);border-radius:6px;padding:6px 8px;font:inherit}
+input[type=number]{width:90px}
+input[type=range]{flex:1;min-width:120px;accent-color:var(--gold)}
+input[type=checkbox]{accent-color:var(--gold);width:16px;height:16px}
+textarea{width:100%;min-height:180px;resize:vertical;line-height:1.45}
+button.b{background:var(--card2);color:var(--text);border:1px solid var(--line);border-radius:7px;padding:7px 12px;font:inherit;cursor:pointer}
+button.b:hover{border-color:var(--gold)}
+button.p{background:linear-gradient(#c99436,#a8741f);border-color:#d8a64a;color:#1a1007;font-weight:700}
+button.d{border-color:#6b2d26;color:#ffb2a8}
+.hint{color:var(--mut);font-size:12px;line-height:1.5}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.stat{background:var(--card2);border-radius:8px;padding:8px 10px}
+.stat b{display:block;font-size:22px;color:var(--gold2)}
+.stat span{color:var(--mut);font-size:12px}
+#log{height:220px;overflow:auto;background:#0e0b09;border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:12px ui-monospace,Consolas,monospace}
+#log div{white-space:pre-wrap}#log .warn{color:var(--warn)}#log .error{color:var(--err)}
+.names{display:flex;flex-wrap:wrap;gap:6px}
+.names span{background:var(--card2);border:1px solid var(--line);border-radius:99px;padding:2px 9px;font-size:12px}
+.names span.walk{border-color:var(--gold);color:var(--gold2)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
+.th{background:#110d0b;border:1px solid var(--line);border-radius:8px;padding:6px;text-align:center;font-size:12px}
+.th img,.th canvas{width:100%;height:110px;object-fit:contain;display:block;margin-bottom:4px}
+.th select{width:100%;font-size:12px;padding:3px}
+.th.off{opacity:.4}
+.frames{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.frames .th canvas{height:120px}
+.sermonline{background:#110d0b;border-left:3px solid var(--gold);padding:8px 10px;border-radius:4px;color:#eadbc6;min-height:40px;font-size:13px}
+.prog{height:6px;background:#110d0b;border-radius:3px;overflow:hidden}.prog>i{display:block;height:100%;background:var(--gold);width:0}
+#lockBar{display:none;padding:8px 16px;background:#5a3a0c;color:#ffe3a0;font-weight:700;border-bottom:1px solid var(--gold)}
+body.plocked #lockBar{display:block}
+body.plocked main{opacity:.72}
+#btnPanelLock.on{background:linear-gradient(#c99436,#a8741f);color:#1a1007;font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <h1>✝ Church Live 3D</h1><span class="ver" id="ver"></span>
+  <span class="sp"></span>
+  <select id="uiLang" title="Ngôn ngữ giao diện"><option value="vi">🇻🇳 Tiếng Việt</option><option value="en">🇬🇧 English</option></select>
+  <button class="b" id="btnPanelLock" title="Khóa toàn bộ bảng điều khiển">🔓 Khóa bảng điều khiển</button>
+  <span class="pill"><i class="dot" id="tkdot"></i><span id="tktxt">Chưa kết nối</span></span>
+  <span class="pill"><i class="dot ok" id="audot"></i><span id="autxt">Âm thanh</span></span>
+</header>
+<div id="lockBar">🔒 Bảng điều khiển đang bị khóa — xem được, không chỉnh được. Bấm “Mở khóa” ở góc trên để chỉnh.</div>
+<nav id="nav">
+  <button data-t="live" class="on">Live</button>
+  <button data-t="seat">Người ngồi</button>
+  <button data-t="donate">Donate & chúc phúc</button>
+  <button data-t="audio">Giọng cha sứ & âm thanh</button>
+  <button data-t="scene">Cảnh & nhân vật</button>
+  <button data-t="sys">Cửa sổ & cập nhật</button>
+</nav>
+<main>
+<!-- LIVE -->
+<section class="tab on" id="t-live">
+  <div class="grid">
+    <div class="card">
+      <h3>Kết nối TikTok LIVE</h3>
+      <div class="row"><label>Username (không cần @)</label><input type="text" data-k="tiktok.username" placeholder="ten_kenh" style="flex:1"></div>
+      <div class="row"><label>Euler Sign API key</label><input type="password" data-k="tiktok.signApiKey" placeholder="không bắt buộc" style="flex:1"></div>
+      <div class="row"><label>Tự kết nối khi mở app</label><input type="checkbox" data-k="tiktok.autoConnect"></div>
+      <div class="row"><label>Tự kết nối lại</label><input type="checkbox" data-k="tiktok.autoReconnect"></div>
+      <div class="row"><button class="b p" id="btnConnect">Kết nối</button><button class="b" id="btnDisconnect">Ngắt</button></div>
+      <div class="row"><label>Ngôn ngữ buổi live</label><select id="liveLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select><button class="b p" id="btnLiveLang">Áp dụng</button></div>
+      <p class="hint" id="liveLangHint">Đổi giọng cha sứ, bài giảng, phụ đề, lời chúc và mọi chữ trên màn hình sang ngôn ngữ đã chọn.</p>
+      <p class="hint">Người vào phòng → hiện người ngồi cầu nguyện có tên. Ai tặng quà → đứng dậy đi lên bục nhận chúc phúc.</p>
+    </div>
+    <div class="card">
+      <h3>Thử nhanh</h3>
+      <div class="row"><input type="text" id="simName" placeholder="Tên (để trống = ngẫu nhiên)" style="flex:1"></div>
+      <div class="row">
+        <button class="b" data-sim="join">+1 người vào</button>
+        <button class="b" data-sim="join10">+10 người vào</button>
+      </div>
+      <div class="row">
+        <button class="b p" data-sim="gift">Donate 1 xu (người mới)</button>
+        <button class="b p" data-sim="giftSeated">Donate 1 xu (người đang ngồi)</button>
+      </div>
+      <div class="row">
+        <button class="b p" data-sim="g5">Donate 5 xu</button>
+        <button class="b p" data-sim="g10">Donate 10 xu</button>
+        <button class="b p" data-sim="g15">Donate 15 xu</button>
+        <button class="b p" data-sim="g30">Donate 30 xu</button>
+        <button class="b" data-sim="g1x5">5 người donate liên tiếp</button>
+      </div>
+      <div class="row">
+        <button class="b" data-sim="follow">❤ Follow mới</button>
+        <button class="b" data-sim="share">🔗 Chia sẻ live</button>
+        <button class="b" data-sim="followSeated">❤ Người đang ngồi follow</button>
+      </div>
+      <div class="row"><button class="b d" data-sim="clear">Xoá người có tên</button><button class="b" data-sim="next">Bỏ qua câu giảng</button></div>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Trạng thái</h3>
+      <div class="stats">
+        <div class="stat"><b id="sSeated">0</b><span>đang ngồi (có tên)</span></div>
+        <div class="stat"><b id="sWalk">0</b><span>đang lên bục</span></div>
+        <div class="stat"><b id="sQueue">0</b><span>donate đang chờ</span></div>
+        <div class="stat"><b id="sSlots">0</b><span>số ghế</span></div>
+      </div>
+      <div class="row" style="margin-top:10px"><div class="names" id="names"></div></div>
+      <div class="row"><label>Cha sứ đang giảng</label></div>
+      <div class="sermonline" id="sermonLine">…</div>
+    </div>
+    <div class="card" style="grid-column:1/-1"><h3>Nhật ký</h3><div id="log"></div></div>
+  </div>
+</section>
+
+<!-- SEAT -->
+<section class="tab" id="t-seat">
+  <div class="grid">
+    <div class="card">
+      <h3>Người vào phòng live</h3>
+      <div class="row"><label>Thời gian ngồi (giây)</label><input type="number" min="3" max="3600" data-k="seating.seatSeconds"></div>
+      <div class="row"><label>Tối đa người có tên</label><input type="number" min="1" max="200" data-k="seating.maxSeated"></div>
+      <div class="row"><label>Người ngồi sẵn (không tên)</label><input type="number" min="0" max="80" data-k="seating.fillerCount"></div>
+      <div class="row"><label>Người bình luận cũng được ngồi</label><input type="checkbox" data-k="seating.chatAlsoSeats"></div>
+      <div class="row"><label>Người thả tim cũng được ngồi</label><input type="checkbox" data-k="seating.likeAlsoSeats"></div>
+      <div class="row"><label>Người vào ẩn danh cũng được ngồi</label><input type="checkbox" data-k="seating.anonSeats"> <label style="min-width:0;margin-left:12px">Tên khi TikTok không gửi tên</label><input type="text" data-k="seating.anonName" style="width:140px"></div>
+      <p class="hint">TikTok hiện ẩn danh tính nhiều người xem lúc vào live (chỉ gửi tên che như "u***" hoặc không có tên, không có avatar). Bật các ô trên để người bình luận / thả tim cũng hiện lên ghế với tên và avatar thật.</p>
+      <div class="row"><label>Hiện mờ dần (giây)</label><input type="range" min="0.2" max="4" step="0.1" data-k="seating.fadeSeconds"><span class="val"></span></div>
+    </div>
+    <div class="card">
+      <h3>Hàng ghế & kích thước</h3>
+      <div class="row"><label>Hàng đầu dùng</label><input type="number" min="0" max="22" data-k="seating.firstRow"></div>
+      <div class="row"><label>Hàng cuối dùng</label><input type="number" min="0" max="22" data-k="seating.lastRow"></div>
+      <div class="row"><label>Ưu tiên hàng gần</label><input type="range" min="0" max="1" step="0.05" data-k="seating.preferNear"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Độ to người ngồi</label><input type="range" min="0.6" max="1.6" step="0.02" data-k="seating.torsoScale"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Cắt nửa thân trên</label><input type="range" min="0.4" max="0.8" step="0.01" data-k="seating.cropFrac"><span class="val"></span></div>
+      <p class="hint">Hàng 0 là hàng sát bục. Bật “Hiện đường căn hàng ghế” ở tab Cảnh để xem vị trí.</p>
+    </div>
+    <div class="card">
+      <h3>Tên trên đầu</h3>
+      <div class="row"><label>Hiện tên</label><input type="checkbox" data-k="seating.showNames"></div>
+      <div class="row"><label>Cỡ chữ</label><input type="range" min="0.6" max="1.8" step="0.05" data-k="seating.nameScale"><span class="val"></span></div>
+      <div class="row"><label>Số ký tự tối đa</label><input type="number" min="4" max="40" data-k="seating.nameMaxChars"></div>
+    </div>
+  </div>
+</section>
+
+<!-- DONATE -->
+<section class="tab" id="t-donate">
+  <div class="grid">
+    <div class="card">
+      <h3>Đi lên bục</h3>
+      <div class="row"><label>Kim cương tối thiểu</label><input type="number" min="0" data-k="donate.minDiamonds"></div>
+      <div class="row"><label>Thời gian đi lên (giây)</label><input type="range" min="3" max="40" step="0.5" data-k="donate.walkSeconds"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Tốc độ bước (khung/giây)</label><input type="range" min="1" max="8" step="0.1" data-k="donate.walkFps"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Độ to người đi</label><input type="range" min="0.6" max="1.6" step="0.02" data-k="donate.walkerScale"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Phóng to khi gần bục</label><input type="range" min="1" max="2.5" step="0.05" data-k="donate.altarBoost"><span class="val"></span></div>
+      <div class="row"><label>Người sau bắt đầu đi khi người trước đi được</label><input type="range" min="0.2" max="1" step="0.05" data-k="donate.nextAtFrac"><span class="val"></span></div>
+      <div class="row"><label>Tối đa cùng lúc trên màn</label><input type="number" min="1" max="10" data-k="donate.maxConcurrent"></div>
+    </div>
+    <div class="card">
+      <h3>Chúc phúc</h3>
+      <div class="row" style="display:none"><label>Camera zoom vào người đi lên</label><input type="checkbox" data-k="scene.camZoom"></div>
+      <div class="row" style="display:none"><label>Mức zoom</label><input type="range" min="1.2" max="3" step="0.05" data-k="scene.camScale"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Giữ zoom (giây)</label><input type="range" min="0.3" max="5" step="0.1" data-k="scene.camHold"><span class="val"></span></div>
+      <div class="row"><label>Thời gian chúc phúc (giây)</label><input type="range" min="2" max="40" step="0.5" data-k="donate.blessSeconds"><span class="val"></span></div>
+      <div class="row"><label>Tư thế</label><select data-k="characters.blessPose"><option value="kneel">Quỳ cầu nguyện</option><option value="bow">Đứng cúi đầu</option></select></div>
+      <div class="row"><label>Sau khi chúc phúc</label><select data-k="donate.afterBless"><option value="return">Quay về ghế</option><option value="vanish">Tan vào ánh sáng</option></select></div>
+      <div class="row"><label>Thời gian quay về (giây)</label><input type="range" min="3" max="30" step="0.5" data-k="donate.returnSeconds"><span class="val"></span></div>
+      <div class="row"><label>Ngồi lại thêm (giây)</label><input type="number" min="3" max="3600" data-k="donate.seatAfterSeconds"></div>
+    </div>
+    <div class="card">
+      <h3>Lời & chữ</h3>
+      <div class="row"><label>Cha sứ đọc lời chúc</label><input type="checkbox" data-k="donate.speakBlessing"></div>
+      <div class="row"><label>Lời chúc</label><input type="text" data-k="donate.blessSpeech" style="flex:1"></div>
+      <div class="row"><label>Hiện băng chữ</label><input type="checkbox" data-k="donate.showBanner"></div>
+      <div class="row"><label>Hiện avatar trước tên</label><input type="checkbox" data-k="donate.bannerAvatar"></div>
+      <div class="row"><label>Cỡ băng chúc phúc</label><input type="range" min="0.5" max="1.6" step="0.02" data-k="donate.bannerScale"><span class="val"></span></div>
+      <div class="row"><label>Bề rộng băng (px)</label><input type="range" min="400" max="1080" step="10" data-k="donate.bannerWidth"><span class="val"></span></div>
+      <div class="row"><label>Cỡ avatar</label><input type="range" min="40" max="180" step="2" data-k="donate.bannerAvatarSize"><span class="val"></span></div>
+      <div class="row"><label>Số băng hiện cùng lúc</label><input type="number" min="1" max="5" data-k="donate.bannerMax"></div>
+      <div class="row"><label>Vị trí băng chữ (Y)</label><input type="range" min="30" max="1800" step="2" data-k="donate.bannerY"><span class="val"></span></div>
+      <div class="row"><label>Dòng chính</label><input type="text" data-k="donate.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ</label><input type="text" data-k="donate.bannerSub" style="flex:1"></div>
+      <p class="hint">Biến: {name} tên, {gift} tên quà, {count} số lượng.</p>
+    </div>
+    <div class="card">
+      <h3>Lời chúc của cha sứ</h3>
+      <div class="row"><label>Cách chọn lời chúc</label><select data-k="donate.blessSpeechMode"><option value="random">Ngẫu nhiên trong danh sách</option><option value="fixed">Luôn dùng câu “Lời chúc” ở trên</option></select></div>
+      <textarea id="blessList" style="min-height:150px"></textarea>
+      <div class="row"><button class="b p" id="btnSaveBless">Lưu danh sách</button><button class="b" id="btnResetBless">Khôi phục mặc định</button></div>
+      <p class="hint">Mỗi dòng một lời chúc, dùng {name} cho tên người donate.</p>
+    </div>
+    <div class="card">
+      <h3>🙏 Chúc phúc người mới vào live</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.join.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.join.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="1" max="20" step="0.5" data-k="social.join.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.join.floatText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời chào</label><input type="checkbox" data-k="social.join.speak"></div>
+      <div class="row"><label>Lời chào</label><input type="text" data-k="social.join.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.join.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.join.sub" style="flex:1"></div>
+      <div class="row"><label>Mỗi người tối đa 1 lần / (giây)</label><input type="number" min="0" max="86400" data-k="social.join.cooldown"></div>
+      <p class="hint">Phòng đông thì nên để “Ánh sáng tại chỗ ngồi”. Chọn “Đi lên bục” khi người vào nhiều sẽ xếp hàng rất dài. Lời chào của cha sứ dùng chung giới hạn “cách nhau ít nhất” với follow/chia sẻ.</p>
+    </div>
+    <div class="card">
+      <h3>❤ Chúc phúc người theo dõi mới</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.follow.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.follow.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="social.follow.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.follow.floatText" style="flex:1"></div>
+      <div class="row"><label>Dòng trên bảng chào</label><input type="text" data-k="social.follow.greetText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời cảm ơn</label><input type="checkbox" data-k="social.follow.speak"></div>
+      <div class="row"><label>Lời cảm ơn</label><input type="text" data-k="social.follow.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.follow.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.follow.sub" style="flex:1"></div>
+    </div>
+    <div class="card">
+      <h3>🔗 Chúc phúc người chia sẻ live</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="social.share.enabled"></div>
+      <div class="row"><label>Cách chúc phúc</label><select data-k="social.share.mode"><option value="glow">Ánh sáng tại chỗ ngồi (nhanh)</option><option value="walk">Đi lên bục như donate 1 xu</option></select></div>
+      <div class="row"><label>Thời gian ánh sáng (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="social.share.glowSeconds"><span class="val"></span></div>
+      <div class="row"><label>Chữ bay trên đầu</label><input type="text" data-k="social.share.floatText" style="flex:1"></div>
+      <div class="row"><label>Dòng trên bảng chào</label><input type="text" data-k="social.share.greetText" style="flex:1"></div>
+      <div class="row"><label>Cha sứ đọc lời cảm ơn</label><input type="checkbox" data-k="social.share.speak"></div>
+      <div class="row"><label>Lời cảm ơn</label><input type="text" data-k="social.share.speech" style="flex:1"></div>
+      <div class="row"><label>Băng chữ (khi đi lên bục)</label><input type="text" data-k="social.share.banner" style="flex:1"></div>
+      <div class="row"><label>Dòng phụ băng chữ</label><input type="text" data-k="social.share.sub" style="flex:1"></div>
+      <div class="row"><label>Mỗi người tối đa 1 lần / (giây)</label><input type="number" min="0" max="3600" data-k="social.share.cooldown"></div>
+    </div>
+    <div class="card">
+      <h3>Follow & chia sẻ — chung</h3>
+      <div class="row"><label>Cha sứ đọc cảm ơn cách nhau ít nhất (giây)</label><input type="number" min="0" max="120" data-k="social.speakCooldown"></div>
+      <p class="hint">Mỗi người chỉ được chúc phúc follow 1 lần. Khi nhiều người follow/chia sẻ dồn dập, ánh sáng vẫn hiện cho từng người nhưng cha sứ chỉ đọc lời cảm ơn cách quãng để không ngắt bài giảng liên tục. Biến: {name}.</p>
+    </div>
+    <div class="card">
+      <h3>Tự chúc phúc khi rảnh</h3>
+      <div class="row"><label>Bật</label><input type="checkbox" data-k="donate.idleEnabled"></div>
+      <div class="row"><label>Không có donate bao lâu thì bắt đầu (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleAfter"></div>
+      <div class="row"><label>Mỗi lượt cách nhau ít nhất (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleMin"></div>
+      <div class="row"><label>… và nhiều nhất (giây)</label><input type="number" min="5" max="3600" data-k="donate.idleMax"></div>
+      <div class="row"><label>Mức khung cao nhất</label><select data-k="donate.idleMaxCoins"><option value="1">1 xu</option><option value="5">5 xu</option><option value="10">10 xu</option><option value="15">15 xu</option><option value="30">30 xu</option></select></div>
+      <div class="row"><label>Cha sứ đọc lời chúc</label><input type="checkbox" data-k="donate.idleSpeak"></div>
+      <p class="hint">Khi không có ai donate, app tự cho một người (tên ngẫu nhiên, tự nhiên như tên người xem TikTok, theo ngôn ngữ buổi live) đứng dậy đi lên bục chúc phúc. Có donate thật thì tạm dừng và người donate thật luôn được ưu tiên.</p>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Khung avatar theo mức xu</h3>
+      <div class="row"><label>Hiện khung avatar khi chúc phúc</label><input type="checkbox" data-k="donate.frameEnabled"></div>
+      <div id="frames"></div>
+      <h3 style="margin-top:14px">Khung của tôi</h3>
+      <div id="myFrames"></div>
+      <p class="hint">Thêm ảnh PNG nền trong suốt, giữa khung để trống (trong suốt) chỗ đặt avatar — app tự dò lỗ đó để đặt avatar vào. Nếu lệch, kéo các thanh "Cỡ lỗ / Lệch" (xem ngay ở ô xem trước). Sau khi thêm, chọn khung ở ô mức xu phía trên.</p>
+      <div class="row"><label>Thời gian hiện (giây)</label><input type="range" min="2" max="20" step="0.5" data-k="donate.frameSeconds"><span class="val"></span></div>
+      <div class="row"><label>Cỡ khung</label><input type="range" min="0.5" max="1.6" step="0.02" data-k="donate.frameScale"><span class="val"></span></div>
+      <div class="row"><label>Vị trí ngang (X)</label><input type="range" min="200" max="880" step="2" data-k="donate.frameX"><span class="val"></span></div>
+      <div class="row"><label>Vị trí dọc (Y, tâm avatar)</label><input type="range" min="250" max="1800" step="2" data-k="donate.frameY"><span class="val"></span></div>
+      <div class="row"><label>Lời chúc dưới tên</label><input type="text" data-k="donate.frameText" style="flex:1" placeholder="để trống = đúng lời chúc cha sứ đọc"></div>
+      <p class="hint">Tổng xu của 1 lần tặng (gồm cả combo) ≥ mức nào thì dùng khung của mức cao nhất đạt được. Khung hiện lúc người donate được chúc phúc ở bục, kèm tên và lời chúc phúc bên dưới; mỗi lần 1 khung, khung sau chờ lượt. Có thể kéo thả/đổi cỡ khung bằng nút "Chỉnh bố cục". Biến: {name} {gift} {count}.</p>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIO -->
+<section class="tab" id="t-audio">
+  <div class="grid">
+    <div class="card">
+      <h3>Giọng cha sứ giảng</h3>
+      <div class="row"><label>Bật giảng</label><input type="checkbox" data-k="audio.sermonEnabled"></div>
+      <div class="row"><label>Nguồn</label><select data-k="audio.sermonMode"><option value="tts">Máy đọc bài giảng (Edge TTS)</option><option value="files">File ghi âm của tôi (mp3)</option></select></div>
+      <div class="row"><label>Ngôn ngữ bài giảng</label><select data-k="audio.sermonLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select></div>
+      <div class="row"><label>Giọng tiếng Việt</label><select data-k="audio.voiceVi">
+        <option value="vi-VN-NamMinhNeural">vi-VN Nam Minh (nam)</option>
+        <option value="vi-VN-HoaiMyNeural">vi-VN Hoài My (nữ)</option>
+      </select></div>
+      <div class="row"><label>Giọng tiếng Anh</label><select data-k="audio.voiceEn">
+        <option value="en-US-ChristopherNeural">en-US Christopher</option>
+        <option value="en-US-GuyNeural">en-US Guy</option>
+        <option value="en-US-EricNeural">en-US Eric</option>
+        <option value="en-US-AndrewNeural">en-US Andrew</option>
+        <option value="en-US-BrianNeural">en-US Brian</option>
+        <option value="en-GB-RyanNeural">en-GB Ryan</option>
+        <option value="en-GB-ThomasNeural">en-GB Thomas</option>
+      </select></div>
+      <p class="hint">App tự nhận biết từng câu là tiếng Việt hay tiếng Anh và đọc bằng đúng giọng của ngôn ngữ đó.</p>
+      <div class="row"><label>Tốc độ</label><select data-k="audio.rate"><option>-20%</option><option>-15%</option><option>-10%</option><option>-5%</option><option>+0%</option><option>+5%</option><option>+10%</option></select></div>
+      <div class="row"><label>Cao độ</label><select data-k="audio.pitch"><option>-12Hz</option><option>-8Hz</option><option>-6Hz</option><option>-3Hz</option><option>+0Hz</option><option>+3Hz</option></select></div>
+      <div class="row"><label>Độ vang nhà thờ</label><input type="range" min="0" max="1" step="0.02" data-k="audio.reverb"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các câu (giây)</label><input type="range" min="0" max="3" step="0.05" data-k="audio.sentenceGap"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các đoạn (giây)</label><input type="range" min="0" max="15" step="0.1" data-k="audio.gapSeconds"><span class="val"></span></div>
+      <div class="row"><label>Nghỉ giữa các bài (giây)</label><input type="range" min="0" max="30" step="0.5" data-k="audio.sectionGap"><span class="val"></span></div>
+      <div class="row"><label>Đọc cả tiêu đề bài</label><input type="checkbox" data-k="audio.readTitles"></div>
+      <div class="row"><label>Phát ngẫu nhiên</label><input type="checkbox" data-k="audio.shuffle"></div>
+      <div class="row"><button class="b" id="btnPretts">Tạo trước toàn bộ giọng đọc</button><button class="b" data-sim="next">Câu tiếp</button><button class="b" id="btnRestartSermon">Giảng lại từ đầu</button></div>
+      <div class="prog"><i id="prettsBar"></i></div>
+      <div class="row"><span class="hint" id="prettsInfo"></span></div>
+      <div class="row"><label>Tự tạo sẵn giọng khi mở app</label><input type="checkbox" data-k="audio.autoPretts"></div>
+      <div class="row"><label>Câu chưa có giọng → giảng lại từ đầu</label><input type="checkbox" data-k="audio.restartOnMissing"></div>
+      <p class="hint">Giọng Edge TTS cần mạng; lần đầu tạo xong sẽ lưu sẵn trên máy. Nếu lỗi, app tự dùng giọng của Windows (không có vang). Chế độ “file ghi âm”: chép mp3 vào thư mục <b>sermon-audio</b> (nút ở tab Cảnh & nhân vật).</p>
+    </div>
+    <div class="card">
+      <h3>Bài giảng (mỗi dòng một đoạn, dòng “# …” là tiêu đề bài)</h3>
+      <div class="row"><select id="textLang"><option value="vi">Tiếng Việt</option><option value="en">English</option></select>
+        <button class="b p" id="btnSaveTexts">Lưu bài giảng</button><button class="b" id="btnResetTexts">Khôi phục mặc định</button></div>
+      <textarea id="sermonTexts"></textarea>
+      <div class="row"><input type="text" id="sayText" placeholder="Cho cha sứ nói ngay một câu…" style="flex:1"><button class="b" id="btnSay">Nói</button></div>
+    </div>
+    <div class="card">
+      <h3>Âm lượng & nhạc nền</h3>
+      <div class="row"><label>Tổng</label><input type="range" min="0" max="1.5" step="0.02" data-k="audio.master"><span class="val"></span></div>
+      <div class="row"><label>Giọng cha sứ</label><input type="range" min="0" max="1.5" step="0.02" data-k="audio.sermonVolume"><span class="val"></span></div>
+      <div class="row"><label>Tiếng của video</label><input type="range" min="0" max="1.5" step="0.02" data-k="audio.videoVolume"><span class="val"></span></div>
+      <div class="row"><label>Đàn organ nền (tự tạo)</label><input type="checkbox" data-k="audio.organPad"><input type="range" min="0" max="0.5" step="0.01" data-k="audio.organVolume"><span class="val"></span></div>
+      <div class="row"><label>Chuông khi chúc phúc</label><input type="checkbox" data-k="audio.blessChime"></div>
+      <div class="row"><label>File nhạc nền</label><span id="musicName" class="hint" style="flex:1">(không)</span><button class="b" id="btnMusic">Chọn…</button><button class="b" id="btnMusicClear">Bỏ</button></div>
+      <div class="row"><label>Âm lượng nhạc</label><input type="range" min="0" max="1" step="0.02" data-k="audio.musicVolume"><span class="val"></span></div>
+    </div>
+  </div>
+</section>
+
+<!-- SCENE -->
+<section class="tab" id="t-scene">
+  <div class="grid">
+    <div class="card">
+      <h3>Cảnh 3D</h3>
+      <div class="row"><label>Cỡ nhân vật</label><input type="range" min="0.8" max="2.6" step="0.05" data-k="scene.char3dScale"><span class="val"></span></div>
+      <div class="row"><label>Cha sứ ở bàn thờ</label><input type="checkbox" data-k="scene.priest3d"> <label style="min-width:0;margin-left:12px">Thiên thần bay</label><input type="checkbox" data-k="scene.angels3d"></div>
+      <div class="row"><label>Huy hiệu avatar trên đầu</label><input type="checkbox" data-k="scene.badge3d"></div>
+      <div class="row"><label>Chọn nhân vật theo giới tính</label><select data-k="characters.genderMode"><option value="auto">Tự nhận biết (avatar + tên)</option><option value="name">Chỉ đoán theo tên</option><option value="off">Ngẫu nhiên</option></select></div>
+      <div class="row"><label>Hình Chúa Giêsu</label><input type="checkbox" data-k="scene.jesus3d"> <label style="min-width:0;margin-left:12px">Cỡ</label><input type="range" min="3" max="20" step="0.5" data-k="scene.jesusSize"><span class="val"></span></div>
+      <div class="row"><label>Độ phân giải 3D (máy yếu thì giảm)</label><input type="range" min="0.3" max="1" step="0.05" data-k="scene.render3dScale"><span class="val"></span></div>
+      <div class="row"><label>Độ cao hình Chúa</label><input type="range" min="3" max="20" step="0.25" data-k="scene.jesusZ"><span class="val"></span></div>
+    </div>
+    <div class="card" style="grid-column:1/-1">
+      <h3>Camera</h3>
+      <div class="row"><b style="color:var(--gold2)">Góc chính</b></div>
+      <div id="camMains"></div>
+      <div class="row"><button class="b p" data-cam="main">🎥 Chỉnh góc chính đang dùng</button><button class="b ok" id="camSaveNew">➕ Lưu thành góc chính mới</button><button class="b" id="camSaveMain">💾 Lưu đè góc đang chỉnh</button></div>
+      <div class="row"><label>Tự đổi ngẫu nhiên giữa các góc chính</label><input type="checkbox" data-k="scene.camRandom"> <label style="min-width:0;margin-left:12px">mỗi</label><input type="number" min="5" max="600" data-k="scene.camRandMin" style="width:70px"> – <input type="number" min="5" max="900" data-k="scene.camRandMax" style="width:70px"> giây</div>
+      <div class="row"><label>Kiểu chuyển góc</label><select data-k="scene.camCut"><option value="false">Lướt mượt</option><option value="true">Cắt cảnh</option></select> <label style="min-width:0;margin-left:12px">Tốc độ lướt</label><input type="range" min="0.1" max="3" step="0.05" data-k="scene.camGlide"><span class="val"></span></div>
+      <div class="row" style="margin-top:10px"><b style="color:var(--gold2)">Khi có người vào phòng</b></div>
+      <div class="row"><button class="b p" data-cam="join">🎥 Chỉnh góc</button><button class="b ok" data-camsave="join">💾 Lưu</button><button class="b" data-campv="join">▶ Xem thử</button><button class="b" data-camreset="join">↺ Mặc định</button></div>
+      <div class="row"><label>Zoom vào mặt người mới vào</label><input type="checkbox" data-k="scene.camJoin"> <label style="min-width:0;margin-left:12px">Giữ (giây)</label><input type="range" min="0.5" max="8" step="0.1" data-k="scene.camJoinHold"><span class="val"></span></div>
+      <div class="row"><label>Mỗi lần cách nhau ít nhất (giây)</label><input type="number" min="2" max="600" data-k="scene.camJoinCooldown"></div>
+      <div class="row" style="margin-top:10px"><b style="color:var(--gold2)">Khi có người donate</b></div>
+      <div class="row"><button class="b p" data-cam="donate">🎥 Chỉnh góc</button><button class="b ok" data-camsave="donate">💾 Lưu</button><button class="b" data-campv="donate">▶ Xem thử</button><button class="b" data-camreset="donate">↺ Mặc định</button></div>
+      <div class="row"><label>Zoom vào mặt người donate</label><input type="checkbox" data-k="scene.camDonate"> <label style="min-width:0;margin-left:12px">bắt đầu khi đi được</label><input type="range" min="0.3" max="1" step="0.05" data-k="scene.camDonateAt"><span class="val"></span></div>
+      <div class="row"><label>Giữ thêm sau khi chúc phúc xong (giây)</label><input type="range" min="0" max="5" step="0.1" data-k="scene.camDonateAfter"><span class="val"></span></div>
+      <div class="row" style="margin-top:10px"><label>Góc rộng (FOV) khi đang chỉnh</label><input type="range" min="15" max="110" step="1" id="camFov"><span class="val" id="camFovV"></span> <button class="b" id="camOff">✓ Thoát chỉnh</button></div>
+      <p class="hint">Bấm "🎥 Chỉnh…" rồi dùng chuột trên cửa sổ 9:16: chuột trái xoay, chuột phải dời, lăn chuột tiến/lùi. Góc vào phòng / donate được lưu tương đối so với khuôn mặt người đó (người ngồi bên phải tự lật đối xứng) — đặt camera phía trước mặt để thấy avatar và tên. Donate: camera zoom vào mặt khi người đó đi gần tới chỗ quỳ, giữ suốt lúc được chúc phúc rồi mới về góc chính.</p>
+    </div>
+    <div class="card">
+      <h3>Bối cảnh</h3>
+      <div class="row"><button class="b p" id="btnEdit">✥ Chỉnh bố cục bằng chuột trên màn hình</button><button class="b" id="btnLock">🔓 Khóa bố cục</button></div>
+      <p class="hint">Kéo thả bảng lời giảng, bảng chào, băng chúc phúc và vùng hình Chúa (băng chữ tránh) ngay trên cửa sổ 9:16. Phím E trên cửa sổ đó cũng bật/tắt.</p>
+      <div class="row" style="display:none"><label>Video nền</label><span id="videoName" class="hint" style="flex:1">Nhà thờ (mặc định)</span><button class="b" id="btnVideo">Chọn…</button><button class="b" id="btnVideoClear">Mặc định</button></div>
+      <div class="row" style="display:none"><label>Tông màu ấm cho nhân vật</label><input type="range" min="0" max="0.6" step="0.01" data-k="scene.warmTint"><span class="val"></span></div>
+      <div class="row" style="display:none"><label>Hiện đường căn hàng ghế</label><input type="checkbox" data-k="scene.showGuides"></div>
+      <div class="row"><label>Tiêu đề trên màn</label><input type="checkbox" data-k="scene.showTitle"><input type="text" data-k="scene.title" style="flex:1" placeholder="VD: Thánh lễ trực tuyến"></div>
+    </div>
+    <div class="card">
+      <h3>Phụ đề bài giảng (cho người khiếm thính)</h3>
+      <div class="row"><label>Hiện phụ đề</label><input type="checkbox" data-k="subtitles.enabled"><label style="min-width:0">Hiện tên bài</label><input type="checkbox" data-k="subtitles.showTitle"></div>
+      <div class="row"><label>Kích thước bảng (tỉ lệ)</label><input type="range" min="0.5" max="2" step="0.02" data-k="subtitles.scale"><span class="val"></span></div>
+      <div class="row"><label>Cỡ chữ</label><input type="range" min="18" max="56" step="1" data-k="subtitles.fontSize"><span class="val"></span></div>
+      <div class="row"><label>Vị trí X</label><input type="range" min="0" max="900" step="2" data-k="subtitles.x"><span class="val"></span></div>
+      <div class="row"><label>Vị trí Y</label><input type="range" min="0" max="1800" step="2" data-k="subtitles.y"><span class="val"></span></div>
+      <div class="row"><label>Rộng</label><input type="range" min="200" max="1080" step="2" data-k="subtitles.w"><span class="val"></span></div>
+      <div class="row"><label>Cao</label><input type="range" min="120" max="1400" step="2" data-k="subtitles.h"><span class="val"></span></div>
+      <div class="row"><label>Độ đậm nền</label><input type="range" min="0" max="1" step="0.02" data-k="subtitles.bgAlpha"><span class="val"></span></div>
+      <div class="row"><label>Độ mờ câu chưa đọc</label><input type="range" min="0.05" max="1" step="0.01" data-k="subtitles.dimAlpha"><span class="val"></span></div>
+      <p class="hint">Khung 1080×1920. Câu đang đọc sáng vàng, câu chưa đọc mờ.</p>
+    </div>
+    <div class="card">
+      <h3>Bảng chào người vào live</h3>
+      <div class="row"><label>Hiện bảng chào</label><input type="checkbox" data-k="greet.enabled"><label style="min-width:0">Avatar</label><input type="checkbox" data-k="greet.avatar"></div>
+      <div class="row"><label>Tiêu đề</label><input type="text" data-k="greet.title" style="flex:1"></div>
+      <div class="row"><label>Dòng mỗi người</label><input type="text" data-k="greet.item" style="flex:1" placeholder="{name}"></div>
+      <div class="row"><label>Kích thước bảng (tỉ lệ)</label><input type="range" min="0.5" max="2" step="0.02" data-k="greet.scale"><span class="val"></span></div>
+      <div class="row"><label>Cỡ chữ</label><input type="range" min="14" max="48" step="1" data-k="greet.fontSize"><span class="val"></span></div>
+      <div class="row"><label>Vị trí X</label><input type="range" min="0" max="1000" step="2" data-k="greet.x"><span class="val"></span></div>
+      <div class="row"><label>Vị trí Y</label><input type="range" min="0" max="1800" step="2" data-k="greet.y"><span class="val"></span></div>
+      <div class="row"><label>Rộng</label><input type="range" min="150" max="1080" step="2" data-k="greet.w"><span class="val"></span></div>
+      <div class="row"><label>Cao</label><input type="range" min="100" max="1400" step="2" data-k="greet.h"><span class="val"></span></div>
+      <div class="row"><label>Độ đậm nền</label><input type="range" min="0" max="1" step="0.02" data-k="greet.bgAlpha"><span class="val"></span></div>
+      <div class="row"><label>Ẩn tên sau (giây, 0 = không ẩn)</label><input type="number" min="0" max="3600" data-k="greet.showSeconds"></div>
+      <p class="hint">Người mới vào hiện trên cùng, sáng vàng vài giây. Dòng chữ dùng {name}, vd “Chào {name}”.</p>
+    </div>
+    <div class="card" style="display:none">
+      <h3>Căn chỉnh phối cảnh</h3>
+      <div class="row"><label>Dịch hàng ghế (px)</label><input type="range" min="-40" max="40" step="1" data-k="scene.geometry.rowOffset"><span class="val"></span></div>
+      <div class="row"><label>Phối cảnh (bề rộng lối đi, m)</label><input type="range" min="2" max="5" step="0.05" data-k="scene.geometry.aisleM"><span class="val"></span></div>
+      <div class="row"><label>Người ngồi nhô khỏi ghế (m)</label><input type="range" min="0.2" max="0.9" step="0.01" data-k="scene.geometry.seatHeadM"><span class="val"></span></div>
+      <div class="row"><label>Chiều cao người đứng (m)</label><input type="range" min="1.3" max="2.1" step="0.01" data-k="scene.geometry.standM"><span class="val"></span></div>
+      <div class="row"><label>Độ rộng mỗi chỗ ngồi (m)</label><input type="range" min="0.4" max="1.2" step="0.01" data-k="scene.geometry.seatWidthM"><span class="val"></span></div>
+      <div class="row"><label>Độ rộng làn đi giữa</label><input type="range" min="0.3" max="0.95" step="0.01" data-k="scene.geometry.laneFrac"><span class="val"></span></div>
+      <div class="row"><label>Vị trí bục (y)</label><input type="range" min="1250" max="1450" step="1" data-k="scene.geometry.altarY"><span class="val"></span></div>
+      <div class="row"><label>Khoảng cách chỗ quỳ</label><input type="range" min="20" max="120" step="1" data-k="scene.geometry.altarSpread"><span class="val"></span></div>
+      <div class="row"><button class="b" id="btnGeoReset">Khôi phục phối cảnh gốc</button></div>
+    </div>
+    <div class="card" style="display:none">
+      <h3>Người cầu nguyện (ảnh ngồi) & giới tính</h3>
+      <div class="row"><label>Chọn hoạt ảnh theo giới tính</label><select data-k="characters.genderMode"><option value="auto">Tự nhận biết (avatar + tên)</option><option value="name">Chỉ đoán theo tên</option><option value="off">Ngẫu nhiên</option></select></div>
+      <p class="hint">Người xem nữ → ảnh ngồi & hoạt ảnh “Nữ”, nam → “Nam”. Bộ để “Chung” dùng được cho cả hai. Không đoán được thì chọn ngẫu nhiên, luân phiên đều giữa các bộ.</p>
+      <div class="thumbs" id="sitters"></div>
+      <div class="row"><button class="b" id="btnAddSitter">+ Thêm ảnh ngồi (PNG nền trong suốt)</button><button class="b" id="btnOpenAssets">Mở thư mục tài nguyên</button><button class="b" id="btnReloadAssets">Nạp lại</button></div>
+    </div>
+    <div class="card" style="display:none">
+      <h3>Bộ hoạt ảnh đi bộ</h3>
+      <div class="thumbs" id="walkers"></div>
+      <div class="row" style="margin-top:10px"><button class="b p" id="btnSlice">+ Nhập sprite sheet (cùng bố cục 6 + 4 khung)</button><input type="text" id="sliceName" placeholder="tên bộ, vd: woman_blue" style="width:200px"></div>
+      <div id="sliceOut"></div>
+      <p class="hint">Bố cục sheet: hàng trên “Đi trái 1, 2 · Đi phải 1, 2 · Đi tới 1, 2”, hàng dưới “Đi lùi 1, 2 · Đứng cúi đầu · Ngồi cầu nguyện (quay lưng)”, nền trong suốt. App tự cắt khung và bỏ nhãn chữ; kiểm tra lại tên từng khung trước khi lưu.</p>
+    </div>
+  </div>
+</section>
+
+<!-- SYS -->
+<section class="tab" id="t-sys">
+  <div class="grid">
+    <div class="card">
+      <h3>Cửa sổ 9:16</h3>
+      <div class="row"><button class="b" data-size="960">540×960</button><button class="b" data-size="1280">720×1280</button><button class="b" data-size="1920">1080×1920</button><button class="b" id="btnFull">Toàn màn hình</button></div>
+      <div class="row"><label>Luôn nằm trên</label><input type="checkbox" data-k="window.stageOnTop"></div>
+      <div class="row"><button class="b" id="btnReloadStage">Tải lại màn hình</button><button class="b" id="btnRelaunch">Khởi động lại app</button></div>
+      <p class="hint">Trong TikTok LIVE Studio: thêm nguồn “Cửa sổ/Window capture” → chọn “Church Live 3D — Màn hình 9:16”.</p>
+    </div>
+    <div class="card">
+      <h3>Cập nhật từ GitHub</h3>
+      <div class="row"><span id="updInfo" class="hint" style="flex:1">…</span></div>
+      <div class="row"><button class="b" id="btnCheck">Kiểm tra</button><button class="b p" id="btnApply">Cập nhật ngay</button><button class="b d" id="btnResetOv">Về bản gốc</button></div>
+      <div class="prog"><i id="updBar"></i></div>
+      <div class="row"><label>Tự kiểm tra khi mở</label><input type="checkbox" data-k="update.autoCheck"></div>
+      <div class="row"><label>Tự cập nhật luôn</label><input type="checkbox" data-k="update.autoApply"></div>
+    </div>
+    <div class="card">
+      <h3>Cấu hình</h3>
+      <div class="row"><button class="b" id="btnExport">Xuất cấu hình</button><button class="b" id="btnImport">Nhập cấu hình</button><button class="b d" id="btnResetAll">Khôi phục mặc định</button><button class="b" id="btnTtsClear">Xoá cache giọng</button></div>
+      <p class="hint" id="paths"></p>
+    </div>
+  </div>
+</section>
+</main>
+<script src="defaults.js"></script>
+<script src="sermons_en.js"></script>
+<script src="i18n.js"></script>
+<script src="slicer.js"></script>
+<script src="panel.js"></script>
+</body>
+</html>

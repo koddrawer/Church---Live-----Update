@@ -1303,7 +1303,7 @@ function drawCards(t) {
 
 // ================== CAMERA ZOOM VÀO NGƯỜI DONATE ==================
 let cam = null, CAMI = null; const camQ = [];
-const MODE3D = () => CFG.scene.mode === '3d';
+const MODE3D = () => false;   // bản 3D đã tách thành app riêng (Church Live 3D)
 function camFor(w) { if (!CFG.scene.camZoom) return; if (!cam) cam = { w, start: w.t0 }; else camQ.push(w); }
 function camView(t) {
   if (!cam && camQ.length) { const w = camQ.shift(); if (!w.done && APPROACH.includes(w.phase) && walkProgress(w) < 0.5) cam = { w, start: Math.max(t, w.t0) }; }
@@ -1620,7 +1620,6 @@ function applyConfig(c, first) {
   const assetChanged = first || prev.seating.cropFrac !== CFG.seating.cropFrac || prev.scene.warmTint !== CFG.scene.warmTint || JSON.stringify(prev.characters) !== JSON.stringify(CFG.characters);
   if (geoChanged) { buildGeometry(); reseatAll(); }
   if (assetChanged) loadAssets().then(() => { for (const p of people) if (p.sit >= SITTERS.length) p.sit = 0; });
-  if (!first && (prev.scene.mode || '2d') !== (CFG.scene.mode || '2d')) { location.reload(); return; }
   if (first || prev.scene.videoFile !== CFG.scene.videoFile) loadVideo();
   const voiceChanged = !first && (prev.audio.voice !== CFG.audio.voice || prev.audio.voiceVi !== CFG.audio.voiceVi || prev.audio.voiceEn !== CFG.audio.voiceEn || prev.audio.sermonLang !== CFG.audio.sermonLang || prev.audio.sermonMode !== CFG.audio.sermonMode || prev.audio.rate !== CFG.audio.rate || prev.audio.pitch !== CFG.audio.pitch || JSON.stringify(prev.audio.sermonTextsVi) !== JSON.stringify(CFG.audio.sermonTextsVi) || JSON.stringify(prev.audio.sermonTextsEn) !== JSON.stringify(CFG.audio.sermonTextsEn));
   if (voiceChanged) { sermon.idx = 0; sermonRestart(); if (CFG.audio.autoPretts !== false) setTimeout(() => pretts(false), 3000); }
