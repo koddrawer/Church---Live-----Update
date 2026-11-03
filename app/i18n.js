@@ -1,6 +1,19 @@
 // Giao diện song ngữ cho Bảng điều khiển (Tiếng Việt / English) + bộ chữ trên màn hình theo ngôn ngữ buổi live.
 (() => {
 const EN = {
+"Nền 3D": "3D background",
+"Ảnh render sẵn — đẹp nhất, camera cố định (chỉ zoom)": "Pre-rendered image — best looking, fixed camera (zoom only)",
+"Mô hình 3D thời gian thực — xoay camera tự do": "Real-time 3D model — free camera",
+"Cỡ hình Chúa": "Jesus image size", "Độ cao": "Height",
+"Camera 3D": "3D camera",
+"🎥 Chỉnh góc chính": "🎥 Edit main angle", "🎥 Chỉnh góc khi donate": "🎥 Edit gift angle", "🎥 Chỉnh góc khi vào phòng": "🎥 Edit join angle",
+"Góc rộng (FOV)": "Field of view (FOV)",
+"💾 Lưu góc đang chỉnh": "💾 Save current angle", "✓ Thoát chỉnh": "✓ Stop editing", "↺ Góc đang chỉnh về mặc định": "↺ Reset this angle",
+"▶ Xem thử góc donate": "▶ Preview gift angle", "▶ Xem thử góc vào phòng": "▶ Preview join angle",
+"Camera quay tới người mới vào phòng": "Camera turns to new viewers", "Giữ (giây)": "Hold (seconds)",
+"Mỗi lần cách nhau ít nhất (giây)": "Minimum gap between shots (seconds)",
+"Bấm một nút \"Chỉnh góc…\" rồi dùng chuột trên cửa sổ 9:16: chuột trái xoay, chuột phải dời, lăn chuột tiến/lùi; chỉnh xong bấm \"Lưu góc đang chỉnh\". Góc khi donate / vào phòng được lưu tương đối so với người đó (người ngồi bên phải thì tự lật đối xứng). Xoay góc tự do cần nền \"Mô hình 3D thời gian thực\" (app tự chuyển khi bấm chỉnh). Thời gian giữ góc donate chỉnh ở tab Donate.": "Press an \"Edit … angle\" button, then use the mouse on the 9:16 window: left drag rotates, right drag pans, wheel moves in/out; press \"Save current angle\" when done. Gift / join angles are saved relative to that person (mirrored for people on the right side). Free rotation needs the \"Real-time 3D model\" background (switched automatically when you edit). The gift hold time is in the Gifts tab.",
+"✦ Hoa huệ vàng": "✦ Golden lilies", "✦ Cánh thiên thần + nến": "✦ Angel wings + candles", "✦ Gothic cờ đỏ + nến": "✦ Gothic red banners + candles", "✦ Hoàng gia: vương miện + cánh": "✦ Royal: crown + wings",
 "Huy hiệu avatar trên đầu": "Avatar badge above the head",
 "Chế độ cảnh 2D / 3D": "Scene mode 2D / 3D",
 "Chế độ cảnh": "Scene mode",

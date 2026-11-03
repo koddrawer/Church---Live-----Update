@@ -1,9 +1,9 @@
 {
-  "version": "1.0.35",
-  "notes": "Chế độ cảnh 3D: nhà thờ 3D, nhân vật chibi gắn avatar, cha sứ, Chúa Giêsu, thiên thần (Cảnh & nhân vật → Chế độ cảnh)",
+  "version": "1.0.36",
+  "notes": "3D: hình Chúa 2D tỏa sáng lấp lánh; 4 khung donate mới; chỉnh & lưu góc camera chính / khi donate / khi vào phòng; nền mô hình 3D thời gian thực",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-03T17:44:34.901Z",
+  "date": "2026-11-03T19:29:12.396Z",
   "files": [
     {
       "path": "assets/3d/Ba.glb",
@@ -71,9 +71,27 @@
       "sha256": "7b082f063d84c0209c4a3460e875695e6616efbc954bee9efda6ed4e3c93ab24"
     },
     {
+      "path": "assets/3d/church_model.glb",
+      "size": 7352600,
+      "sha256": "d6f85da86b6716a4e4b6938a96fed054abfbe07d897de39167460a8c57b4b961",
+      "enc": "b64"
+    },
+    {
       "path": "assets/3d/church_plate.jpg",
       "size": 353944,
       "sha256": "1db6935b5d555ee6acf6e632f646283bf028c52e4f0e3bb3c7924ca85b0d8406",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/3d/jesus.png",
+      "size": 932392,
+      "sha256": "b633e787b949dbeb0fd82aeaf257eb0d056e7c1d721dbdd20715f01ca956dfe6",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/3d/jesus_glow.jpg",
+      "size": 35840,
+      "sha256": "ced1ac13225b51a703646cb1ec54e776df00434c03ea2a3f44d2c86db571c160",
       "enc": "b64"
     },
     {
@@ -176,6 +194,30 @@
       "path": "assets/fonts/cormorant-garamond-vietnamese-700-normal.woff2",
       "size": 6228,
       "sha256": "212275cd3ee9d6a80d8715fc1ac12920b3f328bfc7d1a6bb15442826675e6186",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_A.png",
+      "size": 314106,
+      "sha256": "4f7db27eebd2e0e308999f8697bab64124b2e37992ca295973c77bdc40b65f24",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_B.png",
+      "size": 361025,
+      "sha256": "b86e755487f57cb53dba9ac26b45ff342ade967a1ccca8b6c9cba00b1e0ba9a8",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_C.png",
+      "size": 380949,
+      "sha256": "af084b0905c3df451a59b2893a6feeb2bf36de4882fa383f35029f4b44efd82a",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_D.png",
+      "size": 468221,
+      "sha256": "6c66ecc7affeac20b585b00587efff41659bddc251cd518424e363ae967c8824",
       "enc": "b64"
     },
     {
@@ -366,8 +408,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 36688,
-      "sha256": "e1e5128198bed6afefd5cdc6fb4e24c0701b4eaaa6d82f1f04b9bc093a08e885"
+      "size": 37927,
+      "sha256": "e384fb52ffb996d12de5e0b467060ad6c6fd5114684948ee7d9446a2478354f0"
     },
     {
       "path": "fonts.css",
@@ -376,8 +418,13 @@
     },
     {
       "path": "i18n.js",
-      "size": 29514,
-      "sha256": "416b8d317c18058dc9ce8a709a895085b9affa399c741247d98668c11d0ae9e1"
+      "size": 31718,
+      "sha256": "20bb122c5dd4630cdff804a1a0d4ca417c6603a4c7ff244a8103f6bedf1656c2"
+    },
+    {
+      "path": "lib/jsm/controls/OrbitControls.js",
+      "size": 29868,
+      "sha256": "5a44a9e86a2a0fb11933eed69bc2cd33c76a496854c1aed6ed776efa87d7b064"
     },
     {
       "path": "lib/jsm/loaders/GLTFLoader.js",
@@ -406,18 +453,18 @@
     },
     {
       "path": "panel.html",
-      "size": 43368,
-      "sha256": "9bd07c427c540e2485bd143e1cf636f2fcadfee7bf4389d7c63e24d530a4609b"
+      "size": 45816,
+      "sha256": "a0a72e93c3715c5ed99376eaa5d75fdd5ad360bccde5419eb1124e6fe75d14e4"
     },
     {
       "path": "panel.js",
-      "size": 37104,
-      "sha256": "dce9f44db0af34eaa8ea6c144e38344ce9f087453bcf9845c689e14865aaf951"
+      "size": 38687,
+      "sha256": "933553f55280c1bc9c65863a615acf9d4b28292d7c04fcb62602049f381dd7d9"
     },
     {
       "path": "scene3d.js",
-      "size": 21185,
-      "sha256": "923ad8a86b702973a4bbee78e1bd8c3e027fff7bbbff1606f435338497beb27c"
+      "size": 34358,
+      "sha256": "931692cc71559764a6345bc4ec06affc289d3758742c87e31594fd7610fd1058"
     },
     {
       "path": "sermons_en.js",
@@ -436,13 +483,13 @@
     },
     {
       "path": "stage.js",
-      "size": 114193,
-      "sha256": "1e0dc943092da589c3db50b0f6ade3aaaa2e74c6952df7c4dca7dab5c4b80997"
+      "size": 114716,
+      "sha256": "1a934953bfff11d2d98a94d0c9c235cbe6b63b834ecf3fae73db7574589ee70e"
     },
     {
       "path": "version.json",
       "size": 24,
-      "sha256": "771f9c7f96deda28e673b10397ee23b64c0b6559f76763b3cc72ee5c6d579f24"
+      "sha256": "b1ad962ee5a3f40520a2fb9f282367c5701c4738c3787a734058ffca13731394"
     }
   ]
 }

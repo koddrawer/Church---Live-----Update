@@ -2,9 +2,12 @@
 import * as THREE from 'three';
 import { GLTFLoader } from './lib/jsm/loaders/GLTFLoader.js';
 import { clone as skClone } from './lib/jsm/utils/SkeletonUtils.js';
+import { OrbitControls } from './lib/jsm/controls/OrbitControls.js';
+import { mergeGeometries } from './lib/jsm/utils/BufferGeometryUtils.js';
 
 const CH = window.__church;
 const CFGf = () => CH.CFG();
+const c3cfg = () => CFGf().scene;
 if ((CFGf().scene.mode || '2d') === '3d') start();
 else { const iv = setInterval(() => { if ((CFGf().scene.mode || '2d') === '3d') { clearInterval(iv); start(); } }, 1000); }
 
@@ -41,7 +44,7 @@ async function start() {
   occ.scene.traverse((o) => { if (o.isMesh) { o.material = occMat; o.renderOrder = -10; } });
   scene.add(occ.scene);
 
-  const NAMES = ['Nam_vest', 'Nu_vay_khan_ren', 'Nu_ao_dai', 'Ong', 'Ba', 'Be_trai', 'Be_gai_ruoc_le', 'Cha_su', 'Chua_Giesu', 'Thien_than'];
+  const NAMES = ['Nam_vest', 'Nu_vay_khan_ren', 'Nu_ao_dai', 'Ong', 'Ba', 'Be_trai', 'Be_gai_ruoc_le', 'Cha_su', 'Thien_than'];
   const T = {};
   await Promise.all(NAMES.map(async (n) => { try { T[n] = await gl.loadAsync(A + n + '.glb'); } catch (e) { log('Không tải được ' + n + ': ' + e.message, 'error'); } }));
   const POOL = { f: [['Nu_vay_khan_ren', 4], ['Nu_ao_dai', 4], ['Ba', 1.4], ['Be_gai_ruoc_le', 1]], m: [['Nam_vest', 6], ['Ong', 1.4], ['Be_trai', 1]] };
@@ -122,11 +125,123 @@ async function start() {
   const ease = (t) => t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2, lerp = (a, b, t) => a + (b - a) * t, clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 
   // ---------- nhân vật cố định: cha sứ, Chúa, thiên thần ----------
+  // ---------- camera: góc chính / khi donate / khi vào phòng ----------
+  cam.up.set(0, 1, 0);
+  const V = (a) => new THREE.Vector3().fromArray(a);
+  const DEF = {
+    main: { pos: camJ.pos, target: V(camJ.pos).add(V(camJ.fwd).multiplyScalar(30)).toArray(), fov: camJ.vfov },
+    donate: { off: [3.4, 2.4, -6.2], look: [0, 1.4, 0], fov: 40 },
+    join: { off: [3.2, 2.2, -5.8], look: [0, 1.2, 0], fov: 38 }
+  };
+  const preset = (k) => { const c = (CFGf().scene.cam3d || {})[k]; return c && (c.pos || c.off) ? c : DEF[k]; };
+  const bgMode = () => (CFGf().scene.bg3d === 'model' ? 'model' : 'plate');
+  function shotCam(kind, subj, side) {
+    const pr = preset(kind), off = V(pr.off), look = V(pr.look);
+    if (side > 0) { off.x *= -1; look.x *= -1; }
+    return { pos: subj.clone().add(off), target: subj.clone().add(look), fov: pr.fov };
+  }
+  function applyCam(c) { cam.position.copy(c.pos); cam.fov = c.fov; cam.lookAt(c.target); cam.updateProjectionMatrix(); cam.updateMatrixWorld(); }
+  const mainCam = () => { const m = bgMode() === 'plate' ? DEF.main : preset('main'); return { pos: V(m.pos), target: V(m.target), fov: m.fov }; };
+  applyCam(mainCam());
+
+  // ---------- nền mô hình 3D thời gian thực (cho phép xoay camera tự do) ----------
+  let church = null, churchLoading = false; const modelLights = new THREE.Group(); scene.add(modelLights); modelLights.visible = false;
+  modelLights.add(new THREE.AmbientLight(0xffe8cc, 0.55));
+  for (const [x, y, z, inten] of [[0, 44, 12, 260], [0, 30, 14, 260], [0, 14, 14, 260], [0, 0, 14, 200], [-9, 20, 9, 120], [9, 20, 9, 120], [0, 47, 4, 80]]) { const l = new THREE.PointLight(0xffd49a, inten, 0, 1.6); l.position.copy(B(x, y, z)); modelLights.add(l); }
+  async function loadChurch() {
+    if (church || churchLoading) return; churchLoading = true; log('Đang tải mô hình nhà thờ 3D (camera tự do)…');
+    try {
+      const g = await gl.loadAsync(A + 'church_model.glb'); g.scene.updateMatrixWorld(true);
+      const groups = new Map(), keep = [];
+      g.scene.traverse((o) => { if (!o.isMesh) return; const k = o.material.uuid; if (!groups.has(k)) groups.set(k, { m: o.material, geos: [] }); const ge = o.geometry.clone(); ge.applyMatrix4(o.matrixWorld); for (const n of Object.keys(ge.attributes)) if (!['position', 'normal', 'uv'].includes(n)) ge.deleteAttribute(n); groups.get(k).geos.push(ge); });
+      church = new THREE.Group();
+      for (const { m, geos } of groups.values()) {
+        const ok = geos.filter((x) => x.attributes.normal && x.attributes.uv), rest = geos.filter((x) => !(x.attributes.normal && x.attributes.uv));
+        if (m.emissiveMap) m.emissiveIntensity = Math.max(m.emissiveIntensity, 1.6);
+        let merged = null; try { merged = ok.length ? mergeGeometries(ok.map((x) => x.index ? x.toNonIndexed() : x), false) : null; } catch { merged = null; }
+        if (merged) church.add(new THREE.Mesh(merged, m)); else ok.forEach((x) => church.add(new THREE.Mesh(x, m)));
+        rest.forEach((x) => church.add(new THREE.Mesh(x, m)));
+      }
+      scene.add(church); log('Mô hình nhà thờ 3D đã sẵn sàng (' + church.children.length + ' khối).');
+    } catch (e) { log('Không tải được mô hình nhà thờ: ' + e.message, 'error'); }
+    churchLoading = false;
+  }
+
+  // ---------- chỉnh camera bằng chuột ----------
+  let edit = null, ctrl = null, joinShot = null, lastJoinShot = -99, preview = null;
+  const hint = document.createElement('div');
+  hint.style.cssText = 'position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:9;background:rgba(20,12,4,.82);color:#ffe3a0;font:600 14px BeVN,Segoe UI,sans-serif;padding:8px 14px;border-radius:10px;border:1px solid #e8b553;display:none;text-align:center;pointer-events:none';
+  document.body.appendChild(hint);
+  const sampleSeat = { x: -3.1, y: ROW0 + 18 * ROWD + 0.02, side: -1 };
+  function editSubject(which) {
+    if (!edit.dummy) { edit.dummy = instance('Nam_vest'); }
+    const d = edit.dummy, S = scaleOf();
+    if (which === 'donate') { d.g.position.copy(B(sampleSeat.x, sampleSeat.y + 0.62, 0)); d.g.rotation.y = Math.PI; play(d, 'Dung'); }
+    else { d.g.position.copy(B(sampleSeat.x, sampleSeat.y, 0.47 - 0.04 * S)); d.g.rotation.y = Math.PI; play(d, 'Ngoi_cau_nguyen'); }
+    d.g.scale.setScalar(S); d.g.visible = true; return d.g.position.clone();
+  }
+  const LBL = { main: 'GÓC CHÍNH', donate: 'GÓC KHI DONATE', join: 'GÓC KHI VÀO PHÒNG' };
+  function startEdit(which) {
+    if (bgMode() !== 'model') { CH.api && 0; window.api && window.api.getConfig().then((raw) => { raw.scene = { ...(raw.scene || {}), bg3d: 'model' }; return window.api.setConfig({ scene: raw.scene }); }); log('Chuyển nền 3D sang "Mô hình 3D thời gian thực" để xoay camera tự do.'); loadChurch(); }
+    if (!ctrl) { ctrl = new OrbitControls(cam, document.getElementById('c')); ctrl.enableDamping = true; ctrl.dampingFactor = 0.12; ctrl.screenSpacePanning = true; ctrl.maxDistance = 120; }
+    edit = edit && edit.dummy ? { which, dummy: edit.dummy } : { which };
+    let c;
+    if (which === 'main') { const m = preset('main'); c = { pos: V(m.pos), target: V(m.target), fov: m.fov }; if (edit.dummy) edit.dummy.g.visible = false; edit.subj = null; }
+    else { const subj = editSubject(which); edit.subj = subj; c = shotCam(which, subj, -1); }
+    applyCam(c); ctrl.target.copy(c.target); ctrl.enabled = true; ctrl.update();
+    hint.innerHTML = '🎥 Đang chỉnh <b>' + LBL[which] + '</b> — chuột trái: xoay · chuột phải: dời · lăn: tiến/lùi<br>Xong bấm "Lưu góc đang chỉnh" trong Bảng điều khiển'; hint.style.display = 'block';
+    window.api && window.api.toPanel({ type: 'cam-fov', fov: cam.fov });
+  }
+  function stopEdit() { edit && edit.dummy && (edit.dummy.g.visible = false); edit = null; if (ctrl) ctrl.enabled = false; hint.style.display = 'none'; applyCam(mainCam()); }
+  async function saveEdit() {
+    if (!edit) { log('Chưa bật chỉnh camera.', 'warn'); return; }
+    const which = edit.which; let data;
+    if (which === 'main') data = { pos: cam.position.toArray(), target: ctrl.target.toArray(), fov: cam.fov };
+    else data = { off: cam.position.clone().sub(edit.subj).toArray(), look: ctrl.target.clone().sub(edit.subj).toArray(), fov: cam.fov };
+    const raw = await window.api.getConfig(); raw.scene = { ...(raw.scene || {}) }; raw.scene.cam3d = { ...(raw.scene.cam3d || {}), [which]: data };
+    await window.api.setConfig({ scene: raw.scene }); log('Đã lưu ' + LBL[which].toLowerCase() + '.');
+  }
+  async function resetCam(which) {
+    const raw = await window.api.getConfig(); raw.scene = { ...(raw.scene || {}) }; const c = { ...(raw.scene.cam3d || {}) }; delete c[which]; raw.scene.cam3d = c;
+    await window.api.setConfig({ scene: raw.scene }); log('Đã trả ' + LBL[which].toLowerCase() + ' về mặc định.');
+    setTimeout(() => { if (edit && edit.which === which) startEdit(which); else if (!edit) applyCam(mainCam()); }, 200);
+  }
+  function cmd(m) {
+    if (m.type === 'cam-edit') startEdit(m.which || 'main');
+    else if (m.type === 'cam-edit-off') stopEdit();
+    else if (m.type === 'cam-save') saveEdit();
+    else if (m.type === 'cam-reset') resetCam(m.which || (edit && edit.which) || 'main');
+    else if (m.type === 'cam-fov') { cam.fov = clamp(+m.fov || 45, 10, 120); cam.updateProjectionMatrix(); }
+    else if (m.type === 'cam-preview') {
+      if (edit) stopEdit();
+      const ps = CH.people.filter((p) => !p.filler && p.state === 'seated' && !p.leaving && INST.has(p.uid));
+      const p = ps[Math.floor(Math.random() * ps.length)];
+      if (!p) { log('Chưa có ai ngồi để xem thử camera — bấm "Thêm người xem" trước.', 'warn'); return; }
+      preview = { kind: m.which === 'donate' ? 'donate' : 'join', p, start: CH.now() };
+    }
+  }
   const priest = instance('Cha_su'); if (priest) { priest.g.position.copy(B(0, 48.1, 0.54)); play(priest, 'Dung'); }
-  const jesus = instance('Chua_Giesu'); if (jesus) { jesus.g.position.copy(B(0, 48.6, 6.2)); play(jesus, 'Dang_tay'); }
   const glowTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 128; const x = c.getContext('2d'); const g = x.createRadialGradient(64, 64, 0, 64, 64, 64); g.addColorStop(0, 'rgba(255,240,190,1)'); g.addColorStop(0.35, 'rgba(255,214,120,0.5)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; x.fillRect(0, 0, 128, 128); return new THREE.CanvasTexture(c); })();
-  const jesusGlow = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTex, blending: THREE.AdditiveBlending, depthWrite: false, transparent: true, opacity: 0.85 }));
-  scene.add(jesusGlow);
+  // ---------- Chúa Giêsu: hình 2D + hào quang xoay + hạt lấp lánh phía sau ----------
+  const jesus = new THREE.Group(); scene.add(jesus);
+  const jTex = await texL.loadAsync(A + 'jesus.png'); jTex.colorSpace = THREE.SRGBColorSpace;
+  const jGlowTex = await texL.loadAsync(A + 'jesus_glow.jpg'); jGlowTex.colorSpace = THREE.SRGBColorSpace;
+  const JA = jTex.image.width / jTex.image.height;
+  const addM = (map, op) => new THREE.MeshBasicMaterial({ map, transparent: true, opacity: op, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false });
+  const raysTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 512; const x = c.getContext('2d'); const g = x.createRadialGradient(256, 256, 0, 256, 256, 256); g.addColorStop(0, 'rgba(255,240,190,0.95)'); g.addColorStop(0.45, 'rgba(255,210,110,0.35)'); g.addColorStop(1, 'rgba(255,200,90,0)'); x.fillStyle = g; for (let i = 0; i < 24; i++) { const a = i / 24 * Math.PI * 2, w = i % 2 ? 0.05 : 0.09; x.beginPath(); x.moveTo(256, 256); x.arc(256, 256, 256, a - w, a + w); x.closePath(); x.fill(); } return new THREE.CanvasTexture(c); })();
+  const rays = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), addM(raysTex, 0.55)); rays.renderOrder = 1; jesus.add(rays);
+  const rays2 = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), addM(raysTex, 0.35)); rays2.renderOrder = 1; jesus.add(rays2);
+  const jGlow = new THREE.Mesh(new THREE.PlaneGeometry(JA, 1), addM(jGlowTex, 0.85)); jGlow.renderOrder = 2; jesus.add(jGlow);
+  const jFig = new THREE.Mesh(new THREE.PlaneGeometry(JA, 1), new THREE.MeshBasicMaterial({ map: jTex, transparent: true, depthWrite: false, toneMapped: false })); jFig.renderOrder = 4; jesus.add(jFig);
+  const starTex = (() => { const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'); const g = x.createRadialGradient(32, 32, 0, 32, 32, 32); g.addColorStop(0, 'rgba(255,255,240,1)'); g.addColorStop(0.2, 'rgba(255,236,170,0.9)'); g.addColorStop(1, 'rgba(255,210,120,0)'); x.fillStyle = g; x.fillRect(0, 0, 64, 64); x.fillStyle = 'rgba(255,255,235,0.9)'; x.fillRect(31, 2, 2, 60); x.fillRect(2, 31, 60, 2); return new THREE.CanvasTexture(c); })();
+  const twinkle = [];
+  for (let k = 0; k < 4; k++) {
+    const n = 40, arr = new Float32Array(n * 3);
+    for (let i = 0; i < n; i++) { const a = Math.random() * Math.PI * 2, r = 0.18 + Math.random() * 0.55; arr[i * 3] = Math.cos(a) * r * 0.9; arr[i * 3 + 1] = Math.sin(a) * r * 0.75 + 0.08; arr[i * 3 + 2] = -0.02; }
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(arr, 3));
+    const pts = new THREE.Points(geo, new THREE.PointsMaterial({ map: starTex, size: 0.035 + k * 0.012, sizeAttenuation: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    pts.renderOrder = 3; pts.userData.ph = k * 1.6; jesus.add(pts); twinkle.push(pts);
+  }
   const angels = [instance('Thien_than'), instance('Thien_than')].filter(Boolean);
   angels.forEach((a) => play(a, 'Bay'));
 
@@ -183,13 +298,36 @@ async function start() {
     const dt = Math.min(0.1, Math.max(0, t - lastT)); lastT = t;
     cam.clearViewOffset();
     const S = scaleOf(), people = CH.people, walkers = CH.walkers;
+    const MODEL = bgMode() === 'model';
+    if (MODEL && !church) loadChurch();
+    const useModel = MODEL && !!church;
+    occ.scene.visible = !useModel; modelLights.visible = useModel; if (church) church.visible = useModel;
+    // các cảnh quay: donate (do màn hình 2D điều khiển thời gian), vào phòng, xem thử
+    const shotE = (st, hold) => { const d = t - st, inS = 0.6, outS = 0.7; if (d < 0) return 0; if (d > inS + hold + outS) return -1; return d < inS ? ease(d / inS) : d < inS + hold ? 1 : 1 - ease((d - inS - hold) / outS); };
+    let shot = null;
+    if (cami && cami.w && INST.get(cami.w.person.uid)) shot = { kind: 'donate', inst: INST.get(cami.w.person.uid), side: seatOf(cami.w.person).side, e: cami.e };
+    else if (preview) { const e = shotE(preview.start, preview.kind === 'donate' ? (+c3cfg().camHold || 1) : (+c3cfg().camJoinHold || 1.5)); const inst = INST.get(preview.p.uid); if (e < 0 || !inst) preview = null; else shot = { kind: preview.kind, inst, side: seatOf(preview.p).side, e }; }
+    else if (joinShot) { const e = shotE(joinShot.start, +c3cfg().camJoinHold || 1.5); const inst = INST.get(joinShot.p.uid); if (e < 0 || !inst) joinShot = null; else shot = { kind: 'join', inst, side: seatOf(joinShot.p).side, e }; }
+    window.__shotDbg = shot ? [shot.kind, +shot.e.toFixed(2)] : (preview ? ['pv-noshot'] : null);
+    if (edit) { if (ctrl) ctrl.update(); }
+    else if (useModel) {
+      const mc = mainCam();
+      if (shot && shot.e > 0) {
+        const sc = shotCam(shot.kind, shot.inst.g.position.clone(), shot.side);
+        applyCam({ pos: mc.pos.lerp(sc.pos, shot.e), target: mc.target.lerp(sc.target, shot.e), fov: lerp(mc.fov, sc.fov, shot.e) });
+      } else applyCam(mc);
+    } else applyCam(mainCam());
     const live = new Set();
     const wBy = new Map(); for (const w of walkers) if (!w.done) wBy.set(w.person.uid, w);
     for (const p of people) {
       if (p.leaving && p.alpha <= 0.02) continue;
       live.add(p.uid);
       let inst = INST.get(p.uid);
-      if (!inst) { inst = instance(pickModel(p)); if (!inst) continue; inst.born = t; INST.set(p.uid, inst); }
+      if (!inst) {
+        inst = instance(pickModel(p)); if (!inst) continue; inst.born = t; INST.set(p.uid, inst);
+        const cj = c3cfg();
+        if (cj.camJoin && !p.filler && !wBy.has(p.uid) && !edit && !cami && !joinShot && !preview && t - lastJoinShot > (+cj.camJoinCooldown || 8) && t - p.born < 2) { joinShot = { p, start: t + 0.4 }; lastJoinShot = t; }
+      }
       setFace(inst, p);
       const showBadge = !p.filler && CFGf().scene.badge3d !== false; if (showBadge) setBadge(inst, p);
       const w = wBy.get(p.uid);
@@ -232,10 +370,15 @@ async function start() {
       play(priest, blessing ? 'Ban_phep_lanh' : (CH.sermon && CH.sermon.state === 'playing' ? 'Giang_dao' : 'Dung'), 0.4);
       priest.mixer.update(dt);
     }
-    if (jesus) {
-      jesus.g.visible = c3.jesus3d !== false; jesus.g.scale.setScalar(S * 2.6);
-      jesus.g.position.copy(B(0, 48.4, 8.2 + Math.sin(t * 0.8) * 0.15)); jesus.mixer.update(dt);
-      jesusGlow.visible = jesus.g.visible; jesusGlow.position.copy(B(0, 48.8, 8.2 + 1.0 * S * 2.6)); jesusGlow.scale.setScalar(7 * S * (0.95 + 0.05 * Math.sin(t * 2)));
+    {
+      const js = clamp(+c3.jesusSize || 9, 2, 30), jz = +c3.jesusZ || 9.5;
+      jesus.visible = c3.jesus3d !== false;
+      jesus.position.copy(B(0, 48.4, jz + Math.sin(t * 0.8) * 0.12)); jesus.quaternion.copy(cam.quaternion); jesus.scale.setScalar(js);
+      rays.scale.setScalar(1.45); rays.position.set(0, 0.28, -0.03); rays.rotation.z = t * 0.12;
+      rays2.scale.setScalar(1.1); rays2.position.set(0, 0.3, -0.025); rays2.rotation.z = -t * 0.2;
+      rays.material.opacity = 0.45 + 0.12 * Math.sin(t * 1.3); jGlow.material.opacity = 0.75 + 0.15 * Math.sin(t * 1.7);
+      jGlow.position.z = -0.01;
+      for (const tw of twinkle) { tw.material.opacity = 0.35 + 0.65 * Math.max(0, Math.sin(t * 2.2 + tw.userData.ph)); tw.rotation.z = t * 0.05; }
     }
     angelT += dt;
     angels.forEach((a, i) => {
@@ -252,13 +395,11 @@ async function start() {
 
     // camera zoom = cắt khung ảnh (khớp tuyệt đối với nền render sẵn)
     let s = 1, cx = W / 2, cy = H / 2;
-    if (cami && cami.w) {
-      const w = cami.w, inst = INST.get(w.person.uid);
-      if (inst) {
-        head.copy(inst.g.position).add(new THREE.Vector3(0, 0.8 * S, 0)); cam.clearViewOffset(); project(head, tmp);
-        s = 1 + (cami.scale - 1) * cami.e;
-        cx = clamp(lerp(W / 2, tmp.x, cami.e), W / (2 * s), W - W / (2 * s)); cy = clamp(lerp(H / 2, tmp.y, cami.e), H / (2 * s), H - H / (2 * s));
-      }
+    if (!useModel && !edit && shot && shot.e > 0) {
+      head.copy(shot.inst.g.position).add(new THREE.Vector3(0, 0.8 * S, 0)); cam.clearViewOffset(); project(head, tmp);
+      const zs = clamp(+c3cfg().camScale || 1.8, 1, 4) * (shot.kind === 'join' ? 0.85 : 1);
+      s = 1 + (zs - 1) * shot.e;
+      cx = clamp(lerp(W / 2, tmp.x, shot.e), W / (2 * s), W - W / (2 * s)); cy = clamp(lerp(H / 2, tmp.y, shot.e), H / (2 * s), H - H / (2 * s));
     }
     if (s > 1.0001) {
       cam.setViewOffset(W, H, cx - W / (2 * s), cy - H / (2 * s), W / s, H / s);
@@ -270,8 +411,9 @@ async function start() {
       const fix = (o) => { if (o && o._head) { o._head.x = (o._head.x - (cx - W / (2 * s))) * s; o._head.y = (o._head.y - (cy - H / (2 * s))) * s; if (o._nameSize) o._nameSize *= Math.min(1.6, s); } };
       for (const p of people) fix(p); for (const w of walkers) fix(w);
     }
-    R.clear(); R.render(bgScene, bgCam); R.clearDepth(); R.render(scene, cam);
+    R.clear(); if (!useModel) { R.render(bgScene, bgCam); R.clearDepth(); } else { R.setClearColor(0x1a120c); }
+    R.render(scene, cam);
   }
-  window.__3d = { ready: true, render, THREE, scene, cam, INST };
+  window.__3d = { ready: true, render, THREE, scene, cam, INST, cmd };
   log('Cảnh 3D đã sẵn sàng.');
 }

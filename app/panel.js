@@ -50,7 +50,7 @@ function renderFrames() {
   const upd = async (fn) => { const arr = (CFG.donate.frames || []).map((x) => ({ ...x })); fn(arr); arr.sort((a, b) => a.min - b.min); await save('donate.frames', arr); renderFrames(); };
   list.forEach((f, i) => {
     const el = document.createElement('div'); el.className = 'row';
-    const opts = Object.entries(FRAME_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + (CFG.donate.customFrames || []).map((c) => `<option value="c:${c.id}">★ ${String(c.name || 'Khung').replace(/</g, '&lt;')}</option>`).join('');
+    const opts = Object.entries(FRAME_NAMES).map(([k, v]) => `<option value="${k}">${v}</option>`).join('') + (window.BUILTIN_FRAMES || []).map((b) => `<option value="b:${b.id}">✦ ${b.name}</option>`).join('') + (CFG.donate.customFrames || []).map((c) => `<option value="c:${c.id}">★ ${String(c.name || 'Khung').replace(/</g, '&lt;')}</option>`).join('');
     el.innerHTML = `<b style="color:var(--gold2);min-width:46px">Mức</b><input type="number" min="1" class="fmin" style="width:80px"> xu trở lên → <select class="fst">${opts}</select> <label style="min-width:0;margin-left:10px">Bật</label><input type="checkbox" class="fen"> <button class="b ftest">▶ Thử</button><button class="b d fdel">Xoá</button>`;
     $('.fmin', el).value = f.min; $('.fst', el).value = f.style; $('.fen', el).checked = f.enabled !== false;
     $('.fmin', el).onchange = (e) => upd((a) => a[i].min = Math.max(1, +e.target.value || 1));
@@ -189,6 +189,15 @@ function setTk(s) {
 }
 api.onTiktokStatus(setTk);
 api.tiktokState().then(setTk);
+let camWhich = null;
+$$('[data-cam]').forEach((b) => b.onclick = () => { camWhich = b.dataset.cam; api.toStage({ type: 'cam-edit', which: camWhich }); log('Chỉnh camera: ' + b.textContent.replace('🎥 ', '')); });
+$$('[data-campv]').forEach((b) => b.onclick = () => api.toStage({ type: 'cam-preview', which: b.dataset.campv }));
+if ($('#camSave')) {
+  $('#camSave').onclick = () => api.toStage({ type: 'cam-save' });
+  $('#camOff').onclick = () => { camWhich = null; api.toStage({ type: 'cam-edit-off' }); };
+  $('#camReset').onclick = () => api.toStage({ type: 'cam-reset', which: camWhich || 'main' });
+  $('#camFov').oninput = (e) => { $('#camFovV').textContent = e.target.value + '°'; api.toStage({ type: 'cam-fov', fov: +e.target.value }); };
+}
 $$('[data-sim]').forEach((b) => b.onclick = () => {
   const name = $('#simName').value.trim() || undefined;
   const s = b.dataset.sim;
@@ -216,6 +225,7 @@ api.onStageMsg((m) => {
   if (!m) return;
   if (m.type === 'log') log('[màn hình] ' + m.msg, m.level);
   if (m.type === 'edit-mode') { editOn = m.on; $('#btnEdit').textContent = m.on ? '✓ Xong — thoát chỉnh bố cục' : '✥ Chỉnh bố cục bằng chuột trên màn hình'; }
+  if (m.type === 'cam-fov' && $('#camFov')) { $('#camFov').value = Math.round(m.fov); $('#camFovV').textContent = Math.round(m.fov) + '°'; }
   if (m.type === 'blessed') log('✝ Chúc phúc ' + m.name + ' (' + (m.gift || '') + ' ×' + m.count + ')' + (m.idle ? ' — tự động' : ''));
   if (m.type === 'pretts') { $('#prettsBar').style.width = (100 * m.done / m.total) + '%'; const el = $('#prettsInfo'); if (el) el.textContent = I18N.t('Giọng đọc đã tạo sẵn') + ': ' + m.ok + '/' + m.total + (m.waiting ? ' — ' + I18N.t('máy chủ chưa trả lời, thử lại sau') + ' ' + m.waiting + 's (' + m.error + ')' : (m.ok === m.total ? ' ✓' : '')); if (m.done === m.total && !m.auto) log(`Đã tạo giọng ${m.ok}/${m.total} câu`); }
   if (m.type === 'status') {
@@ -412,6 +422,12 @@ async function applyLive(L, skipConfirm) {
     arr.sort((a, b) => a.min - b.min);
     setK(raw, 'donate.tiers', arr); setK(raw, 'donate.builtinBless1', true); CFG = deepMerge(CHURCH_DEFAULTS, raw);
     await api.setConfig({ donate: raw.donate });
+  }
+  // một lần: nếu chưa tự chỉnh khung theo mức xu thì dùng bộ khung ảnh mới
+  if (!(raw.donate || {}).frames2) {
+    const fr = (raw.donate || {}).frames, OLD = { 5: 'silver', 10: 'gold', 15: 'ruby', 30: 'royal' };
+    if (fr && fr.every((f) => f.style === 'bronze' || OLD[f.min] === f.style)) { setK(raw, 'donate.frames', fr.map((f) => (OLD[f.min] ? { ...f, style: { 5: 'b:fA', 10: 'b:fB', 15: 'b:fC', 30: 'b:fD' }[f.min] } : f))); }
+    setK(raw, 'donate.frames2', true); CFG = deepMerge(CHURCH_DEFAULTS, raw); await api.setConfig({ donate: raw.donate });
   }
   fillInputs();
   $('#uiLang').value = (CFG.window && CFG.window.uiLang) || 'vi'; $('#liveLang').value = CFG.scene.liveLang || CFG.audio.sermonLang || 'vi';

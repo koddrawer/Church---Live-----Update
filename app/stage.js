@@ -1145,6 +1145,12 @@ const FRAME_STYLES = {
   royal: { ring: GOLD, name: '#fff3c4', rays: 1.2, laurel: true, gems: ['#2f7bff', '#c040ff'], crown: true, wings: true }
 };
 function customFrame(style) {
+  if (/^b:/.test(style || '')) {
+    const bf = (window.BUILTIN_FRAMES || []).find((f) => 'b:' + f.id === style); if (!bf) return null;
+    let e = cfImgs.get(bf.file);
+    if (!e) { e = { img: null }; cfImgs.set(bf.file, e); loadImg(bf.file).then((im) => { e.img = im; }); }
+    return e.img ? { cf: bf, img: e.img, hole: bf.hole } : null;
+  }
   if (!/^c:/.test(style || '')) return null;
   const cf = (CFG.donate.customFrames || []).find((f) => 'c:' + f.id === style); if (!cf || !cf.file) return null;
   const url = 'church://user/frames/' + encodeURIComponent(cf.file);
@@ -1158,7 +1164,7 @@ function frameStyleFor(total) {
   const fs = (CFG.donate.frames || []).filter((f) => f && f.enabled !== false).sort((a, b) => a.min - b.min);
   if (!fs.length) return null;
   let r = fs[0]; for (const f of fs) if (total >= f.min) r = f;
-  if (/^c:/.test(r.style || '')) { customFrame(r.style); return r.style; }
+  if (/^[cb]:/.test(r.style || '')) { customFrame(r.style); return r.style; }
   return FRAME_STYLES[r.style] ? r.style : 'gold';
 }
 function metal(g, x0, y0, x1, y1, cols) { const gr = g.createLinearGradient(x0, y0, x1, y1); cols.forEach((c, i) => gr.addColorStop(i / (cols.length - 1), c)); return gr; }
@@ -1639,6 +1645,7 @@ const SIM_NAMES = ['Maria Lan', 'Giuse Hùng', 'Anna Thu', 'Phêrô Minh', 'Têr
 function simName() { return SIM_NAMES[Math.floor(Math.random() * SIM_NAMES.length)] + (Math.random() < 0.3 ? ' ' + (simN++) : ''); }
 api.onCmd((m) => {
   if (!m) return;
+  if (/^cam-/.test(m.type)) { if (window.__3d && window.__3d.cmd) window.__3d.cmd(m); else logp('Camera chỉ chỉnh được ở chế độ cảnh 3D.', 'warn'); return; }
   if (m.type === 'sim-join') { for (let i = 0; i < (m.n || 1); i++) handleJoin({ type: 'join', id: 'sim' + Math.random(), name: m.name || simName(), sim: true }); }
   if (m.type === 'sim-gift') {
     let id = 'sim' + Math.random(), name = m.name || simName();

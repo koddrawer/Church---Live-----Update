@@ -162,10 +162,10 @@ window.CHURCH_DEFAULTS = {
     frameEnabled: true,
     frames: [
       { min: 1, style: 'bronze', enabled: true },
-      { min: 5, style: 'silver', enabled: true },
-      { min: 10, style: 'gold', enabled: true },
-      { min: 15, style: 'ruby', enabled: true },
-      { min: 30, style: 'royal', enabled: true }
+      { min: 5, style: 'b:fA', enabled: true },
+      { min: 10, style: 'b:fB', enabled: true },
+      { min: 15, style: 'b:fC', enabled: true },
+      { min: 30, style: 'b:fD', enabled: true }
     ],
     customFrames: [],          // khung của riêng bạn: { id, name, file (trong user-assets/frames), nameColor, glow, hole: {x,y,r} | null = tự dò lỗ trong suốt }
     frameX: 540, frameY: 1490, frameScale: 1, frameSeconds: 6,
@@ -217,6 +217,10 @@ window.CHURCH_DEFAULTS = {
     title: '', showTitle: false,
     mode: '2d',               // '2d' = video nhà thờ + ảnh người, '3d' = nhà thờ 3D + nhân vật chibi 3D
     char3dScale: 1.5, badge3d: true, priest3d: true, jesus3d: true, angels3d: true,
+    bg3d: 'plate',            // 'plate' = ảnh render sẵn (đẹp nhất, camera cố định + zoom), 'model' = mô hình 3D thời gian thực (camera tự do)
+    jesusSize: 9, jesusZ: 9.5,
+    camJoin: true, camJoinHold: 1.5, camJoinCooldown: 8,   // camera quay tới người mới vào phòng
+    cam3d: {},                // góc camera đã lưu: main {pos,target,fov}, donate/join {off,look,fov}
     camZoom: true, camScale: 1.8, camHold: 1,   // camera zoom vào người donate khi đứng dậy đi lên
 
     geometry: {
@@ -319,3 +323,6 @@ window.loadFrameImg = (() => { const cache = new Map(); let ud = null;
       const ext = String(file).split('.').pop().toLowerCase(), mime = ext === 'webp' ? 'image/webp' : ext === 'gif' ? 'image/gif' : ext === 'jpg' || ext === 'jpeg' ? 'image/jpeg' : 'image/png';
       return await new Promise((r) => { const i = new Image(); i.onload = () => r(i); i.onerror = () => r(null); i.src = 'data:' + mime + ';base64,' + b64; }); } catch { return null; } })();
     cache.set(file, p); return p; }; })();
+
+// khung donate có sẵn (ảnh PNG đã tách nền)
+window.BUILTIN_FRAMES = [{"id": "fA", "name": "Hoa huệ vàng", "file": "church://app/assets/frames/frame_A.png", "hole": {"x": 0.4969, "y": 0.546, "r": 0.3695}, "nameColor": "#ffe7a0", "glow": true}, {"id": "fB", "name": "Cánh thiên thần + nến", "file": "church://app/assets/frames/frame_B.png", "hole": {"x": 0.4816, "y": 0.572, "r": 0.3447}, "nameColor": "#fff4d6", "glow": true}, {"id": "fC", "name": "Gothic cờ đỏ + nến", "file": "church://app/assets/frames/frame_C.png", "hole": {"x": 0.492, "y": 0.5019, "r": 0.3006}, "nameColor": "#ffd27a", "glow": true}, {"id": "fD", "name": "Hoàng gia: vương miện + cánh", "file": "church://app/assets/frames/frame_D.png", "hole": {"x": 0.4958, "y": 0.5656, "r": 0.2978}, "nameColor": "#ffe9a8", "glow": true}];
