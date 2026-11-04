@@ -1,9 +1,9 @@
 {
-  "version": "1.0.1",
-  "notes": "1.0.1: Lớp học Kinh Thánh thay cho câu đố",
+  "version": "1.0.2",
+  "notes": "1.0.2: lớp học — không che cha xứ, hướng dẫn rõ hơn",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-04T04:41:59.171Z",
+  "date": "2026-11-04T07:25:14.372Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -370,8 +370,8 @@
     },
     {
       "path": "heaven_core.js",
-      "size": 56268,
-      "sha256": "57b2a72cf01b89fb9fe1181d4af626257f8b416df58c1d137737a74424b8a1b6"
+      "size": 57485,
+      "sha256": "a8242b5081b2977a44a354b69db3b0494f9d64a20b6267736b9e13d31523bfb0"
     },
     {
       "path": "heaven_data.js",
@@ -386,7 +386,7 @@
     {
       "path": "main-ext.js",
       "size": 20408,
-      "sha256": "c273877ea4f47a9ef97b34c2fbc23bf21992f36823d42bf76a84b63c1e9b7a97"
+      "sha256": "485bcced7ab44c6c42d76685e8cf474c165aa0a7f729361f5b482c52beb943d1"
     },
     {
       "path": "panel.html",
@@ -415,13 +415,13 @@
     },
     {
       "path": "stage.js",
-      "size": 173636,
-      "sha256": "0942e6876c942dfa17df1d7f7b55f5ce70f4e81f5580956a3a65eef4fff847bd"
+      "size": 174853,
+      "sha256": "6d48476e2a71ec9da8568a319193cc3df471451a60e4005e337820261efcbf9d"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "32ea4c64f097e9a4c8f0866dba91930074d90572fcf92c07d8a8f27129d0c752"
+      "sha256": "b6f433f3e0920fc721300367fdde4b94b96b74c78db1070d58ecd927116da50a"
     }
   ]
 }

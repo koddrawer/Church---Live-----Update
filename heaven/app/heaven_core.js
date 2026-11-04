@@ -587,7 +587,7 @@ function hRenderClass(t) {
   ctx.save(); ctx.imageSmoothingEnabled = false;
   if (HV.img.cls) ctx.drawImage(HV.img.cls, 0, 0, W, H); else { ctx.fillStyle = '#5a3a20'; ctx.fillRect(0, 0, W, H); }
   // phủ bảng đen rồi viết phấn
-  const B = CBOARD_FULL; ctx.fillStyle = '#17553a'; ctx.fillRect(B.x, B.y, B.w, B.h);
+  const B = CBOARD_FULL, PRX = CX(250), PRY = CY(672); ctx.fillStyle = '#17553a'; ctx.fillRect(B.x, B.y, B.w, PRY - B.y); ctx.fillRect(PRX, PRY - 1, B.x + B.w - PRX, B.y + B.h - PRY + 1);   // chừa chỗ cha xứ đứng bên trái
   ctx.fillStyle = 'rgba(255,255,255,0.04)'; for (let i = 0; i < 18; i++) ctx.fillRect(B.x + ((i * 97) % B.w), B.y + ((i * 53) % B.h), 60, 2);
   const A = CBOARD;
   if (C.phase === 'lesson') {
@@ -600,7 +600,15 @@ function hRenderClass(t) {
       if (right) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 4; ctx.strokeRect(A.x + 4, y - 17, A.w - 12, 34); }
       ctx.font = PX(24); const ol = wrapLines('ABC'[i] + '. ' + o, A.w - 30, 1)[0]; hChalk(ol + (right ? '  ✔' : ''), A.x + 14, y, 24, right ? '#ffe14d' : '#e8f5e9'); });
     const answered = C.members.filter((m) => m.ans).length;
-    hChalk((en ? 'Comment A, B or C · answered ' : 'Comment A, B hoặc C · đã trả lời ') + answered + '/' + C.members.length, A.x + A.w / 2, A.y + A.h - 14, 16, '#bfe3c8', 'center');
+    if (!C.revealed) hChalk((en ? 'Answered: ' : 'Đã trả lời: ') + answered + '/' + C.members.length, A.x + A.w - 10, A.y + A.h - 18, 20, '#bfe3c8', 'right');
+    // dải hướng dẫn to, rõ dưới bảng
+    { const bx = CX(250), bw = W - bx - 24, bh = 90, by = CY(842) + 4, mx = bx + bw / 2, pulse = C.revealed ? 1 : 1 + 0.04 * Math.sin(t * 5);
+      ctx.fillStyle = 'rgba(20,12,40,0.92)'; ctx.fillRect(bx, by, bw, bh); ctx.fillStyle = '#ffd23f'; ctx.fillRect(bx, by, bw, 4); ctx.fillRect(bx, by + bh - 4, bw, 4); ctx.fillRect(bx, by, 4, bh); ctx.fillRect(bx + bw - 4, by, 4, bh);
+      ctx.save(); ctx.translate(mx, by + 34); ctx.scale(pulse, pulse);
+      if (C.revealed) hText((en ? 'Correct answer: ' : 'Đáp án đúng: ') + 'ABC'[q[2]] + '. ' + q[1][q[2]], 0, 0, 32, '#7dff9a', 'center');
+      else hText(en ? 'Type  A ,  B  or  C  to answer' : 'Gõ  A ,  B  hoặc  C  để trả lời', 0, 0, 32, '#ffe14d', 'center');
+      ctx.restore();
+      hText(C.revealed ? (en ? 'Next question coming…' : 'Chuẩn bị câu tiếp theo…') : (en ? 'Only students in class can answer · 1st answer counts' : 'Chỉ học viên trong lớp được trả lời · tính câu trả lời đầu tiên'), mx, by + 70, 19, '#f0e8ff', 'center'); }
   } else if (C.phase === 'result') {
     hChalk(en ? '🏆 RESULTS' : '🏆 KẾT QUẢ LỚP HỌC', A.x + A.w / 2, A.y + 28, 32, '#ffe9a0', 'center');
     (C.rank || []).slice(0, 3).forEach((m, i) => { const y = A.y + 92 + i * 62;
@@ -610,9 +618,9 @@ function hRenderClass(t) {
   }
   // bong bóng lời thầy
   { const txt = C.phase === 'result' ? (en ? 'Well done! God bless you!' : 'Giỏi lắm! Chúa chúc lành!') : C.revealed ? (en ? 'Answer: ' : 'Đáp án: ') + 'ABC'[C.qs[C.qi][2]] : (en ? 'Who knows?' : 'Ai biết nào?');
-    ctx.font = PX(20); const w = ctx.measureText(txt).width + 28, x = clamp(CTEACH.x - w / 2, 8, W - w - 8), y = CTEACH.y - 150;
-    ctx.fillStyle = '#fffdf2'; ctx.fillRect(x, y, w, 40); ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x, y, w, 3); ctx.fillRect(x, y + 37, w, 3); ctx.fillRect(x, y, 3, 40); ctx.fillRect(x + w - 3, y, 3, 40);
-    ctx.fillStyle = '#fffdf2'; ctx.fillRect(CTEACH.x - 6, y + 40, 12, 10); hText(txt, x + w / 2, y + 21, 20, '#3a2a1a', 'center', false); }
+    ctx.font = PX(26); const w = ctx.measureText(txt).width + 30, x = clamp(CTEACH.x - w / 2, 8, W - w - 8), y = CTEACH.y - 160;
+    ctx.fillStyle = '#fffdf2'; ctx.fillRect(x, y, w, 46); ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x, y, w, 3); ctx.fillRect(x, y + 43, w, 3); ctx.fillRect(x, y, 3, 46); ctx.fillRect(x + w - 3, y, 3, 46);
+    ctx.fillStyle = '#fffdf2'; ctx.fillRect(CTEACH.x - 6, y + 46, 12, 12); hText(txt, x + w / 2, y + 24, 26, '#3a2a1a', 'center', false); }
   // học viên: tên + avatar + câu trả lời
   for (const m of C.members) {
     const s = CSEATS[m.seat]; if (!s) continue; const x = CX(s[0]), y = CY(s[1]) - 40, k = 0.85 + 0.25 * ((s[1] - 1000) / 430);
