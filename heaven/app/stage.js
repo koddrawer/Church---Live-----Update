@@ -1473,7 +1473,7 @@ function drawGuides() {
 }
 function render() {
   const t = now();
-  if (HEAVEN) { if (!HV.img.bg) { ctx.fillStyle = '#1c1840'; ctx.fillRect(0, 0, W, H); return; } H_render(t); drawSubtitles(t); drawGreet(t); hDrawTop(t); drawBanners(t); drawCards(t); drawTitle(); drawEdit(); return; }
+  if (HEAVEN) { if (!HV.img.bg) { ctx.fillStyle = '#1c1840'; ctx.fillRect(0, 0, W, H); return; } H_render(t); if (!(HV.cls && HV.cls.scene)) { drawSubtitles(t); drawGreet(t); } hDrawTop(t); drawBanners(t); drawCards(t); drawTitle(); drawEdit(); return; }
   // video chúc phúc đang phủ kín màn → chỉ vẽ video (không vẽ nhà thờ phía dưới) cho nhẹ
   if (vcur && videoOpaque(t)) { drawVideo(t); drawEdit(); return; }
   if (MODE3D() && window.__3d && window.__3d.ready && G) {
@@ -1530,7 +1530,7 @@ function editItems() {
   const k = d.bannerScale || 1, gw = Math.min(W, d.bannerWidth || 900), gh = 116 * k;
   items.push({ id: 'banner', label: 'Băng chúc phúc', color: '#ffd23f', rect: { x: W / 2 - gw / 2, y: (d.bannerY ?? 110) - gh / 2, w: gw, h: gh } });
   if (d.frameEnabled !== false) { const cg = cardGeom(); items.push({ id: 'card', label: 'Khung avatar donate', color: '#ff9f43', rect: { x: cg.cx - cg.w / 2, y: cg.top, w: cg.w, h: cg.h } }); }
-  if (HEAVEN) { const LB = { top: 'Thanh trên cùng', leader: 'Bảng leo cao nhất', intent: 'Bảng ý nguyện', quiz: 'Bảng câu đố', prayer: 'Bảng giờ cầu nguyện', verse: 'Thẻ Lời Chúa' }; for (const [k, r] of Object.entries(CFG.heaven.boards || {})) items.push({ id: 'hb:' + k, label: LB[k] || k, color: '#b48cff', rect: { ...r } }); return items; }
+  if (HEAVEN) { const LB = { top: 'Thanh trên cùng', leader: 'Bảng leo cao nhất', intent: 'Bảng ý nguyện', cls: 'Bảng ghi danh lớp học', prayer: 'Bảng giờ cầu nguyện', verse: 'Thẻ Lời Chúa' }; for (const [k, r] of Object.entries(CFG.heaven.boards || {})) if (k !== 'quiz') items.push({ id: 'hb:' + k, label: LB[k] || k, color: '#b48cff', rect: { ...r } }); return items; }
   (d.avoidZones || []).forEach((z, i) => items.push({ id: 'zone' + i, zi: i, label: i === 0 ? 'Vùng hình Chúa (băng chữ tránh)' : 'Vùng tránh ' + (i + 1), color: '#ff5a5a', rect: { ...z } }));
   return items;
 }
@@ -1654,8 +1654,10 @@ function simName() { return SIM_NAMES[Math.floor(Math.random() * SIM_NAMES.lengt
 api.onCmd((m) => {
   if (!m) return;
   if (m.type === 'sim-live') { if (HEAVEN) H_event({ id: m.id || ('sim' + Math.floor(Math.random() * 5)), name: m.name || simName(), sim: true, ...m.ev }); return; }
-  if (m.type === 'hv-quiz') { if (HEAVEN && !HV.quiz) { if (HV.prayer) logp('Đang giờ cầu nguyện — câu đố sẽ bắt đầu sau.', 'warn'); else hQuizStart(); } return; }
-  if (m.type === 'hv-prayer') { if (HEAVEN && !HV.prayer) { HV.quiz = null; hPrayerStart(); } return; }
+  if (m.type === 'hv-quiz' || m.type === 'hv-class') { if (HEAVEN && !HV.cls) { if (HV.prayer) logp('Đang giờ cầu nguyện — lớp học sẽ bắt đầu sau.', 'warn'); else hClassStart(); } return; }
+  if (m.type === 'hv-class-fill') { if (HEAVEN && HV.cls && HV.cls.phase === 'join') for (let i = 0; i < (m.n || 20); i++) H_event({ type: 'chat', id: 'cls' + i + '_' + Math.floor(Math.random() * 1e5), name: simName(), sim: true, text: 'me' }); return; }
+  if (m.type === 'hv-class-answer') { if (HEAVEN && HV.cls && HV.cls.phase === 'lesson') for (const mb of HV.cls.members) if (Math.random() < 0.85) H_event({ type: 'chat', id: mb.id, name: mb.name, sim: true, text: Math.random() < 0.6 ? 'ABC'[HV.cls.qs[HV.cls.qi][2]] : 'ABC'[Math.floor(Math.random() * 3)] }); return; }
+  if (m.type === 'hv-prayer') { if (HEAVEN && !HV.prayer) { HV.quiz = null; HV.cls = null; hPrayerStart(); } return; }
   if (m.type === 'hv-lanterns') { if (HEAVEN) { HV.litPairs = LANT.length; hCelebrate(); } return; }
   if (/^cam-/.test(m.type)) { if (window.__3d && window.__3d.cmd) window.__3d.cmd(m); else logp('Camera chỉ chỉnh được ở chế độ cảnh 3D.', 'warn'); return; }
   if (m.type === 'sim-join') { for (let i = 0; i < (m.n || 1); i++) handleJoin({ type: 'join', id: 'sim' + Math.random(), name: m.name || simName(), sim: true }); }
@@ -1920,13 +1922,7 @@ function H_chat(ev) {
   const raw = String(ev.text || '').trim(); if (!raw) return; hAct();
   const c = hClimber(ev), t = now(), n = hnorm(raw), L = HL();
   if (c) { c.last = t; if (c.state === 'climb' && HC().stepsPerComment) c.target = Math.min(HC().steps + 0.02, Math.max(c.target, Math.floor(c.step)) + HC().stepsPerComment); }
-  // câu đố
-  const q = HV.quiz;
-  if (q && !q.winner && t < q.until) {
-    const opts = q.data[1].map(hnorm), m = /^(?:dap an|dap an la|answer|cau|chon)?\s*([abc])[\s.!)]*$/.exec(n);
-    const pick = m ? 'abc'.indexOf(m[1]) : opts.findIndex((o) => o && n === o);
-    if (pick >= 0 && pick === q.data[2]) { hQuizWin(ev, c); return; }
-  }
+  if (hClassChat(ev, n, c)) return;
   const has = (k) => hkw(k).some((w) => n === w || n.startsWith(w + ' ') || n.includes(' ' + w + ' ') || n.endsWith(' ' + w) || (w.length > 3 && n.includes(w)));
   if (hkw('kwIntention').some((w) => n.startsWith(w))) { hIntention(ev, raw); return; }
   if (has('kwVerse')) { hVerse(ev); return; }
@@ -2031,6 +2027,7 @@ function H_update(dt) {
       addGreet({ id: c.id, name: c.name, greetText: (HL() === 'en' ? '⛪ {name} reached the cathedral' : '⛪ {name} đã tới thánh đường').replace('{name}', c.name) });
       continue;
     }
+    if (HV.cls && HV.cls.scene) c.last = Math.max(c.last, t - 2);
     if (!c.moving && t - c.last > (cfg.idleSeconds || 12) && !c.lift) { c.state = 'leave'; c.leaveT = t; }
   }
   if (HV.statsDirty && t - HV.statsDirty > 3) { HV.statsDirty = 0; api.getConfig().then((raw) => { raw.heaven = { ...(raw.heaven || {}), stats: CFG.heaven.stats }; api.setConfig({ heaven: raw.heaven }); }); }
@@ -2041,11 +2038,10 @@ function H_update(dt) {
   // Lời Chúa
   if (HV.verseCur && t > HV.verseCur.until) HV.verseCur = null;
   if (!HV.verseCur && HV.verseQ.length) { const v = HV.verseQ.shift(); v.t = t; v.until = t + (cfg.verseSeconds || 9); HV.verseCur = v; SFX.bell(); if (cfg.verseSpeak) hsay('verse', { name: v.name, verse: v.v[0] }); }
-  // câu đố
-  if (cfg.quiz && !HV.quiz && !HV.prayer) { if (!HV.nextQuiz) HV.nextQuiz = t + Math.min(60, cfg.quizEvery || 300); if (t > HV.nextQuiz) hQuizStart(); }
-  if (HV.quiz && t > HV.quiz.until + (HV.quiz.winner ? 0 : 6)) { HV.quiz = null; HV.nextQuiz = t + (cfg.quizEvery || 300); }
+  // lớp học Kinh Thánh
+  hClassUpdate(t);
   // giờ cầu nguyện chung
-  if (cfg.prayer && !HV.prayer && !HV.quiz) { if (!HV.nextPrayer) HV.nextPrayer = t + (cfg.prayerEvery || 900); if (t > HV.nextPrayer) hPrayerStart(); }
+  if (cfg.prayer && !HV.prayer && !HV.cls) { if (!HV.nextPrayer) HV.nextPrayer = t + (cfg.prayerEvery || 900); if (t > HV.nextPrayer) hPrayerStart(); }
   if (HV.prayer) {
     const P = HV.prayer, lines = HD.prayer[P.lang].lines;
     P.shown = Math.min(lines.length, 1 + Math.floor(P.likes / Math.max(1, cfg.prayerLikesPerLine || 40)) + Math.floor((t - P.start) / ((cfg.prayerSeconds || 60) / lines.length)));
@@ -2095,6 +2091,7 @@ function hCross(x, y, s, col) { ctx.fillStyle = col; ctx.fillRect(x - s / 2, y -
 
 function H_render(t) {
   const cfg = HC(), L = HL();
+  if (HV.cls && HV.cls.scene) { hRenderClass(t); hDrawUI(t, true); return; }
   ctx.save(); ctx.imageSmoothingEnabled = false;
   // camera: zoom vào người được chúc phúc
   const flyer = [...HV.climbers.values()].find((c) => c.fly && t - c.fly.t > 0.2);
@@ -2217,7 +2214,7 @@ function hDrawClimber(c, t) {
     ctx.restore();
   }
 }
-function hDrawUI(t) {
+function hDrawUI(t, classMode) {
   const cfg = HC(), L = HL(), B = cfg.boards || CHURCH_DEFAULTS.heaven.boards, en = L === 'en';
   // thanh trên cùng
   { const b = B.top; hBoard(b.x, b.y, b.w, b.h);
@@ -2229,6 +2226,7 @@ function hDrawUI(t) {
     const hx = b.x + b.w * 0.76; hHeartIcon(hx, b.y + b.h / 2, 3.4, '#ff4d6d');
     const hf = clamp(HV.heart / (cfg.heartGoal || 1500), 0, 1); ctx.fillStyle = '#3d3470'; ctx.fillRect(hx + 22, b.y + b.h / 2 - 8, b.x + b.w - hx - 44, 16); ctx.fillStyle = '#ff6b81'; ctx.fillRect(hx + 22, b.y + b.h / 2 - 8, (b.x + b.w - hx - 44) * hf, 16);
     hText((en ? 'Heart ' : 'Thánh Tâm ') + Math.round(hf * 100) + '%', hx + 22 + (b.x + b.w - hx - 44) / 2, b.y + b.h / 2 + 1, 16, '#fff', 'center'); }
+  if (classMode) return;
   // bảng xếp hạng
   { const tw = (cfg.leaderMinutes || 10) * 60, top3 = [...HV.best.entries()].filter(([, v]) => t - v.t < tw && v.best > 0.5).sort((a, b) => b[1].best - a[1].best).slice(0, 3);
     HV.rankOf = new Map(top3.map(([id], i) => [id, i]));
@@ -2244,8 +2242,10 @@ function hDrawUI(t) {
 }
 function hDrawTop(t) {
   const cfg = HC(), L = HL(), B = cfg.boards || CHURCH_DEFAULTS.heaven.boards, en = L === 'en';
+  hDrawClassJoin(t);
+  if (HV.cls && HV.cls.scene) return;
   // câu đố
-  if (HV.quiz) { const q = HV.quiz, b = B.quiz, left = Math.max(0, Math.ceil(q.until - t));
+  if (false && HV.quiz) { const q = HV.quiz, b = B.quiz, left = Math.max(0, Math.ceil(q.until - t));
     hBoard(b.x, b.y, b.w, b.h, (en ? '📖 Bible quiz' : '📖 Câu đố Kinh Thánh') + (q.winner ? '' : '  ⏱ ' + left + 's'));
     ctx.font = PX(24); const ql = wrapLines(q.data[0], b.w - 50, 2); ql.forEach((ln, i) => hText(ln, b.x + b.w / 2, b.y + 78 + i * 30, 24, '#fff', 'center'));
     q.data[1].forEach((o, i) => { const yy = b.y + 150 + i * 46, right = (q.winner || t > q.until) && i === q.data[2];
@@ -2266,6 +2266,155 @@ function hDrawTop(t) {
   if (cfg.promptEvery) { const list = HD.prompts[L]; if (t > HV.nextPrompt) { HV.promptI = (HV.promptI + 1) % list.length; HV.nextPrompt = t + cfg.promptEvery; }
     const txt = list[HV.promptI], a = clamp((HV.nextPrompt - t) / 0.5, 0, 1) * clamp((t - (HV.nextPrompt - cfg.promptEvery)) / 0.5, 0, 1);
     ctx.save(); ctx.globalAlpha = a; ctx.font = PX(24); const w = ctx.measureText(txt).width + 50; hBoard(W / 2 - w / 2, H - 70, w, 54); hText(txt, W / 2, H - 43, 24, '#fff3c4', 'center'); ctx.restore(); }
+}
+
+
+// ================== LỚP HỌC KINH THÁNH (mini game mỗi 5 phút) ==================
+const CS = 1080 / 941, CX = (x) => x * CS, CY = (y) => y * CS;
+const CSEATS = [[150, 1000], [635, 1000], [280, 1005], [778, 1000], [122, 1075], [658, 1078], [282, 1075], [815, 1075], [95, 1155], [675, 1155], [270, 1155], [850, 1155],
+  [70, 1250], [685, 1240], [268, 1240], [868, 1240], [65, 1335], [695, 1335], [255, 1335], [880, 1335], [45, 1430], [710, 1430], [238, 1430], [895, 1430]];
+const CBOARD = { x: CX(255), y: CY(552), w: CX(800) - CX(255), h: CY(838) - CY(552) }, CBOARD_FULL = { x: CX(136), y: CY(546), w: CX(806) - CX(136), h: CY(842) - CY(546) };
+const CTEACH = { x: CX(150), y: CY(700) };
+(async () => { HV.img.cls = await loadImg('church://app/assets/heaven/class.png'); })();
+function hHighestFrame() { return frameStyleFor(Infinity) || 'b:fD'; }
+function hClassBless(w) {
+  const ev = { id: w.id, name: w.name, avatar: w.avatar, gift: HL() === 'en' ? 'Bible class' : 'Lớp học Kinh Thánh', count: 1, frame: hHighestFrame(), sim: true };
+  const c = hClimber(ev); if (!c) return; c.laurel = true; c.acc = 'crown'; c.last = now();
+  (HV.giftQ = HV.giftQ || []).push({ c, ev, line: blessingLine({ name: c.name, gift: ev.gift, count: 1 }), total: 0 });
+}
+function hClassStart() {
+  const t = now(), cfg = HC();
+  HV.cls = { phase: 'join', start: t, joinUntil: t + (cfg.classJoinSeconds || 30), members: [], scene: false };
+  SFX.fanfare(); hsay('classAnnounce', { max: cfg.classMax || 20, n: cfg.classQuestions || 5 });
+  toPanel({ type: 'log', msg: '📖 Lớp học Kinh Thánh: mở ghi danh (comment "me")' });
+}
+function hClassBegin() {
+  const C = HV.cls, t = now(), cfg = HC(), L = HL(), list = HD.quiz[L], n = Math.max(1, Math.min(10, cfg.classQuestions || 5));
+  if (C.members.length < Math.max(1, cfg.classMin || 1)) { hsay('classCancel'); C.phase = 'cancel'; C.cancelUntil = t + 5; return; }
+  const idx = []; while (idx.length < Math.min(n, list.length)) { const i = Math.floor(Math.random() * list.length); if (!idx.includes(i) && !HV.quizUsed.has(L + i)) idx.push(i); if (HV.quizUsed.size > list.length - n) HV.quizUsed.clear(); }
+  idx.forEach((i) => HV.quizUsed.add(L + i));
+  C.qs = idx.map((i) => list[i]); C.qi = -1; C.phase = 'lesson'; C.scene = true; C.sceneAt = t; C.qDur = Math.max(6, (cfg.classSeconds || 60) / C.qs.length);
+  SFX.bell(); hsay('classStart'); hClassNextQ();
+}
+function hClassNextQ() {
+  const C = HV.cls, t = now(); C.qi++;
+  if (C.qi >= C.qs.length) return hClassResult();
+  C.qStart = t; C.revealAt = t + C.qDur - 2.6; C.revealed = false;
+  for (const m of C.members) m.ans = null;
+  SFX.coin(); if (HC().classReadQ !== false) speakBlessing({ text: (HL() === 'en' ? 'Question ' : 'Câu ') + (C.qi + 1) + '. ' + C.qs[C.qi][0], lang: HL() });
+}
+function hClassResult() {
+  const C = HV.cls, t = now(); C.phase = 'result'; C.resultAt = t;
+  const rank = [...C.members].sort((a, b) => b.score - a.score || a.time - b.time); C.rank = rank;
+  const w = rank[0];
+  if (w && w.score > 0) {
+    C.winner = w; SFX.win();
+    hsay('classWin', { name: w.name, score: w.score, n: C.qs.length });
+    addGreet({ id: w.id, name: w.name, avatar: w.avatar, greetText: (HL() === 'en' ? '🏆 {name} topped the Bible class' : '🏆 {name} giỏi nhất lớp học Kinh Thánh').replace('{name}', w.name) });
+    toPanel({ type: 'log', msg: '🏆 Lớp học Kinh Thánh: ' + w.name + ' đúng ' + w.score + '/' + C.qs.length });
+  } else { hsay('classNone'); }
+}
+function hClassChat(ev, n, c) {
+  const C = HV.cls; if (!C) return false; const t = now(), cfg = HC();
+  if (C.phase === 'join' && hkw('kwClassJoin').some((w) => n === w || n === w + '!' || n.replace(/[^a-z0-9 ]/g, '').trim() === w)) {
+    if (C.members.some((m) => m.id === ev.id)) return true;
+    if (C.members.length >= (cfg.classMax || 20)) return true;
+    const m = { id: ev.id, name: cleanName(ev.name), avatar: ev.avatar, avatarImg: c && c.avatarImg, seat: C.members.length, score: 0, time: 0, ans: null, joinT: t };
+    C.members.push(m); SFX.coin();
+    if (!m.avatarImg && ev.avatar) loadAvatar(ev.avatar).then((im) => { m.avatarImg = im; });
+    if (c) hFloat(c, '📖 ' + (HL() === 'en' ? 'Joined!' : 'Vào lớp!'), '#bff5c9');
+    if (C.members.length >= (cfg.classMax || 20)) C.joinUntil = Math.min(C.joinUntil, t + 3);
+    return true;
+  }
+  if (C.phase === 'lesson' && !C.revealed) {
+    const m = C.members.find((x) => x.id === ev.id); if (!m || m.ans) return !!m;
+    const q = C.qs[C.qi], opts = q[1].map(hnorm), mm = /^(?:dap an|dap an la|answer|cau|chon)?\s*([abc])[\s.!)]*$/.exec(n);
+    const pick = mm ? 'abc'.indexOf(mm[1]) : opts.findIndex((o) => o && n === o);
+    if (pick < 0) return true;
+    m.ans = { pick, t: t - C.qStart }; SFX.step(); return true;
+  }
+  return false;
+}
+function hClassUpdate(t) {
+  const cfg = HC();
+  if (!HV.cls) { if (cfg.classOn !== false && !HV.prayer) { if (!HV.nextClass) HV.nextClass = t + Math.min(90, cfg.classEvery || 300); if (t > HV.nextClass) hClassStart(); } return; }
+  const C = HV.cls;
+  if (C.phase === 'join' && t > C.joinUntil) hClassBegin();
+  else if (C.phase === 'lesson') {
+    if (!C.revealed && (t > C.revealAt || C.members.every((m) => m.ans))) {
+      if (t < C.revealAt) C.revealAt = t;
+      C.revealed = true; const q = C.qs[C.qi];
+      for (const m of C.members) if (m.ans && m.ans.pick === q[2]) { m.score++; m.time += m.ans.t; } else m.time += C.qDur;
+      SFX.bell();
+    }
+    if (C.revealed && t > C.revealAt + 2.6) hClassNextQ();
+  } else if (C.phase === 'result' && t > C.resultAt + 9) { HV.cls = null; if (C.winner) hClassBless(C.winner); HV.nextClass = t + (cfg.classEvery || 300); }
+  else if (C.phase === 'cancel' && t > C.cancelUntil) { HV.cls = null; HV.nextClass = t + (cfg.classEvery || 300); }
+}
+function hChalk(txt, x, y, size, color = '#f4f7ee', align = 'left') { ctx.font = PX(size); ctx.textAlign = align; ctx.textBaseline = 'middle'; ctx.fillStyle = 'rgba(0,0,0,0.25)'; ctx.fillText(txt, x + 2, y + 2); ctx.fillStyle = color; ctx.fillText(txt, x, y); }
+function hRenderClass(t) {
+  const C = HV.cls, L = HL(), en = L === 'en';
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  if (HV.img.cls) ctx.drawImage(HV.img.cls, 0, 0, W, H); else { ctx.fillStyle = '#5a3a20'; ctx.fillRect(0, 0, W, H); }
+  // phủ bảng đen rồi viết phấn
+  const B = CBOARD_FULL; ctx.fillStyle = '#17553a'; ctx.fillRect(B.x, B.y, B.w, B.h);
+  ctx.fillStyle = 'rgba(255,255,255,0.04)'; for (let i = 0; i < 18; i++) ctx.fillRect(B.x + ((i * 97) % B.w), B.y + ((i * 53) % B.h), 60, 2);
+  const A = CBOARD;
+  if (C.phase === 'lesson') {
+    const q = C.qs[C.qi], left = Math.max(0, C.revealAt - t), frac = clamp(left / (C.revealAt - C.qStart), 0, 1);
+    hChalk((en ? 'Question ' : 'Câu ') + (C.qi + 1) + '/' + C.qs.length, A.x + 10, A.y + 26, 24, '#ffe9a0');
+    ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.fillRect(A.x + 200, A.y + 20, A.w - 220, 12); ctx.fillStyle = frac < 0.3 ? '#ff8a8a' : '#ffe9a0'; ctx.fillRect(A.x + 200, A.y + 20, (A.w - 220) * frac, 12);
+    ctx.font = PX(24); const ql = wrapLines(q[0], A.w - 24, 3); ql.forEach((ln, i) => hChalk(ln, A.x + 10, A.y + 70 + i * 30, 24));
+    const oy = A.y + 80 + ql.length * 30;
+    q[1].forEach((o, i) => { const y = oy + i * 38, right = C.revealed && i === q[2];
+      if (right) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 4; ctx.strokeRect(A.x + 4, y - 17, A.w - 12, 34); }
+      ctx.font = PX(24); const ol = wrapLines('ABC'[i] + '. ' + o, A.w - 30, 1)[0]; hChalk(ol + (right ? '  ✔' : ''), A.x + 14, y, 24, right ? '#ffe14d' : '#e8f5e9'); });
+    const answered = C.members.filter((m) => m.ans).length;
+    hChalk((en ? 'Comment A, B or C · answered ' : 'Comment A, B hoặc C · đã trả lời ') + answered + '/' + C.members.length, A.x + A.w / 2, A.y + A.h - 14, 16, '#bfe3c8', 'center');
+  } else if (C.phase === 'result') {
+    hChalk(en ? '🏆 RESULTS' : '🏆 KẾT QUẢ LỚP HỌC', A.x + A.w / 2, A.y + 28, 32, '#ffe9a0', 'center');
+    (C.rank || []).slice(0, 3).forEach((m, i) => { const y = A.y + 92 + i * 62;
+      hChalk(['①', '②', '③'][i], A.x + 30, y, 32, ['#ffd23f', '#e6ecf5', '#e0a060'][i]); hAvatar(m.avatarImg, m.name, A.x + 92, y, 24);
+      hChalk(m.name, A.x + 128, y, 24); hChalk(m.score + '/' + C.qs.length, A.x + A.w - 20, y, 28, '#ffe9a0', 'right'); });
+    if (!C.winner) hChalk(en ? 'No correct answers — see you next class!' : 'Chưa ai đúng — hẹn lớp sau nhé!', A.x + A.w / 2, A.y + A.h - 30, 20, '#ffd0d0', 'center');
+  }
+  // bong bóng lời thầy
+  { const txt = C.phase === 'result' ? (en ? 'Well done! God bless you!' : 'Giỏi lắm! Chúa chúc lành!') : C.revealed ? (en ? 'Answer: ' : 'Đáp án: ') + 'ABC'[C.qs[C.qi][2]] : (en ? 'Who knows?' : 'Ai biết nào?');
+    ctx.font = PX(20); const w = ctx.measureText(txt).width + 28, x = clamp(CTEACH.x - w / 2, 8, W - w - 8), y = CTEACH.y - 150;
+    ctx.fillStyle = '#fffdf2'; ctx.fillRect(x, y, w, 40); ctx.fillStyle = '#3a2a1a'; ctx.fillRect(x, y, w, 3); ctx.fillRect(x, y + 37, w, 3); ctx.fillRect(x, y, 3, 40); ctx.fillRect(x + w - 3, y, 3, 40);
+    ctx.fillStyle = '#fffdf2'; ctx.fillRect(CTEACH.x - 6, y + 40, 12, 10); hText(txt, x + w / 2, y + 21, 20, '#3a2a1a', 'center', false); }
+  // học viên: tên + avatar + câu trả lời
+  for (const m of C.members) {
+    const s = CSEATS[m.seat]; if (!s) continue; const x = CX(s[0]), y = CY(s[1]) - 40, k = 0.85 + 0.25 * ((s[1] - 1000) / 430);
+    const fs = Math.round(16 * k + 2); ctx.font = PX(fs); const tw = ctx.measureText(m.name).width, bw = tw + fs * 2.4 + 10, bx = Math.round(x - bw / 2), by = Math.round(y - fs * 1.6), bh = Math.round(fs * 1.5);
+    ctx.fillStyle = 'rgba(18,14,44,0.85)'; ctx.fillRect(bx, by, Math.round(bw), bh); ctx.fillStyle = m === C.winner ? '#ffd23f' : '#9b84ff'; ctx.fillRect(bx, by, Math.round(bw), 2); ctx.fillRect(bx, by + bh - 2, Math.round(bw), 2);
+    hAvatar(m.avatarImg, m.name, bx + fs * 0.75 + 2, by + bh / 2, fs * 0.62);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText(m.name, bx + fs * 1.5 + 4, by + bh / 2 + 1);
+    ctx.fillStyle = '#ffe08a'; ctx.fillText(String(m.score), bx + fs * 1.5 + 8 + tw, by + bh / 2 + 1);
+    let mark = null, col = '#fff';
+    if (C.phase === 'lesson') { if (C.revealed) { if (m.ans) { const ok = m.ans.pick === C.qs[C.qi][2]; mark = 'ABC'[m.ans.pick] + (ok ? ' ✔' : ' ✘'); col = ok ? '#7dff9a' : '#ff8a8a'; } else { mark = '…'; col = '#bbb'; } } else if (m.ans) { mark = '✋'; col = '#ffe08a'; } }
+    if (mark) hText(mark, x, by - fs, Math.round(fs * 1.4), col, 'center');
+    if (m === C.winner && C.phase === 'result' && Math.random() < 0.3) hSpark(x, y, 2, 30);
+  }
+  drawFX();
+  // chuyển cảnh
+  const fade = clamp(1 - (t - C.sceneAt) / 0.6, 0, 1); if (fade > 0) { ctx.fillStyle = `rgba(255,248,225,${fade})`; ctx.fillRect(0, 0, W, H); }
+  ctx.restore();
+}
+function hDrawClassJoin(t) {
+  const C = HV.cls; if (!C || (C.phase !== 'join' && C.phase !== 'cancel')) return;
+  const cfg = HC(), en = HL() === 'en', B = (cfg.boards || {}).cls || { x: 90, y: 700, w: 900, h: 470 }, max = cfg.classMax || 20;
+  hBoard(B.x, B.y, B.w, B.h, en ? '📖 BIBLE CLASS IS STARTING!' : '📖 LỚP HỌC KINH THÁNH SẮP BẮT ĐẦU!', '#bff5c9');
+  if (C.phase === 'cancel') { hText(en ? 'Nobody joined — the class moves to next time 🙏' : 'Chưa có ai tham gia — lớp học dời sang lần sau 🙏', B.x + B.w / 2, B.y + B.h / 2, 24, '#ffd0d0', 'center'); return; }
+  const left = Math.max(0, Math.ceil(C.joinUntil - t)), pulse = 1 + 0.06 * Math.sin(t * 6);
+  ctx.save(); ctx.translate(B.x + B.w / 2, B.y + 92); ctx.scale(pulse, pulse); hText(en ? 'Comment  "me"  to join' : 'Comment  "me"  để tham gia', 0, 0, 40, '#ffe14d', 'center'); ctx.restore();
+  hText((en ? 'Fastest ' : 'Chỉ nhận ') + max + (en ? ' people · ' : ' bạn nhanh nhất · ') + (cfg.classQuestions || 5) + (en ? ' quiz questions · ' : ' câu trắc nghiệm · ') + (cfg.classSeconds || 60) + 's', B.x + B.w / 2, B.y + 144, 22, '#f0e8ff', 'center');
+  hText(en ? 'Most correct answers → blessing + golden avatar frame' : 'Ai đúng nhiều nhất → được chúc phúc + khung avatar vàng', B.x + B.w / 2, B.y + 176, 22, '#ffd27a', 'center');
+  hText('⏱ ' + left + 's   ·   ' + C.members.length + '/' + max, B.x + B.w / 2, B.y + 214, 28, '#ffffff', 'center');
+  const cols = 10, cw = (B.w - 40) / cols;
+  for (let i = 0; i < max; i++) { const x = B.x + 20 + cw * (i % cols) + cw / 2, y = B.y + 270 + Math.floor(i / cols) * 90, m = C.members[i];
+    if (m) { hAvatar(m.avatarImg, m.name, x, y, 26); ctx.font = PX(16); hText(m.name.slice(0, 8), x, y + 40, 16, '#fff', 'center'); }
+    else { ctx.strokeStyle = 'rgba(207,195,255,0.35)'; ctx.lineWidth = 3; ctx.beginPath(); ctx.arc(x, y, 26, 0, Math.PI * 2); ctx.stroke(); } }
 }
 
 // ---------- điều phối sự kiện LIVE ----------

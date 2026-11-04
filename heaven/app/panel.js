@@ -211,7 +211,8 @@ $$('[data-hv]').forEach((b) => b.onclick = () => {
   if (k === 'share') L({ type: 'share' });
   if (k === 'follow') L({ type: 'follow' });
   if (k === 'quiz') api.toStage({ type: 'hv-quiz' });
-  if (k === 'answer') for (const a of ['A', 'B', 'C']) api.toStage({ type: 'sim-live', id: 'simQ' + a, name: 'Người trả lời ' + a, ev: { type: 'chat', text: a } });
+  if (k === 'classfill') api.toStage({ type: 'hv-class-fill', n: 20 });
+  if (k === 'answer') api.toStage({ type: 'hv-class-answer' });
   if (k === 'prayer') api.toStage({ type: 'hv-prayer' });
   if (k === 'lanterns') api.toStage({ type: 'hv-lanterns' });
 });

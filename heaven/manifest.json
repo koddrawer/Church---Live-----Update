@@ -1,9 +1,9 @@
 {
-  "version": "1.0.0",
-  "notes": "Heaven Live 1.0.0 — cầu thang lên thánh đường 8-bit",
+  "version": "1.0.1",
+  "notes": "1.0.1: Lớp học Kinh Thánh thay cho câu đố",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-04T04:17:27.493Z",
+  "date": "2026-11-04T04:41:59.171Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -158,6 +158,12 @@
       "path": "assets/heaven/bg.png",
       "size": 2659910,
       "sha256": "1347d1459663e25312536eefccca59367df93e4fe07d0e4aaefb7d32dfcd0b27",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/class.png",
+      "size": 2543991,
+      "sha256": "d753e37d5c613e116d6964cb54cbb70925b022be11915d00d19e27044903d810",
       "enc": "b64"
     },
     {
@@ -354,8 +360,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 41902,
-      "sha256": "5fa6831291b4a9d2047129dd29b68f0cfa1db7a08d03217cf582bfafbfce055d"
+      "size": 43288,
+      "sha256": "728d09aa79e6374955af29074c6959e97c6d24bf9f592ed67c6b94bfe57b6b62"
     },
     {
       "path": "fonts.css",
@@ -364,8 +370,8 @@
     },
     {
       "path": "heaven_core.js",
-      "size": 43689,
-      "sha256": "18355ffde792f18ea533f59541cd987eaf10f7e37229d9e9fc656a695d0ab7ea"
+      "size": 56268,
+      "sha256": "57b2a72cf01b89fb9fe1181d4af626257f8b416df58c1d137737a74424b8a1b6"
     },
     {
       "path": "heaven_data.js",
@@ -374,23 +380,23 @@
     },
     {
       "path": "i18n.js",
-      "size": 35541,
-      "sha256": "015dba553cf04b46ab5eb2ef3b0033b58edeea5571e979bd4ac0bbbeb2c5e216"
+      "size": 36726,
+      "sha256": "3184844dc23da729e53f397e2b2b9080eb58bea90c5d3f33a45def4e4e669877"
     },
     {
       "path": "main-ext.js",
       "size": 20408,
-      "sha256": "84b5d39edb71cdbef800825ff06958e4c0fe17e68bd35e1b8c4259a7bcb64771"
+      "sha256": "c273877ea4f47a9ef97b34c2fbc23bf21992f36823d42bf76a84b63c1e9b7a97"
     },
     {
       "path": "panel.html",
-      "size": 49590,
-      "sha256": "516062420b79b0f4f3ae87f8b97145ac05e6db92363ff55f6f183ecbe99c02a6"
+      "size": 50701,
+      "sha256": "7e53eb715de4a05999ab60e8edd348a92bb892ae4776edcd2f5e0354b73b8682"
     },
     {
       "path": "panel.js",
-      "size": 39967,
-      "sha256": "089d35957fd2eef8e863b9aa3409f0a664d844a457f00a03b138c3856a151f29"
+      "size": 39931,
+      "sha256": "2f36575b509e5ee4c5b9beeb001e79efce939101555a587e3d7821bff186963f"
     },
     {
       "path": "sermons_en.js",
@@ -409,13 +415,13 @@
     },
     {
       "path": "stage.js",
-      "size": 160378,
-      "sha256": "bbd20ad6f813216505421747f41722d61cd1d788823a8edaec8bc5e7527ea312"
+      "size": 173636,
+      "sha256": "0942e6876c942dfa17df1d7f7b55f5ce70f4e81f5580956a3a65eef4fff847bd"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "e4ee40fd592208992f9a4ef4baa7895838b2eef26d2cc3295863508826c8557a"
+      "sha256": "32ea4c64f097e9a4c8f0866dba91930074d90572fcf92c07d8a8f27129d0c752"
     }
   ]
 }

@@ -122,8 +122,9 @@ body.plocked main{opacity:.72}
         <button class="b" data-hv="verse">💬 Lời Chúa</button>
         <button class="b" data-hv="share">🔗 Chia sẻ</button>
         <button class="b" data-hv="follow">➕ Theo dõi</button>
-        <button class="b" data-hv="quiz">📖 Bắt đầu câu đố</button>
-        <button class="b" data-hv="answer">💬 Trả lời câu đố (A/B/C)</button>
+        <button class="b" data-hv="quiz">📖 Mở lớp học Kinh Thánh</button>
+        <button class="b" data-hv="classfill">💬 20 người comment "me"</button>
+        <button class="b" data-hv="answer">💬 Học viên trả lời (A/B/C)</button>
         <button class="b" data-hv="prayer">✝ Giờ cầu nguyện</button>
         <button class="b" data-hv="lanterns">🏮 Thắp hết đèn lồng</button>
       </div>
@@ -396,9 +397,13 @@ body.plocked main{opacity:.72}
       <p class="hint">Ý nguyện có từ ngữ không phù hợp, đường link hay số điện thoại sẽ tự bị bỏ qua, không hiện và không đọc.</p>
     </div>
     <div class="card">
-      <h3>Câu đố & giờ cầu nguyện</h3>
-      <div class="row"><label>📖 Câu đố Kinh Thánh</label><input type="checkbox" data-k="heaven.quiz"> <label style="min-width:0;margin-left:12px">mỗi (giây)</label><input type="number" min="30" max="7200" data-k="heaven.quizEvery"></div>
-      <div class="row"><label>Thời gian trả lời (giây)</label><input type="number" min="10" max="300" data-k="heaven.quizSeconds"></div>
+      <h3>Lớp học Kinh Thánh & giờ cầu nguyện</h3>
+      <div class="row"><label>📖 Lớp học Kinh Thánh</label><input type="checkbox" data-k="heaven.classOn"> <label style="min-width:0;margin-left:12px">mỗi (giây)</label><input type="number" min="60" max="7200" data-k="heaven.classEvery"></div>
+      <div class="row"><label>Thời gian ghi danh (giây)</label><input type="number" min="10" max="180" data-k="heaven.classJoinSeconds"> <label style="min-width:0;margin-left:12px">tối đa học viên</label><input type="number" min="1" max="24" data-k="heaven.classMax"></div>
+      <div class="row"><label>Thời gian lớp học (giây)</label><input type="number" min="30" max="600" data-k="heaven.classSeconds"> <label style="min-width:0;margin-left:12px">số câu hỏi</label><input type="number" min="1" max="10" data-k="heaven.classQuestions"></div>
+      <div class="row"><label>Từ khoá ghi danh</label><input type="text" data-k="heaven.kwClassJoin" style="flex:1"></div>
+      <div class="row"><label>Đọc to câu hỏi</label><input type="checkbox" data-k="heaven.classReadQ"></div>
+      <p class="hint">Thông báo "comment me để tham gia" hiện trước giờ học. Mỗi câu hỏi học viên comment A, B hoặc C (chỉ tính câu trả lời đầu tiên). Người đúng nhiều nhất (bằng điểm thì ai trả lời nhanh hơn) được lên nhận phép lành với khung avatar bậc cao nhất.</p>
       <div class="row"><label>✝ Giờ cầu nguyện chung</label><input type="checkbox" data-k="heaven.prayer"> <label style="min-width:0;margin-left:12px">mỗi (giây)</label><input type="number" min="60" max="14400" data-k="heaven.prayerEvery"></div>
       <div class="row"><label>Kéo dài (giây)</label><input type="number" min="20" max="600" data-k="heaven.prayerSeconds"> <label style="min-width:0;margin-left:12px">tim mở 1 dòng kinh</label><input type="number" min="1" max="10000" data-k="heaven.prayerLikesPerLine"></div>
       <p class="hint">Có thể kéo thả các bảng (thanh trên cùng, xếp hạng, ý nguyện, câu đố, cầu nguyện, Lời Chúa) bằng "Chỉnh bố cục" ở tab Cảnh. Câu đố, Lời Chúa và kinh nguyện nằm trong file app/heaven_data.js, sửa thêm thoải mái.</p>

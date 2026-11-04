@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = 'H1.0.0';
+  const EXT_VER = 'H1.0.1';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));

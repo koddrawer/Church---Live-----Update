@@ -320,7 +320,7 @@ CHURCH_DEFAULTS.heaven = {
   candleSeconds: 300, maxCandles: 40,
   readIntentions: true, intentionGap: 15, maxIntentions: 6,
   verseSpeak: true, verseSeconds: 9,
-  quiz: true, quizEvery: 300, quizSeconds: 40,
+  classOn: true, classEvery: 300, classJoinSeconds: 30, classSeconds: 60, classQuestions: 5, classMax: 20, classReadQ: true, kwClassJoin: 'me, tôi, toi, join, em',
   shareSteps: 12, shareMilestone: 20,
   followRobe: true,
   prayer: true, prayerEvery: 900, prayerSeconds: 60, prayerLikesPerLine: 40,
@@ -328,14 +328,15 @@ CHURCH_DEFAULTS.heaven = {
   idleAngels: true, promptEvery: 9,
   leaderMinutes: 10,
   speech: {
-    vi: { top: 'Chúc mừng {name} đã tới thánh đường. Xin Chúa chúc lành cho {name}.', heart: 'Thánh Tâm Chúa Giêsu đang tỏa sáng. Xin Chúa chúc lành cho tất cả anh chị em đang hiện diện. Amen.', lanterns: 'Alleluia! Cả cộng đoàn đã thắp sáng đèn lồng lên tới thánh đường. Tạ ơn anh chị em.', intention: 'Xin Chúa nhận lời cầu nguyện của {name}: {text}.', quizWin: 'Chúc mừng {name} đã trả lời đúng.', prayerStart: 'Giờ cầu nguyện chung đã tới. Xin cả nhà cùng thả tim để đọc kinh Lạy Cha.', prayerEnd: 'Amen. Xin Chúa chúc lành cho tất cả anh chị em đã cùng cầu nguyện.', share: 'Cảm ơn {name} đã chia sẻ. Thiên thần nâng {name} lên gần Chúa.', follow: 'Chào mừng {name} gia nhập cộng đoàn.', verse: '{name}, Lời Chúa dành cho bạn: {verse}' },
-    en: { top: 'Congratulations, {name}, you reached the cathedral. May God bless you.', heart: 'The Sacred Heart of Jesus is shining. May God bless everyone here. Amen.', lanterns: 'Alleluia! Together we lit the lanterns all the way to the cathedral. Thank you all.', intention: 'Lord, hear the prayer of {name}: {text}.', quizWin: 'Congratulations, {name}, that is correct.', prayerStart: 'It is time to pray together. Please tap likes as we pray the Lord’s Prayer.', prayerEnd: 'Amen. May God bless everyone who prayed with us.', share: 'Thank you {name} for sharing. An angel lifts you closer to God.', follow: 'Welcome {name} to our community.', verse: '{name}, God’s word for you: {verse}' }
+    vi: { top: 'Chúc mừng {name} đã tới thánh đường. Xin Chúa chúc lành cho {name}.', heart: 'Thánh Tâm Chúa Giêsu đang tỏa sáng. Xin Chúa chúc lành cho tất cả anh chị em đang hiện diện. Amen.', lanterns: 'Alleluia! Cả cộng đoàn đã thắp sáng đèn lồng lên tới thánh đường. Tạ ơn anh chị em.', intention: 'Xin Chúa nhận lời cầu nguyện của {name}: {text}.', quizWin: 'Chúc mừng {name} đã trả lời đúng.', classAnnounce: 'Lớp học Kinh Thánh sắp bắt đầu! Bình luận chữ me để tham gia. Chỉ nhận {max} bạn nhanh nhất. Ai trả lời đúng nhiều nhất sẽ được chúc phúc.', classStart: 'Cả lớp ổn định nào. Lớp học Kinh Thánh bắt đầu. Hãy bình luận A, B hoặc C để trả lời.', classWin: 'Chúc mừng {name} đúng {score} trên {n} câu, giỏi nhất lớp học hôm nay. Xin mời {name} lên nhận phép lành.', classNone: 'Lớp học hôm nay chưa có ai trả lời đúng. Hẹn cả nhà lớp học sau nhé.', classCancel: 'Chưa có bạn nào vào lớp. Lớp học Kinh Thánh sẽ mở lại sau ít phút.', prayerStart: 'Giờ cầu nguyện chung đã tới. Xin cả nhà cùng thả tim để đọc kinh Lạy Cha.', prayerEnd: 'Amen. Xin Chúa chúc lành cho tất cả anh chị em đã cùng cầu nguyện.', share: 'Cảm ơn {name} đã chia sẻ. Thiên thần nâng {name} lên gần Chúa.', follow: 'Chào mừng {name} gia nhập cộng đoàn.', verse: '{name}, Lời Chúa dành cho bạn: {verse}' },
+    en: { top: 'Congratulations, {name}, you reached the cathedral. May God bless you.', heart: 'The Sacred Heart of Jesus is shining. May God bless everyone here. Amen.', lanterns: 'Alleluia! Together we lit the lanterns all the way to the cathedral. Thank you all.', intention: 'Lord, hear the prayer of {name}: {text}.', quizWin: 'Congratulations, {name}, that is correct.', classAnnounce: 'Bible class is about to start! Comment me to join. Only the fastest {max} people get a seat. The best student will receive a blessing.', classStart: 'Settle down, class. Bible class begins now. Comment A, B or C to answer.', classWin: 'Congratulations {name}, {score} out of {n} correct, the best student today. Please come up to receive a blessing.', classNone: 'Nobody got a correct answer today. See you at the next class.', classCancel: 'Nobody joined the class yet. Bible class will open again in a few minutes.', prayerStart: 'It is time to pray together. Please tap likes as we pray the Lord’s Prayer.', prayerEnd: 'Amen. May God bless everyone who prayed with us.', share: 'Thank you {name} for sharing. An angel lifts you closer to God.', follow: 'Welcome {name} to our community.', verse: '{name}, God’s word for you: {verse}' }
   },
   boards: {
     top: { x: 10, y: 8, w: 1060, h: 74 },
     leader: { x: 770, y: 92, w: 300, h: 176 },
     intent: { x: 10, y: 92, w: 330, h: 230 },
     quiz: { x: 150, y: 560, w: 780, h: 330 },
+    cls: { x: 90, y: 700, w: 900, h: 470 },
     prayer: { x: 110, y: 470, w: 860, h: 560 },
     verse: { x: 120, y: 1330, w: 840, h: 270 }
   },
