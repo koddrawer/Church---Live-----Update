@@ -1,9 +1,9 @@
 {
-  "version": "1.0.2",
-  "notes": "1.0.2: lớp học — không che cha xứ, hướng dẫn rõ hơn",
+  "version": "1.0.3",
+  "notes": "1.0.3: thiên thần mới, sửa giọng đọc bị kẹt, chỉnh bảng hướng dẫn, gọn bảng điều khiển",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-04T07:25:14.372Z",
+  "date": "2026-11-04T07:58:45.001Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -132,26 +132,14 @@
     },
     {
       "path": "assets/heaven/angel_0.png",
-      "size": 525,
-      "sha256": "2e5518c0392e5eaae230b170cd74af62b653c29cc5e827c4d6e60293b8bed983",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/heaven/angel_1.png",
-      "size": 488,
-      "sha256": "5a0ee047565f8d7c815dcf90a40bcf4a907f6eb7e817df5d76286c5665975dcb",
+      "size": 7758,
+      "sha256": "85850192a40a160bf07354bb70656085e343efb1fa4caa4955b9e68c4b340d0d",
       "enc": "b64"
     },
     {
       "path": "assets/heaven/angel_trumpet_0.png",
-      "size": 570,
-      "sha256": "a3a7caea15410318a39d09c86442ab48ad81877b06617dc126acb694342266c2",
-      "enc": "b64"
-    },
-    {
-      "path": "assets/heaven/angel_trumpet_1.png",
-      "size": 542,
-      "sha256": "400cfa36156049d597dd27570e7d7da3c6ed1c9f481a63a564f319413cb256ca",
+      "size": 7647,
+      "sha256": "535565b1fb76d8ab9fb7f41aa42680ef274a2c3b05ab80765fa2921588a144a0",
       "enc": "b64"
     },
     {
@@ -360,8 +348,8 @@
     },
     {
       "path": "defaults.js",
-      "size": 43288,
-      "sha256": "728d09aa79e6374955af29074c6959e97c6d24bf9f592ed67c6b94bfe57b6b62"
+      "size": 44351,
+      "sha256": "1dc0f521a78f08fbeeb6b385ea95454b736e899931b426f4f93915e1084e3d60"
     },
     {
       "path": "fonts.css",
@@ -370,8 +358,8 @@
     },
     {
       "path": "heaven_core.js",
-      "size": 57485,
-      "sha256": "a8242b5081b2977a44a354b69db3b0494f9d64a20b6267736b9e13d31523bfb0"
+      "size": 57707,
+      "sha256": "166cd542ffa50838c6dbc5cba5136666f8503350df3e318603587d637169f157"
     },
     {
       "path": "heaven_data.js",
@@ -380,23 +368,23 @@
     },
     {
       "path": "i18n.js",
-      "size": 36726,
-      "sha256": "3184844dc23da729e53f397e2b2b9080eb58bea90c5d3f33a45def4e4e669877"
+      "size": 39039,
+      "sha256": "4540067b4e2f1f5085cb3169cc543ae4a977ade7a8b3719f08f4153c0b5ff7fc"
     },
     {
       "path": "main-ext.js",
       "size": 20408,
-      "sha256": "485bcced7ab44c6c42d76685e8cf474c165aa0a7f729361f5b482c52beb943d1"
+      "sha256": "2324760c9636522a2a33fb4bd3d10cea89b79fee57f57deef7067f2e477c8b2d"
     },
     {
       "path": "panel.html",
-      "size": 50701,
-      "sha256": "7e53eb715de4a05999ab60e8edd348a92bb892ae4776edcd2f5e0354b73b8682"
+      "size": 38370,
+      "sha256": "c16021e976a706bca236a85e18e65f11daf1ccef36c5483fd69dfa56e93bb82e"
     },
     {
       "path": "panel.js",
-      "size": 39931,
-      "sha256": "2f36575b509e5ee4c5b9beeb001e79efce939101555a587e3d7821bff186963f"
+      "size": 41345,
+      "sha256": "15a4191d82896230a34b4d10b014645c97826c412a35374d99bcf27d728b792e"
     },
     {
       "path": "sermons_en.js",
@@ -415,13 +403,13 @@
     },
     {
       "path": "stage.js",
-      "size": 174853,
-      "sha256": "6d48476e2a71ec9da8568a319193cc3df471451a60e4005e337820261efcbf9d"
+      "size": 177625,
+      "sha256": "bf1e5d72f1dffeaf69552d5a6fd69eea57686c90d4adf2c069d5ec7052ae867a"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "b6f433f3e0920fc721300367fdde4b94b96b74c78db1070d58ecd927116da50a"
+      "sha256": "7af2ff43c2a60cd6be901ffd180a51e6e590a00f158460adcf8277f9ad6e4d6a"
     }
   ]
 }

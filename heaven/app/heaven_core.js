@@ -30,8 +30,8 @@ function hbad(t) {
 (async () => {
   const L = (n) => loadImg('church://app/assets/heaven/' + n);
   HV.img.bg = await L('bg.png');
-  HV.img.angel = [await L('angel_0.png'), await L('angel_1.png')];
-  HV.img.angelT = [await L('angel_trumpet_0.png'), await L('angel_trumpet_1.png')];
+  HV.img.angel = [await L('angel_0.png')];
+  HV.img.angelT = [await L('angel_trumpet_0.png')];
   try { const f = new FontFace('PixelVN', 'url(church://app/assets/heaven/pixel.woff)'); await f.load(); document.fonts.add(f); } catch {}
 })();
 const PX = (n) => `${n}px PixelVN, "Courier New", monospace`;
@@ -370,8 +370,8 @@ function H_render(t) {
     const dt0 = 1 / 30;
     if (a.carry) { const c = HV.climbers.get(a.carry); if (c) { const p = posOf(c.step, c.u); const tx = p.x + 10, ty = p.y - 230 * p.k; a.x = lerp(a.x, tx, 0.12); a.y = lerp(a.y, ty, 0.12); } else a.carry = null; }
     else { a.x += a.vx * dt0; a.y += (a.vy || Math.sin((t - a.t) * 2) * 20) * dt0; }
-    const fr = (a.trumpet ? HV.img.angelT : HV.img.angel)[Math.floor(t * 6) % 2]; if (!fr) continue;
-    const sc = a.carry ? 3.2 : 3; ctx.save(); ctx.translate(a.x, a.y + Math.sin(t * 3 + a.t) * 8); if (a.vx < 0) ctx.scale(-1, 1); ctx.drawImage(fr, -fr.width * sc / 2, -fr.height * sc / 2, fr.width * sc, fr.height * sc); ctx.restore();
+    const fr = (a.trumpet ? HV.img.angelT : HV.img.angel)[0]; if (!fr) continue;
+    const sc = (a.carry ? 1.6 : 1.45) * (HC().angelScale || 1); ctx.save(); ctx.imageSmoothingEnabled = false; ctx.translate(a.x, a.y + Math.sin(t * 3 + a.t) * 8); if (a.vx < 0) ctx.scale(-1, 1); ctx.rotate(Math.sin(t * 2.2 + a.t) * 0.05); ctx.scale(1, 1 + Math.sin(t * 6 + a.t) * 0.025); ctx.drawImage(fr, -fr.width * sc / 2, -fr.height * sc / 2, fr.width * sc, fr.height * sc); ctx.restore();
   }
   // nốt nhạc
   for (const n of HV.notes) { const e = t - n.t; if (e < 0) continue; hText(e % 0.5 < 0.25 ? '♪' : '♫', n.x + n.vx * e, n.y + n.vy * e, 32, `rgba(255,228,120,${clamp(1 - e / 2.6, 0, 1)})`, 'center'); }
@@ -493,9 +493,9 @@ function hDrawTop(t) {
     hAvatar(v.avatarImg, v.name, b.x + 60, b.y + 110, 34); ctx.font = PX(24); const ls = wrapLines('“' + v.v[0] + '”', b.w - 150, 4);
     ls.forEach((ln, i) => hText(ln, b.x + 112, b.y + 80 + i * 32, 24, '#fff6dc')); hText('— ' + v.v[1], b.x + b.w - 30, b.y + b.h - 28, 20, '#ffd23f', 'right'); ctx.restore(); }
   // câu nhắc dưới cùng
-  if (cfg.promptEvery) { const list = HD.prompts[L]; if (t > HV.nextPrompt) { HV.promptI = (HV.promptI + 1) % list.length; HV.nextPrompt = t + cfg.promptEvery; }
-    const txt = list[HV.promptI], a = clamp((HV.nextPrompt - t) / 0.5, 0, 1) * clamp((t - (HV.nextPrompt - cfg.promptEvery)) / 0.5, 0, 1);
-    ctx.save(); ctx.globalAlpha = a; ctx.font = PX(24); const w = ctx.measureText(txt).width + 50; hBoard(W / 2 - w / 2, H - 70, w, 54); hText(txt, W / 2, H - 43, 24, '#fff3c4', 'center'); ctx.restore(); }
+  if (cfg.promptEvery && cfg.promptOn !== false) { const list = hPrompts(); if (t > HV.nextPrompt) { HV.promptI = (HV.promptI + 1) % list.length; HV.nextPrompt = t + cfg.promptEvery; }
+    const txt = list[HV.promptI % list.length], a = clamp((HV.nextPrompt - t) / 0.5, 0, 1) * clamp((t - (HV.nextPrompt - cfg.promptEvery)) / 0.5, 0, 1), P = B.prompt || CHURCH_DEFAULTS.heaven.boards.prompt;
+    ctx.save(); ctx.globalAlpha = a; hBoard(P.x, P.y, P.w, P.h); hFitText(txt, P.x + P.w / 2, P.y + P.h / 2 + 1, P.w - 30, Math.round(P.h * 0.46), '#fff3c4'); ctx.restore(); }
 }
 
 
@@ -506,6 +506,9 @@ const CSEATS = [[150, 1000], [635, 1000], [280, 1005], [778, 1000], [122, 1075],
 const CBOARD = { x: CX(255), y: CY(552), w: CX(800) - CX(255), h: CY(838) - CY(552) }, CBOARD_FULL = { x: CX(136), y: CY(546), w: CX(806) - CX(136), h: CY(842) - CY(546) };
 const CTEACH = { x: CX(150), y: CY(700) };
 (async () => { HV.img.cls = await loadImg('church://app/assets/heaven/class.png'); })();
+function hTxt(k, o) { const L = HL(), v = (((HC().texts || {})[L] || {})[k]); const d = ((CHURCH_DEFAULTS.heaven.texts || {})[L] || {})[k]; return fmt(String(v != null && v !== '' ? v : d || ''), o || {}); }
+function hPrompts() { const L = HL(), v = String((HC().prompts || {})[L] || '').split('\n').map((x) => x.trim()).filter(Boolean); return v.length ? v : HD.prompts[L]; }
+function hFitText(txt, cx, cy, maxW, size, color) { ctx.font = PX(size); let s = size; while (s > 12 && ctx.measureText(txt).width > maxW) { s -= 1; ctx.font = PX(s); } hText(txt, cx, cy, s, color, 'center'); }
 function hHighestFrame() { return frameStyleFor(Infinity) || 'b:fD'; }
 function hClassBless(w) {
   const ev = { id: w.id, name: w.name, avatar: w.avatar, gift: HL() === 'en' ? 'Bible class' : 'Lớp học Kinh Thánh', count: 1, frame: hHighestFrame(), sim: true };
@@ -531,7 +534,7 @@ function hClassNextQ() {
   if (C.qi >= C.qs.length) return hClassResult();
   C.qStart = t; C.revealAt = t + C.qDur - 2.6; C.revealed = false;
   for (const m of C.members) m.ans = null;
-  SFX.coin(); if (HC().classReadQ !== false) speakBlessing({ text: (HL() === 'en' ? 'Question ' : 'Câu ') + (C.qi + 1) + '. ' + C.qs[C.qi][0], lang: HL() });
+  SFX.coin(); if (HC().classReadQ !== false) speakBlessing({ text: (HL() === 'en' ? 'Question ' : 'Câu ') + (C.qi + 1) + '. ' + C.qs[C.qi][0], lang: HL(), low: true });
 }
 function hClassResult() {
   const C = HV.cls, t = now(); C.phase = 'result'; C.resultAt = t;
@@ -602,13 +605,13 @@ function hRenderClass(t) {
     const answered = C.members.filter((m) => m.ans).length;
     if (!C.revealed) hChalk((en ? 'Answered: ' : 'Đã trả lời: ') + answered + '/' + C.members.length, A.x + A.w - 10, A.y + A.h - 18, 20, '#bfe3c8', 'right');
     // dải hướng dẫn to, rõ dưới bảng
-    { const bx = CX(250), bw = W - bx - 24, bh = 90, by = CY(842) + 4, mx = bx + bw / 2, pulse = C.revealed ? 1 : 1 + 0.04 * Math.sin(t * 5);
+    { const HB = (HC().boards || {}).clsHint || CHURCH_DEFAULTS.heaven.boards.clsHint, bx = HB.x, bw = HB.w, bh = HB.h, by = HB.y, mx = bx + bw / 2, pulse = C.revealed ? 1 : 1 + 0.04 * Math.sin(t * 5);
       ctx.fillStyle = 'rgba(20,12,40,0.92)'; ctx.fillRect(bx, by, bw, bh); ctx.fillStyle = '#ffd23f'; ctx.fillRect(bx, by, bw, 4); ctx.fillRect(bx, by + bh - 4, bw, 4); ctx.fillRect(bx, by, 4, bh); ctx.fillRect(bx + bw - 4, by, 4, bh);
-      ctx.save(); ctx.translate(mx, by + 34); ctx.scale(pulse, pulse);
-      if (C.revealed) hText((en ? 'Correct answer: ' : 'Đáp án đúng: ') + 'ABC'[q[2]] + '. ' + q[1][q[2]], 0, 0, 32, '#7dff9a', 'center');
-      else hText(en ? 'Type  A ,  B  or  C  to answer' : 'Gõ  A ,  B  hoặc  C  để trả lời', 0, 0, 32, '#ffe14d', 'center');
+      ctx.save(); ctx.translate(mx, by + bh * 0.38); ctx.scale(pulse, pulse);
+      if (C.revealed) hFitText(hTxt('reveal') + 'ABC'[q[2]] + '. ' + q[1][q[2]], 0, 0, bw - 30, Math.round(bh * 0.36), '#7dff9a');
+      else hFitText(hTxt('ask'), 0, 0, bw - 30, Math.round(bh * 0.36), '#ffe14d');
       ctx.restore();
-      hText(C.revealed ? (en ? 'Next question coming…' : 'Chuẩn bị câu tiếp theo…') : (en ? 'Only students in class can answer · 1st answer counts' : 'Chỉ học viên trong lớp được trả lời · tính câu trả lời đầu tiên'), mx, by + 70, 19, '#f0e8ff', 'center'); }
+      hFitText(C.revealed ? hTxt('next') : hTxt('askSub'), mx, by + bh * 0.78, bw - 30, Math.round(bh * 0.22), '#f0e8ff'); }
   } else if (C.phase === 'result') {
     hChalk(en ? '🏆 RESULTS' : '🏆 KẾT QUẢ LỚP HỌC', A.x + A.w / 2, A.y + 28, 32, '#ffe9a0', 'center');
     (C.rank || []).slice(0, 3).forEach((m, i) => { const y = A.y + 92 + i * 62;
@@ -642,12 +645,13 @@ function hRenderClass(t) {
 function hDrawClassJoin(t) {
   const C = HV.cls; if (!C || (C.phase !== 'join' && C.phase !== 'cancel')) return;
   const cfg = HC(), en = HL() === 'en', B = (cfg.boards || {}).cls || { x: 90, y: 700, w: 900, h: 470 }, max = cfg.classMax || 20;
-  hBoard(B.x, B.y, B.w, B.h, en ? '📖 BIBLE CLASS IS STARTING!' : '📖 LỚP HỌC KINH THÁNH SẮP BẮT ĐẦU!', '#bff5c9');
+  const o = { max, n: cfg.classQuestions || 5, s: cfg.classSeconds || 60 };
+  hBoard(B.x, B.y, B.w, B.h, hTxt('joinTitle', o), '#bff5c9');
   if (C.phase === 'cancel') { hText(en ? 'Nobody joined — the class moves to next time 🙏' : 'Chưa có ai tham gia — lớp học dời sang lần sau 🙏', B.x + B.w / 2, B.y + B.h / 2, 24, '#ffd0d0', 'center'); return; }
   const left = Math.max(0, Math.ceil(C.joinUntil - t)), pulse = 1 + 0.06 * Math.sin(t * 6);
-  ctx.save(); ctx.translate(B.x + B.w / 2, B.y + 92); ctx.scale(pulse, pulse); hText(en ? 'Comment  "me"  to join' : 'Comment  "me"  để tham gia', 0, 0, 40, '#ffe14d', 'center'); ctx.restore();
-  hText((en ? 'Fastest ' : 'Chỉ nhận ') + max + (en ? ' people · ' : ' bạn nhanh nhất · ') + (cfg.classQuestions || 5) + (en ? ' quiz questions · ' : ' câu trắc nghiệm · ') + (cfg.classSeconds || 60) + 's', B.x + B.w / 2, B.y + 144, 22, '#f0e8ff', 'center');
-  hText(en ? 'Most correct answers → blessing + golden avatar frame' : 'Ai đúng nhiều nhất → được chúc phúc + khung avatar vàng', B.x + B.w / 2, B.y + 176, 22, '#ffd27a', 'center');
+  ctx.save(); ctx.translate(B.x + B.w / 2, B.y + 92); ctx.scale(pulse, pulse); hFitText(hTxt('join', o), 0, 0, B.w - 40, 40, '#ffe14d'); ctx.restore();
+  hFitText(hTxt('rule1', o), B.x + B.w / 2, B.y + 144, B.w - 40, 22, '#f0e8ff');
+  hFitText(hTxt('rule2', o), B.x + B.w / 2, B.y + 176, B.w - 40, 22, '#ffd27a');
   hText('⏱ ' + left + 's   ·   ' + C.members.length + '/' + max, B.x + B.w / 2, B.y + 214, 28, '#ffffff', 'center');
   const cols = 10, cw = (B.w - 40) / cols;
   for (let i = 0; i < max; i++) { const x = B.x + 20 + cw * (i % cols) + cw / 2, y = B.y + 270 + Math.floor(i / cols) * 90, m = C.members[i];

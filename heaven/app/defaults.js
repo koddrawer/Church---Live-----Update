@@ -320,6 +320,12 @@ CHURCH_DEFAULTS.heaven = {
   candleSeconds: 300, maxCandles: 40,
   readIntentions: true, intentionGap: 15, maxIntentions: 6,
   verseSpeak: true, verseSeconds: 9,
+  promptOn: true, angelScale: 1,
+  prompts: { vi: '', en: '' },
+  texts: {
+    vi: { joinTitle: '📖 LỚP HỌC KINH THÁNH SẮP BẮT ĐẦU!', join: 'Comment  "me"  để tham gia', rule1: 'Chỉ nhận {max} bạn nhanh nhất · {n} câu trắc nghiệm · {s} giây', rule2: 'Ai đúng nhiều nhất → được chúc phúc + khung avatar vàng', ask: 'Gõ  A ,  B  hoặc  C  để trả lời', askSub: 'Chỉ học viên trong lớp được trả lời · tính câu trả lời đầu tiên', reveal: 'Đáp án đúng: ', next: 'Chuẩn bị câu tiếp theo…' },
+    en: { joinTitle: '📖 BIBLE CLASS IS STARTING!', join: 'Comment  "me"  to join', rule1: 'Fastest {max} people · {n} quiz questions · {s}s', rule2: 'Most correct answers → blessing + golden avatar frame', ask: 'Type  A ,  B  or  C  to answer', askSub: 'Only students in class can answer · 1st answer counts', reveal: 'Correct answer: ', next: 'Next question coming…' }
+  },
   classOn: true, classEvery: 300, classJoinSeconds: 30, classSeconds: 60, classQuestions: 5, classMax: 20, classReadQ: true, kwClassJoin: 'me, tôi, toi, join, em',
   shareSteps: 12, shareMilestone: 20,
   followRobe: true,
@@ -337,6 +343,8 @@ CHURCH_DEFAULTS.heaven = {
     intent: { x: 10, y: 92, w: 330, h: 230 },
     quiz: { x: 150, y: 560, w: 780, h: 330 },
     cls: { x: 90, y: 700, w: 900, h: 470 },
+    prompt: { x: 160, y: 1838, w: 760, h: 64 },
+    clsHint: { x: 287, y: 970, w: 769, h: 90 },
     prayer: { x: 110, y: 470, w: 860, h: 560 },
     verse: { x: 120, y: 1330, w: 840, h: 270 }
   },

@@ -1,7 +1,8 @@
+const HEAVEN_PROMPTS_DEFAULT = { vi: ['❤ Thả tim để bước lên thánh đường', '✍ Comment "Amen" để cùng cầu nguyện', '🕯 Comment "cầu nguyện" để thắp nến', '🙏 Comment "cầu cho …" gửi ý nguyện, cha sẽ đọc lên', '📖 Comment "Lời Chúa" để nhận câu Kinh Thánh', '🔗 Chia sẻ live để thiên thần nâng bạn lên', '🎺 Cùng thả tim thắp sáng đèn lồng'], en: ['❤ Tap likes to climb to the cathedral', '✍ Comment "Amen" to pray together', '🕯 Comment "pray" to light a candle', '🙏 Comment "pray for …" — the priest will read it', '📖 Comment "verse" for a Bible verse', '🔗 Share the LIVE and an angel lifts you up', '🎺 Tap likes together to light the lanterns'] };
 (() => {
 'use strict';
 const api = window.api;
-const $ = (s, r = document) => r.querySelector(s);
+const $ = (s, r = document) => r.querySelector(s) || (r === document && /^#[\w-]+$/.test(s) ? document.createElement('div') : null);   // phần tử đã bỏ khỏi bản này → trả về phần tử rỗng để không lỗi
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 let raw = {};                 // cấu hình đã lưu (chỉ phần người dùng đổi)
 let CFG = deepMerge(CHURCH_DEFAULTS, {});
@@ -249,7 +250,7 @@ api.onStageMsg((m) => {
   if (m.type === 'status') {
     $('#sSeated').textContent = m.seated; $('#sWalk').textContent = m.walking; $('#sQueue').textContent = m.queue; $('#sSlots').textContent = m.slots;
     $('#names').innerHTML = '';
-    for (const n of m.names) { const s = document.createElement('span'); s.textContent = n.name + (n.state === 'seated' ? ' · ' + n.left + 's' : ' · ⛪'); if (n.state !== 'seated') s.className = 'walk'; $('#names').appendChild(s); }
+    for (const n of m.names) { const s = document.createElement('span'); s.textContent = n.name + (m.heaven ? ' · bậc ' + n.left : n.state === 'seated' ? ' · ' + n.left + 's' : ' · ⛪'); if (n.state !== 'seated') s.className = 'walk'; $('#names').appendChild(s); }
     const st = m.sermon || {};
     $('#sermonLine').textContent = (st.state === 'playing' ? '🔊 ' : st.state === 'loading' ? '⏳ ' : '') + (st.line || '…') + (st.fallback ? '  (giọng Windows)' : '');
     $('#audot').className = 'dot ' + (m.audio === 'running' ? 'ok' : 'warn');
@@ -271,6 +272,8 @@ $('#btnSaveTexts').onclick = () => {
 $('#btnResetTexts').onclick = () => { save($('#textLang').value === 'en' ? 'audio.sermonTextsEn' : 'audio.sermonTextsVi', null).then(loadTexts); };
 $('#btnSaveBless').onclick = () => { const l = $('#blessList').value.split('\n').map((x) => x.trim()).filter(Boolean); save('donate.blessSpeeches', l); log('Đã lưu ' + l.length + ' lời chúc'); };
 $('#btnResetBless').onclick = () => save('donate.blessSpeeches', null).then(fillInputs);
+for (const id of ['#btnTtsTest', '#btnTtsTest2']) $(id).onclick = () => { log('Đang thử giọng đọc…'); api.toStage({ type: 'tts-test' }); };
+$('#btnPromptDefault').onclick = async () => { for (const L of ['vi', 'en']) { const el = document.querySelector('[data-k="heaven.prompts.' + L + '"]'); if (el && !el.value.trim()) { el.value = HEAVEN_PROMPTS_DEFAULT[L].join('\n'); await save('heaven.prompts.' + L, el.value); } } };
 $('#btnPretts').onclick = () => { $('#prettsBar').style.width = '0'; api.toStage({ type: 'pretts' }); };
 $('#btnRestartSermon').onclick = () => api.toStage({ type: 'sermon-restart' });
 $('#btnSay').onclick = () => { const t = $('#sayText').value.trim(); if (t) api.toStage({ type: 'speak', text: t }); };
