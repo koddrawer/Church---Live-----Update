@@ -1,9 +1,9 @@
 {
-  "version": "1.0.3",
-  "notes": "1.0.3: thiên thần mới, sửa giọng đọc bị kẹt, chỉnh bảng hướng dẫn, gọn bảng điều khiển",
+  "version": "1.0.4",
+  "notes": "1.0.4: giọng đọc khớp màn hình, ưu tiên lời chúc donate, câu hỏi theo ngôn ngữ live",
   "base": "app",
   "minShell": "1.0.2",
-  "date": "2026-11-04T07:58:45.001Z",
+  "date": "2026-11-04T09:35:32.315Z",
   "files": [
     {
       "path": "assets/faceapi/LICENSE.txt",
@@ -358,8 +358,8 @@
     },
     {
       "path": "heaven_core.js",
-      "size": 57707,
-      "sha256": "166cd542ffa50838c6dbc5cba5136666f8503350df3e318603587d637169f157"
+      "size": 58008,
+      "sha256": "b0d2f7736bead3f9b10d71f56e6a3498661252a7f2660b347635b6cc17e1a2d5"
     },
     {
       "path": "heaven_data.js",
@@ -373,8 +373,8 @@
     },
     {
       "path": "main-ext.js",
-      "size": 20408,
-      "sha256": "2324760c9636522a2a33fb4bd3d10cea89b79fee57f57deef7067f2e477c8b2d"
+      "size": 20564,
+      "sha256": "b01898e0d852d9eeda8334b4833d9d3f24ac278e56fff6f549c7033d858fe694"
     },
     {
       "path": "panel.html",
@@ -403,13 +403,13 @@
     },
     {
       "path": "stage.js",
-      "size": 177625,
-      "sha256": "bf1e5d72f1dffeaf69552d5a6fd69eea57686c90d4adf2c069d5ec7052ae867a"
+      "size": 179666,
+      "sha256": "5eefb92ea6e6419793072b08b9bf77830edf384324c56b861b4fabcc51255803"
     },
     {
       "path": "version.json",
       "size": 23,
-      "sha256": "7af2ff43c2a60cd6be901ffd180a51e6e590a00f158460adcf8277f9ad6e4d6a"
+      "sha256": "de4fbc1f89d72b1bf74d5bb47e990fe42990adeceaab132072cd51ab0b09a177"
     }
   ]
 }

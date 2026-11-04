@@ -19,7 +19,7 @@ const hnorm = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀
 const hkw = (k) => String(HC()[k] || '').split(',').map((x) => hnorm(x)).filter(Boolean);
 const hhash = (s) => { let h = 2166136261; for (const c of String(s)) h = Math.imul(h ^ c.charCodeAt(0), 16777619); h ^= h >>> 16; h = Math.imul(h, 2246822507); h ^= h >>> 13; h = Math.imul(h, 3266489909); h ^= h >>> 16; return (h >>> 0) / 4294967295; };
 function hLane() { const us = [...HV.climbers.values()].filter((c) => c.state !== 'leave' && c.step < 8).map((c) => c.u); let best = 0, bd = -1; for (let i = 0; i < 11; i++) { const u = -0.78 + i * 0.156 + (Math.random() - 0.5) * 0.05; const d = us.length ? Math.min(...us.map((x) => Math.abs(x - u))) : 1 + Math.random(); if (d > bd) { bd = d; best = u; } } return best; }
-function hsay(key, o) { const L = HL(), t = ((HC().speech || {})[L] || {})[key] || ((CHURCH_DEFAULTS.heaven.speech || {})[L] || {})[key]; if (!t) return; speakBlessing({ text: fmt(t, o || {}), lang: L }); }
+function hsay(key, o) { const L = HL(), t = ((HC().speech || {})[L] || {})[key] || ((CHURCH_DEFAULTS.heaven.speech || {})[L] || {})[key]; if (!t) return; speakBlessing({ text: fmt(t, o || {}), lang: L, pri: /^(classWin|top|heart|lanterns|prayerStart|prayerEnd|classAnnounce|classStart)$/.test(key) ? 2 : 1 }); }
 function hbad(t) {
   const low = ' ' + String(t || '').toLowerCase().replace(/[.,!?;:()\[\]"'“”]+/g, ' ').replace(/\s+/g, ' ') + ' ', asc = ' ' + hnorm(t) + ' ';
   if (/(\d[\s.-]?){8,}/.test(t)) return true;   // số điện thoại
@@ -207,6 +207,7 @@ function H_gift(ev) {
   c.acc = c.total >= 30 ? 'crown' : c.total >= 5 ? 'cape' : 'wreath';
   const line = blessingLine({ name: c.name, gift: ev.gift || '', count: ev.count || 1 });
   (HV.giftQ = HV.giftQ || []).push({ c, ev, line, total });
+  if (CFG.donate.speakBlessing) prefetchSpeech(line);
   if (HC().donorCandle !== false && !HV.candles.some((x) => x.donor && x.name === c.name)) hCandle(c, true);
 }
 function hQuizWin(ev, c) {
@@ -513,7 +514,7 @@ function hHighestFrame() { return frameStyleFor(Infinity) || 'b:fD'; }
 function hClassBless(w) {
   const ev = { id: w.id, name: w.name, avatar: w.avatar, gift: HL() === 'en' ? 'Bible class' : 'Lớp học Kinh Thánh', count: 1, frame: hHighestFrame(), sim: true };
   const c = hClimber(ev); if (!c) return; c.laurel = true; c.acc = 'crown'; c.last = now();
-  (HV.giftQ = HV.giftQ || []).push({ c, ev, line: blessingLine({ name: c.name, gift: ev.gift, count: 1 }), total: 0 });
+  const line = blessingLine({ name: c.name, gift: ev.gift, count: 1 }); (HV.giftQ = HV.giftQ || []).push({ c, ev, line, total: 0 }); prefetchSpeech(line);
 }
 function hClassStart() {
   const t = now(), cfg = HC();
@@ -526,7 +527,7 @@ function hClassBegin() {
   if (C.members.length < Math.max(1, cfg.classMin || 1)) { hsay('classCancel'); C.phase = 'cancel'; C.cancelUntil = t + 5; return; }
   const idx = []; while (idx.length < Math.min(n, list.length)) { const i = Math.floor(Math.random() * list.length); if (!idx.includes(i) && !HV.quizUsed.has(L + i)) idx.push(i); if (HV.quizUsed.size > list.length - n) HV.quizUsed.clear(); }
   idx.forEach((i) => HV.quizUsed.add(L + i));
-  C.qs = idx.map((i) => list[i]); C.qi = -1; C.phase = 'lesson'; C.scene = true; C.sceneAt = t; C.qDur = Math.max(6, (cfg.classSeconds || 60) / C.qs.length);
+  C.qIdx = idx; Object.defineProperty(C, 'qs', { configurable: true, get: () => C.qIdx.map((i) => (HD.quiz[HL()] || list)[i] || list[i]) }); C.qi = -1; C.phase = 'lesson'; C.scene = true; C.sceneAt = t; C.qDur = Math.max(6, (cfg.classSeconds || 60) / C.qs.length);
   SFX.bell(); hsay('classStart'); hClassNextQ();
 }
 function hClassNextQ() {

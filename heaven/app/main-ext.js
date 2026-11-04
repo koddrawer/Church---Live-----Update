@@ -5,7 +5,7 @@ const { createRequire } = require('module');
 
 module.exports = (ctx) => {
   const { app, ipcMain, both, log, getConfig } = ctx;
-  const EXT_VER = 'H1.0.3';
+  const EXT_VER = 'H1.0.4';
   try { ipcMain.handle('relaunch', () => { app.relaunch(); app.exit(0); }); } catch {}
   setTimeout(() => log('Đã nạp bản sửa kết nối TikTok (main-ext ' + EXT_VER + ')'), 1500);
   const req = createRequire(path.join(app.getAppPath(), 'package.json'));
@@ -19,16 +19,17 @@ module.exports = (ctx) => {
   // Bộ điều phối: câu đang giảng (ưu tiên) tối đa 2 yêu cầu song song; tạo sẵn nền chỉ 1 yêu cầu và nhường ưu tiên.
   // Giãn cách giữa các yêu cầu + nghỉ khi máy chủ Microsoft từ chối liên tục (tránh bị chặn).
   let active = 0, lastStart = 0, cooldownUntil = 0, failStreak = 0;
-  const fgQ = [], bgQ = [];
+  const fgQ = [], bgQ = [], urQ = [];
   function pump() {
     const t = Date.now();
     if (t < cooldownUntil) { setTimeout(pump, cooldownUntil - t + 20); return; }
     const gap = 350 - (t - lastStart); if (gap > 0) { setTimeout(pump, gap); return; }
-    if (fgQ.length && active < 2) { active++; lastStart = t; fgQ.shift()(); }
-    else if (!fgQ.length && bgQ.length && active < 1) { active++; lastStart = t; bgQ.shift()(); }
+    if (urQ.length && active < 3) { active++; lastStart = t; urQ.shift()(); }
+    else if (fgQ.length && active < 2) { active++; lastStart = t; fgQ.shift()(); }
+    else if (!fgQ.length && !urQ.length && bgQ.length && active < 1) { active++; lastStart = t; bgQ.shift()(); }
   }
-  async function withSlot(fn, bg) {
-    await new Promise((r) => { (bg ? bgQ : fgQ).push(r); pump(); });
+  async function withSlot(fn, bg, urgent) {
+    await new Promise((r) => { (urgent ? urQ : bg ? bgQ : fgQ).push(r); pump(); });
     try { return await fn(); } finally { active--; setTimeout(pump, 0); }
   }
   function noteResult(ok, err) {
@@ -51,7 +52,7 @@ module.exports = (ctx) => {
       await fsp.rename(r.audioFilePath, file);
     } finally { try { t.close(); } catch {} fsp.rm(tmp, { recursive: true, force: true }).catch(() => {}); }
   }
-  function tts({ text, voice, rate, pitch, bg, onlyCached }) {
+  function tts({ text, voice, rate, pitch, bg, onlyCached, urgent }) {
     voice = voice || 'vi-VN-NamMinhNeural';
     const key = crypto.createHash('sha256').update([voice, rate || '', pitch || '', text].join('|')).digest('hex').slice(0, 24);
     const file = path.join(TTS_DIR, key + '.mp3');
@@ -62,7 +63,7 @@ module.exports = (ctx) => {
       await fsp.mkdir(TTS_DIR, { recursive: true });
       try { await ttsOnce(text, voice, rate, pitch, file); noteResult(true); return { ok: true, url: 'church://tts/' + key + '.mp3' }; }
       catch (e) { const m = (e && e.message) || 'TTS lỗi'; noteResult(false, m); return { ok: false, error: m }; }
-    }, !!bg).finally(() => ttsJobs.delete(key));
+    }, !!bg, !!urgent && !bg).finally(() => ttsJobs.delete(key));
     ttsJobs.set(key, job);
     return job;
   }
