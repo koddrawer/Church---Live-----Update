@@ -1,0 +1,421 @@
+{
+  "version": "1.0.0",
+  "notes": "Heaven Live 1.0.0 — cầu thang lên thánh đường 8-bit",
+  "base": "app",
+  "minShell": "1.0.2",
+  "date": "2026-11-04T04:17:27.493Z",
+  "files": [
+    {
+      "path": "assets/faceapi/LICENSE.txt",
+      "size": 1067,
+      "sha256": "9a3442b79acaf4fbc7c2e07b7e2d8f84af9bb3871bf08a69d80304ab00640e9a"
+    },
+    {
+      "path": "assets/faceapi/age_gender_model-weights_manifest.json",
+      "size": 8392,
+      "sha256": "74b60bf3ebf981bf4e661e9cca3a185614e10b25d797118b62e2a68d3ff2569f"
+    },
+    {
+      "path": "assets/faceapi/age_gender_model.bin",
+      "size": 429708,
+      "sha256": "49f92bbc0afef2342c4385e4a2b0acb6d7a727c6f0aa539499719a81acf9abaa",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/faceapi/face-api.js",
+      "size": 1333943,
+      "sha256": "0160f7af3a8c78cece45c7ecc765383bad74becfd438bb787cdd627b2d6f2cf6"
+    },
+    {
+      "path": "assets/faceapi/tiny_face_detector_model-weights_manifest.json",
+      "size": 3219,
+      "sha256": "5d1af4849ac48d5b985f4a9b16010c512353ddd6fcc63d50fd0bc9e9e64296e5"
+    },
+    {
+      "path": "assets/faceapi/tiny_face_detector_model.bin",
+      "size": 193321,
+      "sha256": "b7503ce7df31039b1c43316a9b865cab6a70dd748cc602d3fa28b551503c3871",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/OFL-bevietnam.txt",
+      "size": 6476,
+      "sha256": "0bd4db1cda123af9d91794b0f98324b7d7d81aef0fcaf78c433160153f2c6f25"
+    },
+    {
+      "path": "assets/fonts/OFL-cormorant.txt",
+      "size": 4504,
+      "sha256": "732f37009943e7f4378cf37113c9bcc4716af002a8583511aa91ed5d37683e73"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-latin-500-normal.woff2",
+      "size": 21892,
+      "sha256": "b621f77d35f777023aa11ca524462d511b4b28a813adbc0e9d15a10fc61dfe4e",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-latin-700-normal.woff2",
+      "size": 22152,
+      "sha256": "a193dd87699bd2e18ddf72dc271493ea82a23dad9f5c334d9f2a257b1e05fc30",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-latin-ext-500-normal.woff2",
+      "size": 13548,
+      "sha256": "947d592eb7676914507ff68fc11fcf2cfdecd6ebaf0fa2af6047f66a63ea7d0f",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-latin-ext-700-normal.woff2",
+      "size": 13852,
+      "sha256": "33d57e5bd840b03921568e08d2be1082d453e55f1ba55f421e41a1aa54e12601",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-vietnamese-500-normal.woff2",
+      "size": 12172,
+      "sha256": "86341610cbe907eecf461c9159c168d5efb52bb1a33963813a08f520555d8e66",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/be-vietnam-pro-vietnamese-700-normal.woff2",
+      "size": 12468,
+      "sha256": "4f58af2d1c3e28a9ba14c51c82db2751d78344b75bdcb34de24a1031ebe59da6",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/cormorant-garamond-latin-700-normal.woff2",
+      "size": 22340,
+      "sha256": "21a0fc1c5c22708cf4aa0c147fd32982e25bf9e21efec0ca31a4495ba41753eb",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/cormorant-garamond-latin-ext-700-normal.woff2",
+      "size": 19328,
+      "sha256": "f6cf9ae2417875c056a91df3669b14099da0a004ed66460324208d3541e7fa86",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/fonts/cormorant-garamond-vietnamese-700-normal.woff2",
+      "size": 6228,
+      "sha256": "212275cd3ee9d6a80d8715fc1ac12920b3f328bfc7d1a6bb15442826675e6186",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_A.png",
+      "size": 314106,
+      "sha256": "4f7db27eebd2e0e308999f8697bab64124b2e37992ca295973c77bdc40b65f24",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_B.png",
+      "size": 361025,
+      "sha256": "b86e755487f57cb53dba9ac26b45ff342ade967a1ccca8b6c9cba00b1e0ba9a8",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_C.png",
+      "size": 380949,
+      "sha256": "af084b0905c3df451a59b2893a6feeb2bf36de4882fa383f35029f4b44efd82a",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/frames/frame_D.png",
+      "size": 468221,
+      "sha256": "6c66ecc7affeac20b585b00587efff41659bddc251cd518424e363ae967c8824",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/UNIFONT-LICENSE.txt",
+      "size": 2733,
+      "sha256": "0986c8df2fc58c2103248700e14dca643db03aa64bb2b84638d4c99780f37f77"
+    },
+    {
+      "path": "assets/heaven/angel_0.png",
+      "size": 525,
+      "sha256": "2e5518c0392e5eaae230b170cd74af62b653c29cc5e827c4d6e60293b8bed983",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/angel_1.png",
+      "size": 488,
+      "sha256": "5a0ee047565f8d7c815dcf90a40bcf4a907f6eb7e817df5d76286c5665975dcb",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/angel_trumpet_0.png",
+      "size": 570,
+      "sha256": "a3a7caea15410318a39d09c86442ab48ad81877b06617dc126acb694342266c2",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/angel_trumpet_1.png",
+      "size": 542,
+      "sha256": "400cfa36156049d597dd27570e7d7da3c6ed1c9f481a63a564f319413cb256ca",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/bg.png",
+      "size": 2659910,
+      "sha256": "1347d1459663e25312536eefccca59367df93e4fe07d0e4aaefb7d32dfcd0b27",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/heaven/pixel.woff",
+      "size": 22380,
+      "sha256": "85864243c6f80f0feaa050d4b42fe27a331051a8a31fc2ed6e72781bc81733db",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit1.png",
+      "size": 434202,
+      "sha256": "208ac2c4ea35126d83a836e729a72414f48ec80d2fc144491699e1532870953a",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit2.png",
+      "size": 426320,
+      "sha256": "dbbb4f6e259b2c52f9256f855c6ab303f788c1ce1e3c428338b933c37d7fad9f",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit3.png",
+      "size": 463272,
+      "sha256": "8653c1eb50822efe573b8663b54df99eb29c523d1492e3f7739808e0e0d2ccb8",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit4.png",
+      "size": 440580,
+      "sha256": "5e690583aa5d448e69a65ed35f24f57f0e3973de17d3035bf66f6d26b3db914d",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit5.png",
+      "size": 432245,
+      "sha256": "1d241d04f5723f166e923b2332e8aae365bdb59f9dff5422a3989996912ed3c7",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit6.png",
+      "size": 444135,
+      "sha256": "4609100f7d9fbf7ac1dda8eef536f5bda3ff7e1d88203ac054c13ab5a15b61b7",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit7.png",
+      "size": 414422,
+      "sha256": "a2cb7f19390f60665c07eb7ed8e09336c8455e46dd06236ea93869a56e9fea98",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit8.png",
+      "size": 402362,
+      "sha256": "2e4c3588ea2830ab3c5ff01e7563f01094c026a1507fe8dadff4e8b90605b1fe",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/sitters/sit9.png",
+      "size": 429325,
+      "sha256": "8de2810f28384175ed9804692bba3320a8f530e9a7a2d2c209aa40947c70bd2e",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/video/church_loop.mp4",
+      "size": 2447251,
+      "sha256": "c07c932cd1d0eb27c5098e66831e9a9cf287533205485a2ae50e894292ca6cb6",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/video/poster.jpg",
+      "size": 206275,
+      "sha256": "f3f3723d9154ac82f9b1e3a17c4600e9f0f4d450eeec83329d962a3b356c7043",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/back1.png",
+      "size": 210862,
+      "sha256": "b891b32769f5b9ea37c1f6c0be6574b9d6ebc4879cd07b583f19adbed1cc597e",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/back2.png",
+      "size": 222969,
+      "sha256": "4764484525013fb3ab41b8f0139932bd8e5e1f1f72aca4dbf05f559f14d960d9",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/bow.png",
+      "size": 254641,
+      "sha256": "f80f72715b403f5a12fde2465d925d0d1d338f441663f136854b8a302bdb3e79",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/front1.png",
+      "size": 208990,
+      "sha256": "77a7084af9dfc7c9e922033d8769ceee244bb525248e5b1cd8109694a7d188b8",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/front2.png",
+      "size": 226031,
+      "sha256": "29d246d638bf13fe6f7ea7f957088dba087b589c4af5ed8122a93dfab83cb599",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/kneel.png",
+      "size": 299776,
+      "sha256": "9c8874ee9a51c2e5606d86f96fe41f4edec9879814cd85c65ecc646c67500ef3",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/left1.png",
+      "size": 215670,
+      "sha256": "ffc28b5872bdd85bed771781225f82c5fedfb3f3d11ab617c0af4799070e283c",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/left2.png",
+      "size": 172391,
+      "sha256": "a7a0fe9ca1a0d1019b590651b4219a4a404bc1cf966cb7a4c01ee836797ff0de",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/right1.png",
+      "size": 203408,
+      "sha256": "c05da35fe484a27d7fb41927f3633e31296e16813cedf8b3fef7ca27d40e4d21",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/elder_red/right2.png",
+      "size": 211847,
+      "sha256": "fb16c07e02e5270ee84a57d24c8278305184d8813bd5470d886bb3ccdacf1611",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/back1.png",
+      "size": 179998,
+      "sha256": "d3feaf7a03dd04d2a981fa4a8e625552d7700939c0b89ee2ba629fd73396adf7",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/back2.png",
+      "size": 186987,
+      "sha256": "4b0827f7d6458ab7c8c2c2512dc83c5a202cecc849da821b50961b85ea88a6d9",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/bow.png",
+      "size": 172962,
+      "sha256": "20b2cd23b96a6c8135610eb5ef71376b0f1dad4616e97fe4d14c20c7c3e4c6b0",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/front1.png",
+      "size": 186331,
+      "sha256": "f9a28fdb4418bb9fbf77d80b82a108ed626ed25408184265dba6e8c8cea6467e",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/front2.png",
+      "size": 196705,
+      "sha256": "102102c1b048b461574ce17e3c7c9cc858f0557b118c14dac90d75ab507d2ec8",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/kneel.png",
+      "size": 228088,
+      "sha256": "8caf95ae5386fe3521e56a4b9baf6409697bcc556c2a145c968f4814bdca0335",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/left1.png",
+      "size": 195074,
+      "sha256": "a69daaf5f580eccd80f9193e7708cd9a3a63a25ca17ea80da0aec56d1fb3ba38",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/left2.png",
+      "size": 165963,
+      "sha256": "1368f41fbc01d4a43b2b41ce3e70f964b0228051efa0a5573bf6753eddc544d3",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/right1.png",
+      "size": 176714,
+      "sha256": "b1ed8c5ebc8cde32371e78c71c17d3486d01fbe96b791a596fb5cdeef4cdc355",
+      "enc": "b64"
+    },
+    {
+      "path": "assets/walkers/young_blue/right2.png",
+      "size": 181473,
+      "sha256": "93542943f504ad200d83144ea6764ab8d8e4e575a11f116b613eb1f355f67aff",
+      "enc": "b64"
+    },
+    {
+      "path": "defaults.js",
+      "size": 41902,
+      "sha256": "5fa6831291b4a9d2047129dd29b68f0cfa1db7a08d03217cf582bfafbfce055d"
+    },
+    {
+      "path": "fonts.css",
+      "size": 2877,
+      "sha256": "b9a7682298e0e50d4706a281f2859b276654ee2266b2a1b3307dbf10812c83fb"
+    },
+    {
+      "path": "heaven_core.js",
+      "size": 43689,
+      "sha256": "18355ffde792f18ea533f59541cd987eaf10f7e37229d9e9fc656a695d0ab7ea"
+    },
+    {
+      "path": "heaven_data.js",
+      "size": 14409,
+      "sha256": "b0ea114c4c4c161f7f1ba8ee15ba32f7d617e12087634de17b33abeade4e633a"
+    },
+    {
+      "path": "i18n.js",
+      "size": 35541,
+      "sha256": "015dba553cf04b46ab5eb2ef3b0033b58edeea5571e979bd4ac0bbbeb2c5e216"
+    },
+    {
+      "path": "main-ext.js",
+      "size": 20408,
+      "sha256": "84b5d39edb71cdbef800825ff06958e4c0fe17e68bd35e1b8c4259a7bcb64771"
+    },
+    {
+      "path": "panel.html",
+      "size": 49590,
+      "sha256": "516062420b79b0f4f3ae87f8b97145ac05e6db92363ff55f6f183ecbe99c02a6"
+    },
+    {
+      "path": "panel.js",
+      "size": 39967,
+      "sha256": "089d35957fd2eef8e863b9aa3409f0a664d844a457f00a03b138c3856a151f29"
+    },
+    {
+      "path": "sermons_en.js",
+      "size": 15236,
+      "sha256": "3d10a77fa722d19597c98f4c47759442ca532a37d95f7f45faeed79f14c0af5c"
+    },
+    {
+      "path": "slicer.js",
+      "size": 5109,
+      "sha256": "ee1a48d8b3319255e2ecf1d235bc7485e785726d449921637696e2f4ed265532"
+    },
+    {
+      "path": "stage.html",
+      "size": 942,
+      "sha256": "66464d091a466d9388e84f270f721e4c19a80259aea8b46d63f2ef45bdda952a"
+    },
+    {
+      "path": "stage.js",
+      "size": 160378,
+      "sha256": "bbd20ad6f813216505421747f41722d61cd1d788823a8edaec8bc5e7527ea312"
+    },
+    {
+      "path": "version.json",
+      "size": 23,
+      "sha256": "e4ee40fd592208992f9a4ef4baa7895838b2eef26d2cc3295863508826c8557a"
+    }
+  ]
+}
