@@ -15,7 +15,8 @@
     "h": 430,
     "bob": 6,
     "speed": 0.7,
-    "glow": "255,230,160"
+    "glow": "255,230,160",
+    "pixelArt": true
    },
    {
     "file": "thien_than_ken.png",

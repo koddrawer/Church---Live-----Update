@@ -689,7 +689,7 @@ function drawBgFigures() {
       const x = f.x + Math.sin(now * sp * 0.5 + ph) * (f.sway || 0), y = f.y + Math.sin(now * sp + ph) * (f.bob || 0);
       if (f.glow && fxOn()) { ctx.save(); ctx.globalCompositeOperation = 'lighter'; drawGlow(x, y, h * 0.62, f.glow, 0.22 * w * (0.85 + 0.15 * Math.sin(now * 1.3 + ph))); ctx.restore(); }
       ctx.save(); ctx.globalAlpha = w * (f.alpha ?? 1); ctx.translate(x, y); if (f.flip) ctx.scale(-1, 1); if (f.tilt) ctx.rotate(Math.sin(now * 0.6 + ph) * f.tilt);
-      if (isPixel()) { // hình Chúa / thiên thần dạng 8-bit, cùng cỡ điểm ảnh với ảnh nền
+      if (isPixel() && !f.pixelArt) { // hình Chúa / thiên thần dạng 8-bit, cùng cỡ điểm ảnh với ảnh nền
         const n = Math.max(120, Math.min(540, (cfg.style && cfg.style.bgPixels) || 270)), ph = Math.round(h * n / W);
         if (!im._pix || im._pixH !== ph) { im._pix = pixelateCanvas(im, ph * wd / h, ph, { levels: 8, saturate: 1.15, alphaCut: 90 }); im._pixH = ph; }
         const pc = im._pix, k = h / ph, pd = pc.pad || 0; ctx.imageSmoothingEnabled = false;
