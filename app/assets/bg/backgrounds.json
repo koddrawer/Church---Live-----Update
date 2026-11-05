@@ -115,6 +115,20 @@
    360,
    885
   ],
-  "pixelArt": true
+  "pixelArt": true,
+  "cherubs": {
+   "file": "thien_than_nho.png",
+   "frames": 6,
+   "fw": 288,
+   "fh": 300,
+   "fps": 6,
+   "facing": "right",
+   "area": [
+    40,
+    140,
+    680,
+    1080
+   ]
+  }
  }
 ]

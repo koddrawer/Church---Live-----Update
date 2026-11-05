@@ -246,7 +246,9 @@
     "enabled": true,
     "intensity": 1.0,
     "motes": 110,
-    "figures": true
+    "figures": true,
+    "cherubs": 5,
+    "cherubSize": 95
   },
   "camera": {
     "enabled": false,

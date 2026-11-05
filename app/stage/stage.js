@@ -702,6 +702,39 @@ function drawBgFigures() {
     }
   }
 }
+// ---------------- Thiên thần nhỏ bay lượn quanh thánh đường ----------------
+const cherubs = [];
+function cherubDef() { for (const [d] of bgWeights()) if (d.cherubs) return d.cherubs; return null; }
+function updateCherubs(dt) {
+  const D = cherubDef(); const n = D ? Math.max(0, Math.min(8, (cfg.effects && cfg.effects.cherubs) ?? 5)) : 0;
+  while (cherubs.length < n) {
+    const i = cherubs.length, A = D.area, rnd = Math.random;
+    cherubs.push({ cx: A[0] + (A[2] - A[0]) * (0.35 + 0.3 * rnd()), cy: A[1] + (A[3] - A[1]) * ((i + 0.5) / Math.max(1, n)),
+      ax: (A[2] - A[0]) * (0.32 + 0.12 * rnd()), ay: (A[3] - A[1]) * (0.1 + 0.1 * rnd()),
+      w1: 0.12 + 0.08 * rnd(), w2: 0.17 + 0.1 * rnd(), p1: rnd() * 6.28, p2: rnd() * 6.28, s: 0.75 + 0.5 * rnd(),
+      f0: Math.floor(rnd() * 6), front: i % 3 === 0, flip: false, x: 0, y: 0, vx: 0, alpha: 0, tilt: 0 });
+  }
+  if (cherubs.length > n) cherubs.length = n;
+  for (const c of cherubs) {
+    const t = now; const x = c.cx + c.ax * Math.sin(t * c.w1 * 6.28 / 3 + c.p1), y = c.cy + c.ay * Math.sin(t * c.w2 * 6.28 / 3 + c.p2) + Math.sin(t * 2.4 + c.p1) * 6;
+    c.vx = (x - c.x) / Math.max(dt, 1e-3); c.x = x; c.y = y; c.alpha = Math.min(1, c.alpha + dt / 1.5);
+    const right = D && D.facing === 'right';
+    if (c.vx > 4) c.flip = !right; else if (c.vx < -4) c.flip = right; // quay mặt theo hướng bay
+    c.tilt += (Math.max(-0.25, Math.min(0.25, -c.vx * 0.004 * (c.flip ? -1 : 1))) - c.tilt) * Math.min(1, dt * 3);
+  }
+}
+function drawCherubs(front) {
+  const D = cherubDef(); if (!D || !cherubs.length) return;
+  const im = figImg(D.file); if (!im.complete || !im.naturalWidth) return;
+  const base = (cfg.effects && cfg.effects.cherubSize) || 95;
+  for (const c of cherubs) {
+    if (c.front !== front) continue;
+    const h = base * c.s * (front ? 1.15 : 0.85), w = h * D.fw / D.fh;
+    const fi = (Math.floor(now * (D.fps || 6)) + c.f0) % (D.frames || 1);
+    ctx.save(); ctx.globalAlpha = c.alpha * (front ? 1 : 0.92); ctx.translate(c.x, c.y); if (c.flip) ctx.scale(-1, 1); ctx.rotate(c.tilt);
+    ctx.drawImage(im, fi * D.fw, 0, D.fw, D.fh, -w / 2, -h / 2, w, h); ctx.restore();
+  }
+}
 function fxOn() { return !cfg.effects || cfg.effects.enabled !== false; }
 function drawHalo(h, w, I) {
   const t = now;
@@ -910,6 +943,7 @@ function render(dt) {
   if (haveVideo) ctx.drawImage(vbuf, 0, 0, W, H);
   ctx.imageSmoothingEnabled = true;
   drawBgFigures();
+  updateCherubs(dt); drawCherubs(false);
   updateMotes(dt);
   const sorted = chars.slice().sort((a, b) => (a.lift ? 1e5 : a.y) - (b.lift ? 1e5 : b.y));
   if (px) {
@@ -920,6 +954,7 @@ function render(dt) {
   drawCloudCover();
   if (px) fxLayer(fxF, () => { for (const c of sorted) drawAuraFront(c, cH(c)); drawParticles(); drawMotes(true); });
   else { drawParticles(); drawMotes(true); }
+  drawCherubs(true);
   for (const c of sorted) drawName(c);
   drawFloats(dt);
   ctx.restore();
