@@ -1,4 +1,4 @@
 {
-  "version": "1.0.3",
-  "notes": "Kho cập nhật: nhánh cong-giao-live trong repo Church---Live-----Update"
+  "version": "1.0.4",
+  "notes": "Sửa lỗi đứng hình khi chỉnh chiều cao nhân vật trên thẻ; luôn zoom khi đọc Lời Chúa; ô số chỉ áp dụng khi gõ xong"
 }
