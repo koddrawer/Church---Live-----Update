@@ -1,4 +1,4 @@
 {
-  "version": "1.0.6",
-  "notes": "Người ngồi hàng ghế bên phải quay sang trái cầu nguyện (hướng vào giữa)"
+  "version": "1.0.7",
+  "notes": "Dòng chữ dưới cùng: chặn giá trị cỡ chữ/vị trí sai làm chữ biến mất; sửa đường dẫn font tiếng Việt"
 }
