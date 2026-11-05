@@ -1,6 +1,6 @@
 [
  {
-  "file": "nha_tho.jpg",
+  "file": "nha_tho_8bit.jpg",
   "name": "Thánh đường",
   "halo": {
    "x": 360,
@@ -109,6 +109,7 @@
   "door": [
    360,
    885
-  ]
+  ],
+  "pixelArt": true
  }
 ]

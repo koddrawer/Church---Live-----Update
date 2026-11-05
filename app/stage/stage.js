@@ -623,7 +623,7 @@ function pixBg(img) {
 }
 function grab(slot) {
   const v = slot.el, b = slot.buf;
-  if (slot.img) { if (!b.ready && slot.img.complete && slot.img.naturalWidth) { b.x.clearRect(0, 0, BW, BH); b.x.imageSmoothingEnabled = !isPixel(); b.x.drawImage(isPixel() ? pixBg(slot.img) : slot.img, 0, 0, BW, BH); b.ready = true; } return b.ready; }
+  if (slot.img) { if (!b.ready && slot.img.complete && slot.img.naturalWidth) { b.x.clearRect(0, 0, BW, BH); const pa = slot.def && slot.def.pixelArt; b.x.imageSmoothingEnabled = !isPixel() || pa; b.x.imageSmoothingQuality = 'high'; b.x.drawImage(isPixel() && !pa ? pixBg(slot.img) : slot.img, 0, 0, BW, BH); b.ready = true; } return b.ready; }
   if (v.readyState >= 2 && !v.seeking && v.videoWidth) {
     const t = v.currentTime;
     if (t !== b.t || !b.ready) { b.x.drawImage(v, 0, 0, BW, BH); b.t = t; b.ready = true; }
