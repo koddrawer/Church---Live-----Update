@@ -281,7 +281,7 @@ function pickSeat() {
 const pewMode = () => cfg.scene.stairs === 'church' && cfg.scene.seatViewers !== false;
 function seatChar(c, seat) {
   seat.c = c; c.seat = seat; c.seatX = seat.x + (Math.random() - 0.5) * 4; c.mode = 'seat'; c.y = seat.y + 6;
-  const k = animFrames(c.pack, 'kneel'); setFrame(c, k.frames[0], false); c.xf = 1;
+  const k = animFrames(c.pack, 'kneel'); setFrame(c, k.frames[0], seat.side > 0 ? !k.flip : !!k.flip); c.xf = 1; // hàng ghế bên phải quay sang trái (hướng vào giữa)
   const meta = (c.pack.json.frames || {})[c.frame]; const ref = c.pack.json.refHeight || 1;
   const dh = meta ? meta.h * seat.h / ref : seat.h * 0.8;
   c.seatFeet = seat.y - seat.h * 0.42 + dh; // chỉ lộ đầu + vai phía trên lưng ghế
