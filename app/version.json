@@ -1,4 +1,4 @@
 {
-  "version": "1.0.7",
-  "notes": "Dòng chữ dưới cùng: chặn giá trị cỡ chữ/vị trí sai làm chữ biến mất; sửa đường dẫn font tiếng Việt"
+  "version": "1.0.8",
+  "notes": "Hình 8-bit: ảnh nền, Chúa, thiên thần, nhân vật dạng pixel (chữ giữ nguyên, có tuỳ chọn chữ 8-bit)"
 }

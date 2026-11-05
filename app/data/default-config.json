@@ -268,9 +268,11 @@
     "replies": "amen, a men => Amen. Xin Chúa chúc lành cho {name}.\nhalleluia, alleluia, ha le lu gia, haleluia => Ha-lê-lui-a! Ngợi khen Chúa cùng {name}.\nbinh an, cau binh an => Bình an của Chúa ở cùng {name} và gia đình.\ncau nguyen, xin cau nguyen, cau cho => Xin Chúa nhậm lời cầu nguyện của {name}.\ntai loc, lam an, buon ban, cong viec => Xin Chúa chúc lành cho công việc của {name} được thuận lợi.\nsuc khoe, benh, om => Xin Chúa chữa lành và ban sức khỏe cho {name} cùng người thân.\nthi cu, di thi, hoc hanh => Xin Chúa ban ơn khôn ngoan cho {name} học hành tấn tới.\ncha me, bo me, ba me, ong ba, gia dinh => Xin Chúa gìn giữ gia đình của {name} luôn bình an, hạnh phúc.\nbuon, met moi, stress, chan, co don => {name} ơi, Chúa luôn ở bên bạn. Hãy phó thác mọi lo âu cho Người.\nxin chao, hello, chao, hi => Bình an của Chúa, chào mừng {name} đến với thánh đường.\ncam on, thank => Tạ ơn Chúa, cảm ơn {name}.\nduc me, me maria => Xin Đức Mẹ Maria luôn phù hộ cho {name}."
   },
   "style": {
-    "pixel": false,
-    "charPixels": 64,
-    "fxRes": 240
+    "pixel": true,
+    "charPixels": 60,
+    "fxRes": 240,
+    "pixelUI": false,
+    "bgPixels": 270
   },
   "vieneu": {
     "python": "",
