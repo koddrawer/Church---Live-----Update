@@ -49,7 +49,7 @@
     "videoRate": 1.0,
     "vanishY": 0,
     "autoZoom": true,
-    "autoZoomInterval": 5,
+    "autoZoomInterval": 10,
     "autoZoomScale": 1.7,
     "autoZoomEase": 1.6,
     "autoZoomHold": 2,
@@ -59,7 +59,8 @@
     "idleVanishSeconds": 10,
     "seatSeconds": 180,
     "seatViewers": true,
-    "seatScale": 1.05
+    "seatScale": 1.05,
+    "nameAvatar": true
   },
   "characters": {
     "disabled": [],

@@ -100,6 +100,7 @@
       <label>Thời gian hiện tên (giây)<input type="number" step="1" data-k="scene.nameSeconds"></label>
       <label class="chk"><input type="checkbox" data-k="scene.hideWithName"> Nhân vật biến mất cùng lúc với tên</label>
       <label class="chk"><input type="checkbox" data-k="scene.showNames"> Hiện tên trên đầu</label>
+      <label class="chk"><input type="checkbox" data-k="scene.nameAvatar"> Hiện avatar cạnh tên người xem</label>
       <label>Cỡ chữ tên<input type="number" data-k="scene.nameFontSize"></label>
       <label>Chữ chúc phúc hiện (giây)<input type="number" step="0.5" data-k="scene.blessingSeconds"></label>
       <label class="chk"><input type="checkbox" data-k="scene.joinOnChat"> Người bình luận cũng xuất hiện</label>
@@ -149,10 +150,10 @@
     <div class="row"><button id="btnAddVideo">+ Thêm ảnh / video nền</button><button id="btnNextBg">Đổi nền ngay</button></div>
     <p class="muted small">Video nên cùng bố cục lối đi như ảnh thánh đường mẫu (720×1280) để nhân vật đi đúng lối đi.</p>
   </div>
-  <div class="card"><h3>Tự động zoom vào người đang đi <span class="muted small">— ưu tiên người xem LIVE thật, tạm dừng khi có donate</span></h3>
+  <div class="card"><h3>Tự động zoom vào người xem <span class="muted small">— chọn ngẫu nhiên người xem LIVE (đang ngồi, đang đi hay đang quỳ), tạm dừng khi có donate</span></h3>
     <div class="grid3">
       <label class="chk"><input type="checkbox" data-k="scene.autoZoom"> Bật tự động zoom</label>
-      <label>Nghỉ giữa 2 lần zoom (giây)<input type="number" step="0.5" min="1" data-k="scene.autoZoomInterval"></label>
+      <label>Cứ bao nhiêu giây zoom vào 1 người xem<input type="number" step="0.5" min="1" data-k="scene.autoZoomInterval"></label>
       <label>Giữ zoom (giây)<input type="number" step="0.5" min="0" data-k="scene.autoZoomHold"></label>
       <label>Mức zoom (×)<input type="number" step="0.1" min="1.1" data-k="scene.autoZoomScale"></label>
       <label>Thời gian zoom vào / ra (giây — càng lớn càng chậm)<input type="number" step="0.1" min="0.3" data-k="scene.autoZoomEase"></label>

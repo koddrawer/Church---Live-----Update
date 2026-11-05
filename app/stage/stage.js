@@ -165,6 +165,14 @@ function addHearts(c, n) {
   c.nameUntil = Infinity;
 }
 function standStart(c) { c.mode = 'stand'; c.stepT = 0; c.lastActive = c.lastActive || now; const w = animFrames(c.pack, pewMode() ? 'kneel' : 'walk_up'); setFrame(c, w.frames[0], w.flip); }
+// avatar nhỏ cạnh tên người xem
+function loadCharAvatar(c) {
+  if (cfg.scene.nameAvatar === false || !c.user) return;
+  const u = c.user, im = new Image(); im.referrerPolicy = 'no-referrer';
+  im.onerror = () => { im.onerror = null; im.src = defaultAvatar(u.nickname); };
+  const src = u.avatar ? window.api.avatar(u.avatars && u.avatars.length ? u.avatars : u.avatar).catch(() => null) : Promise.resolve(null);
+  src.then(url => { if (c.dead) return; im.src = url || defaultAvatar(u.nickname); if (!c.avatarImg) c.avatarImg = im; });
+}
 function spawn(opts = {}) {
   const p = pickPack(); if (!p) return null;
   const y = opts.y ?? EMERGE_Y;
@@ -177,7 +185,7 @@ function spawn(opts = {}) {
     hearts: 0, stepsLeft: 0, lastActive: now, heartPops: [],
   };
   chars.push(c);
-  if (c.user) byUser.set(c.user.id, c);
+  if (c.user) { byUser.set(c.user.id, c); loadCharAvatar(c); }
   if (opts.seat) { seatChar(c, opts.seat); c.alpha = 0; }
   if (isHeartChar(c) && !opts.seat) c.nameUntil = Infinity;
   if (isHeartChar(c)) { const ph = pendingHearts.get(c.user.id); if (ph) { pendingHearts.delete(c.user.id); addHearts(c, ph); } }
@@ -803,18 +811,19 @@ function updateCam(dt) {
 }
 // Tự động zoom ngẫu nhiên vào người đang đi (ưu tiên người xem thật)
 let lastAutoZoomEnd = 0, lastAutoTarget = null;
+let lastAutoZoomStart = -99;
 function autoZoomTick() {
   const s = cfg.scene;
   if (!s.autoZoom || cam.anim || donorBusy || previewHold || editMode) return;
-  if (now - lastAutoZoomEnd < (s.autoZoomInterval ?? 5)) return;
-  const ok = c => !c.removing && !c.dead && c.alpha > 0.9 && c.y > DOOR_Y + 90 && c.y < START_Y && (c.mode === 'walk' || c.mode === 'action') && !c.auraOn;
-  let pool = chars.filter(c => ok(c) && c.user && c !== lastAutoTarget);
-  if (!pool.length) pool = chars.filter(c => ok(c) && c !== lastAutoTarget);
-  if (!pool.length) { lastAutoZoomEnd = now - (s.autoZoomInterval ?? 5) + 1; return; }
-  // ưu tiên người vào live gần đây nhất
-  pool.sort((a, b) => (b.user ? 1 : 0) - (a.user ? 1 : 0) || b.born - a.born);
-  const c = pool[Math.floor(Math.random() * Math.min(3, pool.length))];
-  lastAutoTarget = c;
+  const iv = s.autoZoomInterval ?? 10; // tính từ lúc bắt đầu lần zoom trước: cứ N giây zoom 1 lần
+  if (now - lastAutoZoomStart < iv || now - lastAutoZoomEnd < 0.8) return;
+  const ok = c => !c.removing && !c.dead && !c.lift && c.alpha > 0.9 && c.y > DOOR_Y + 20 && ['walk', 'action', 'stand', 'seat', 'unseat'].includes(c.mode);
+  let pool = chars.filter(c => ok(c) && c.user && c !== lastAutoTarget);   // người xem thật bất kỳ
+  if (!pool.length) pool = chars.filter(c => ok(c) && c.user);
+  if (!pool.length) pool = chars.filter(c => ok(c) && c !== lastAutoTarget); // chưa có ai xem: zoom người tự do
+  if (!pool.length) return;
+  const c = pool[Math.floor(Math.random() * pool.length)];
+  lastAutoTarget = c; lastAutoZoomStart = now; if (c.user) c.nameUntil = Math.max(c.nameUntil || 0, now + (s.autoZoomHold ?? 2) + 2 * (s.autoZoomEase ?? 1.6));
   camFocus(c, { Z: s.autoZoomScale ?? 1.7, ease: s.autoZoomEase ?? 1.6, hold: s.autoZoomHold ?? 2, auto: true });
 }
 

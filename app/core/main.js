@@ -45,6 +45,7 @@ const OLD_THANKS = 'A Di Đà Phật. Xin cảm ơn {name} đã gửi tặng {gi
 if (config.update && !config.update.repo) config.update.repo = DEFAULTS.update.repo;
 // kho cập nhật: nhánh riêng 'cong-giao-live' trong repo Church---Live-----Update (không đụng nhánh main của app Church Live cũ)
 if (config.update && (config.update.repo === 'koddrawer/cong-giao-live-updates' || (config.update.repo === DEFAULTS.update.repo && (!config.update.branch || config.update.branch === 'main')))) { config.update.repo = DEFAULTS.update.repo; config.update.branch = DEFAULTS.update.branch; }
+if (!config._migZoom105) { config.scene.autoZoom = true; config.scene.autoZoomInterval = 10; config._migZoom105 = true; }
 config.gallery.enabled = false; config.donate.style = 'lift'; // bản Công Giáo: không treo avatar, chỉ dùng thẻ Lời Chúa
 // ---------- Ngôn ngữ (vi / en): đổi cả nội dung, mẫu lời đọc, giọng đọc ----------
 const LANG_KEYS = ['voice.thanksTemplate', 'voice.greetTemplate', 'voice.voice', 'voice.thanksVoice', 'voice.engine', 'chatVoice.readTemplate', 'chatVoice.replies', 'layout.title.text', 'layout.card.giftText', 'layout.card.tierText', 'layout.card.headText', 'layout.fortune.titleText', 'content'];

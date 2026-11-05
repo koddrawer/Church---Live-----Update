@@ -1,4 +1,4 @@
 {
-  "version": "1.0.4",
-  "notes": "Sửa lỗi đứng hình khi chỉnh chiều cao nhân vật trên thẻ; luôn zoom khi đọc Lời Chúa; ô số chỉ áp dụng khi gõ xong"
+  "version": "1.0.5",
+  "notes": "Cứ 10 giây camera zoom vào một người xem bất kỳ (đang ngồi, đi hay quỳ); avatar nhỏ cạnh tên người xem"
 }
