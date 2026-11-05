@@ -1,0 +1,302 @@
+{
+  "tiktok": {
+    "username": "",
+    "signApiKey": "",
+    "autoConnect": false,
+    "retrySeconds": 15,
+    "roomId": ""
+  },
+  "window": {
+    "openStageOnStart": true,
+    "stageOnTop": false,
+    "stageFrame": true,
+    "stage": {},
+    "panel": {}
+  },
+  "update": {
+    "repo": "koddrawer/Church---Live-----Update",
+    "branch": "cong-giao-live",
+    "token": "",
+    "auto": true,
+    "autoApply": true
+  },
+  "scene": {
+    "nameSeconds": 30,
+    "climbSeconds": 45,
+    "stepsPerBow": 4,
+    "stepSeconds": 0.55,
+    "bowSeconds": 1.3,
+    "charScale": 2.6,
+    "maxCharacters": 45,
+    "spawnInterval": 0.6,
+    "idleCount": 14,
+    "idleSpawnSeconds": 1.5,
+    "idleWhenViewers": 8,
+    "hideWithName": false,
+    "sideWalkChance": 0.18,
+    "nameFontSize": 15,
+    "showNames": true,
+    "blessingSeconds": 3.5,
+    "zoomScale": 2.4,
+    "zoomHold": 1.0,
+    "zoomEase": 0.55,
+    "auraIntensity": 1.0,
+    "kneelRounds": 3,
+    "cardSeconds": 8,
+    "joinOnChat": true,
+    "joinOnLike": true,
+    "rejoinCooldown": 20,
+    "videoRate": 1.0,
+    "vanishY": 0,
+    "autoZoom": true,
+    "autoZoomInterval": 5,
+    "autoZoomScale": 1.7,
+    "autoZoomEase": 1.6,
+    "autoZoomHold": 2,
+    "stairs": "church",
+    "heartMode": true,
+    "stepsPerHeart": 1,
+    "idleVanishSeconds": 10,
+    "seatSeconds": 180,
+    "seatViewers": true,
+    "seatScale": 1.05
+  },
+  "characters": {
+    "disabled": [],
+    "weights": {}
+  },
+  "tiers": [
+    {
+      "min": 1,
+      "label": "Tín hữu",
+      "fortuneLevel": "Ơn lành",
+      "kneelRounds": 2,
+      "color": "#ffd88a",
+      "cardSeconds": 0
+    },
+    {
+      "min": 10,
+      "label": "Ân nhân",
+      "fortuneLevel": "Hồng ân",
+      "kneelRounds": 3,
+      "color": "#ffc861",
+      "cardSeconds": 0
+    },
+    {
+      "min": 100,
+      "label": "Ân nhân đặc biệt",
+      "fortuneLevel": "Phúc lành dồi dào",
+      "kneelRounds": 3,
+      "color": "#ffe9b0",
+      "cardSeconds": 0
+    },
+    {
+      "min": 500,
+      "label": "Đại ân nhân",
+      "fortuneLevel": "Hồng ân tràn đầy",
+      "kneelRounds": 4,
+      "color": "#fff3cf",
+      "cardSeconds": 0
+    }
+  ],
+  "voice": {
+    "engine": "edge",
+    "voice": "vi-VN-NamMinhNeural",
+    "thanksVoice": "vi-VN-HoaiMyNeural",
+    "rate": -8,
+    "pitch": -2,
+    "thanksRate": 0,
+    "sermonVolume": 1.0,
+    "thanksVolume": 1.0,
+    "sermonEnabled": true,
+    "sermonGap": 1.2,
+    "sectionGap": 4,
+    "shuffleSections": true,
+    "thanksTemplate": "Tạ ơn Chúa. Xin cảm ơn {name} đã dâng tặng {gift}. Chúc mừng {name} đã nhận được Lời Chúa, {verse}.",
+    "greetEnabled": false,
+    "greetTemplate": "Bình an của Chúa ở cùng {name}. Chào mừng bạn đến với thánh đường.",
+    "resumeDelay": 1.0,
+    "fallbackGoogle": true,
+    "duckFade": 0.9,
+    "sentenceWaitMax": 25
+  },
+  "music": {
+    "enabled": true,
+    "volume": 0.35,
+    "duckVolume": 0.15,
+    "playlist": [
+      "bundled:thanh_ca_organ.ogg"
+    ],
+    "shuffle": false
+  },
+  "sfx": {
+    "bell": true,
+    "chime": true,
+    "volume": 0.6
+  },
+  "layout": {
+    "sermon": {
+      "x": 10,
+      "y": 560,
+      "w": 250,
+      "h": 300,
+      "font": 17,
+      "opacity": 0.62,
+      "show": true,
+      "blur": true
+    },
+    "welcome": {
+      "x": 476,
+      "y": 560,
+      "w": 236,
+      "h": 200,
+      "font": 16,
+      "opacity": 0.55,
+      "show": true,
+      "max": 6,
+      "blur": true
+    },
+    "card": {
+      "x": 360,
+      "y": 250,
+      "size": 360,
+      "delay": 0,
+      "showName": true,
+      "nameSize": 40,
+      "showTier": true,
+      "tierText": "✦ {tier} ✦",
+      "showGift": true,
+      "giftText": "Dâng tặng {gift} · {coins} xu",
+      "headText": "",
+      "showRays": true
+    },
+    "title": {
+      "show": true,
+      "text": "Tiến lên bàn thờ · Thả tim nhận phúc lành",
+      "y": 1232,
+      "size": 30,
+      "bottom": 12
+    },
+    "fortune": {
+      "show": true,
+      "x": 360,
+      "y": 790,
+      "w": 540,
+      "scale": 1.0,
+      "opacity": 0.92,
+      "titleText": "✝ {fortuneName}",
+      "showLevel": true,
+      "showVerse": true,
+      "showMeaning": true
+    },
+    "chat": {
+      "show": true,
+      "x": 10,
+      "y": 880,
+      "w": 230,
+      "h": 180,
+      "font": 15,
+      "opacity": 0.45,
+      "blur": true,
+      "max": 6
+    },
+    "liveinfo": {
+      "show": true,
+      "y": 1190,
+      "font": 15,
+      "clock": true,
+      "date": true,
+      "viewers": true,
+      "likes": true,
+      "auto": true
+    }
+  },
+  "content": {
+    "custom": false,
+    "sermons": null,
+    "fortunes": null,
+    "blessings": null
+  },
+  "backgrounds": {
+    "switchSeconds": 30,
+    "fadeSeconds": 2,
+    "random": true,
+    "disabled": []
+  },
+  "gallery": {
+    "enabled": false,
+    "showName": true,
+    "baseSize": 72,
+    "sizeGrow": 1.2,
+    "left": {
+      "x": 6,
+      "y": 20,
+      "w": 200,
+      "h": 330
+    },
+    "right": {
+      "x": 514,
+      "y": 20,
+      "w": 200,
+      "h": 330
+    }
+  },
+  "effects": {
+    "enabled": true,
+    "intensity": 1.0,
+    "motes": 110,
+    "figures": true
+  },
+  "camera": {
+    "enabled": false,
+    "deviceId": "",
+    "x": 520,
+    "y": 650,
+    "size": 180,
+    "shape": "circle",
+    "mirror": true,
+    "label": ""
+  },
+  "chatVoice": {
+    "enabled": true,
+    "readAll": false,
+    "readGap": 8,
+    "readTemplate": "{name} nói: {comment}",
+    "userCooldown": 45,
+    "globalCooldown": 6,
+    "replies": "amen, a men => Amen. Xin Chúa chúc lành cho {name}.\nhalleluia, alleluia, ha le lu gia, haleluia => Ha-lê-lui-a! Ngợi khen Chúa cùng {name}.\nbinh an, cau binh an => Bình an của Chúa ở cùng {name} và gia đình.\ncau nguyen, xin cau nguyen, cau cho => Xin Chúa nhậm lời cầu nguyện của {name}.\ntai loc, lam an, buon ban, cong viec => Xin Chúa chúc lành cho công việc của {name} được thuận lợi.\nsuc khoe, benh, om => Xin Chúa chữa lành và ban sức khỏe cho {name} cùng người thân.\nthi cu, di thi, hoc hanh => Xin Chúa ban ơn khôn ngoan cho {name} học hành tấn tới.\ncha me, bo me, ba me, ong ba, gia dinh => Xin Chúa gìn giữ gia đình của {name} luôn bình an, hạnh phúc.\nbuon, met moi, stress, chan, co don => {name} ơi, Chúa luôn ở bên bạn. Hãy phó thác mọi lo âu cho Người.\nxin chao, hello, chao, hi => Bình an của Chúa, chào mừng {name} đến với thánh đường.\ncam on, thank => Tạ ơn Chúa, cảm ơn {name}.\nduc me, me maria => Xin Đức Mẹ Maria luôn phù hộ cho {name}."
+  },
+  "style": {
+    "pixel": false,
+    "charPixels": 64,
+    "fxRes": 240
+  },
+  "vieneu": {
+    "python": "",
+    "port": 8765,
+    "voice": "",
+    "thanksVoice": "",
+    "sermonRef": "",
+    "thanksRef": "",
+    "strict": true
+  },
+  "donate": {
+    "style": "lift",
+    "liftHeight": 300,
+    "liftY": 760,
+    "liftX": 360,
+    "liftSeconds": 1.4,
+    "maxWait": 0,
+    "groupMax": 3,
+    "shortTemplate": "Cảm ơn {name}. Quẻ {fortuneName}, {level}. {verse}.",
+    "cardY": 560,
+    "cardWidth": 216,
+    "cardGap": 10,
+    "slotCharHeight": 230,
+    "readZoom": 1.5,
+    "dimBoards": true,
+    "cardFrame": "alt"
+  },
+  "_migThanks33": true,
+  "lang": "vi"
+}

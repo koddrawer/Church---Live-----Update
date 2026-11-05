@@ -1,0 +1,122 @@
+{
+ "name": "Bé gái",
+ "refHeight": 442,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 207,
+   "h": 312,
+   "ax": 89.7,
+   "ay": 312
+  },
+  "walk_left_1.png": {
+   "w": 185,
+   "h": 311,
+   "ax": 81.4,
+   "ay": 311
+  },
+  "walk_right_0.png": {
+   "w": 209,
+   "h": 314,
+   "ax": 106.2,
+   "ay": 314
+  },
+  "walk_right_1.png": {
+   "w": 200,
+   "h": 312,
+   "ax": 109.5,
+   "ay": 312
+  },
+  "walk_front_0.png": {
+   "w": 180,
+   "h": 326,
+   "ax": 83.5,
+   "ay": 326
+  },
+  "walk_front_1.png": {
+   "w": 178,
+   "h": 326,
+   "ax": 79.8,
+   "ay": 326
+  },
+  "back_0.png": {
+   "w": 178,
+   "h": 318,
+   "ax": 88.9,
+   "ay": 318
+  },
+  "back_1.png": {
+   "w": 170,
+   "h": 319,
+   "ax": 84.8,
+   "ay": 319
+  },
+  "bow_0.png": {
+   "w": 194,
+   "h": 316,
+   "ax": 97.1,
+   "ay": 316
+  },
+  "bowfront_0.png": {
+   "w": 183,
+   "h": 320,
+   "ax": 91.5,
+   "ay": 320
+  },
+  "kneel_0.png": {
+   "w": 335,
+   "h": 287,
+   "ax": 163.4,
+   "ay": 287
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "bow_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "bow_front": {
+   "frames": [
+    "bowfront_0.png"
+   ]
+  }
+ }
+}

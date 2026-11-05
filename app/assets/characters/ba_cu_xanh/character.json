@@ -1,0 +1,122 @@
+{
+ "name": "Bà cụ áo xanh",
+ "refHeight": 374,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 213,
+   "h": 355,
+   "ax": 102.6,
+   "ay": 355
+  },
+  "walk_left_1.png": {
+   "w": 172,
+   "h": 352,
+   "ax": 74.9,
+   "ay": 352
+  },
+  "walk_right_0.png": {
+   "w": 189,
+   "h": 352,
+   "ax": 92.2,
+   "ay": 352
+  },
+  "walk_right_1.png": {
+   "w": 208,
+   "h": 352,
+   "ax": 109.4,
+   "ay": 352
+  },
+  "walk_front_0.png": {
+   "w": 176,
+   "h": 367,
+   "ax": 75.4,
+   "ay": 367
+  },
+  "walk_front_1.png": {
+   "w": 173,
+   "h": 365,
+   "ax": 73.9,
+   "ay": 365
+  },
+  "back_0.png": {
+   "w": 179,
+   "h": 374,
+   "ax": 89.6,
+   "ay": 374
+  },
+  "back_1.png": {
+   "w": 174,
+   "h": 374,
+   "ax": 87.0,
+   "ay": 374
+  },
+  "bow_0.png": {
+   "w": 184,
+   "h": 374,
+   "ax": 91.9,
+   "ay": 374
+  },
+  "bowfront_0.png": {
+   "w": 201,
+   "h": 368,
+   "ax": 100.5,
+   "ay": 368
+  },
+  "kneel_0.png": {
+   "w": 338,
+   "h": 341,
+   "ax": 158.3,
+   "ay": 341
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "bow_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "bow_front": {
+   "frames": [
+    "bowfront_0.png"
+   ]
+  }
+ }
+}

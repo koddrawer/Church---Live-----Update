@@ -1,0 +1,116 @@
+{
+ "name": "Thiếu nữ áo xanh",
+ "refHeight": 386,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 214,
+   "h": 340,
+   "ax": 107.2,
+   "ay": 340
+  },
+  "walk_left_1.png": {
+   "w": 172,
+   "h": 339,
+   "ax": 76.4,
+   "ay": 339
+  },
+  "walk_right_0.png": {
+   "w": 190,
+   "h": 340,
+   "ax": 100.4,
+   "ay": 340
+  },
+  "walk_right_1.png": {
+   "w": 208,
+   "h": 340,
+   "ax": 104.8,
+   "ay": 340
+  },
+  "walk_front_0.png": {
+   "w": 174,
+   "h": 348,
+   "ax": 80.8,
+   "ay": 348
+  },
+  "walk_front_1.png": {
+   "w": 170,
+   "h": 346,
+   "ax": 81.1,
+   "ay": 346
+  },
+  "back_0.png": {
+   "w": 181,
+   "h": 386,
+   "ax": 90.4,
+   "ay": 386
+  },
+  "back_1.png": {
+   "w": 174,
+   "h": 387,
+   "ax": 87.0,
+   "ay": 387
+  },
+  "bowfront_0.png": {
+   "w": 178,
+   "h": 380,
+   "ax": 88.9,
+   "ay": 380
+  },
+  "kneel_0.png": {
+   "w": 369,
+   "h": 349,
+   "ax": 184.4,
+   "ay": 349
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "back_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "bow_front": {
+   "frames": [
+    "bowfront_0.png"
+   ]
+  }
+ }
+}

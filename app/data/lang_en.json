@@ -1,0 +1,17 @@
+{
+ "voice.thanksTemplate": "Thanks be to God. Thank you, {name}, for offering {gift}. Congratulations, {name}, you have received the Word of God: {verse}.",
+ "voice.greetTemplate": "The peace of the Lord be with you, {name}. Welcome to the church.",
+ "chatVoice.readTemplate": "{name} says: {comment}",
+ "chatVoice.replies": "amen, a men => Amen. May God bless {name}.\nhallelujah, alleluia, halleluja, haleluya => Alleluia! Let us praise the Lord with {name}.\npeace, pray for peace => The peace of the Lord be with {name} and your family.\npray, please pray, pray for => May God hear the prayers of {name}.\nmoney, business, work, job => May God bless the work of {name} and make it prosper.\nhealth, sick, ill, healing => May God heal {name} and grant good health to you and your loved ones.\nexam, test, school, study => May God grant {name} wisdom and success in your studies.\nparents, mom, dad, grandparents, family => May God keep {name}'s family always safe and happy.\nsad, tired, stress, lonely, depressed => {name}, God is always with you. Place all your worries in His hands.\nhello, hi, hey, good morning, good evening => The peace of the Lord, welcome {name} to the church.\nthank you, thanks, thank => Thanks be to God, and thank you, {name}.\nmary, mother mary, holy mother => May the Blessed Virgin Mary always protect {name}.",
+ "layout.title.text": "Come to the altar · Send hearts for a blessing",
+ "layout.card.giftText": "Offered {gift} · {coins} coins",
+ "layout.card.tierText": "✦ {tier} ✦",
+ "layout.card.headText": "",
+ "layout.fortune.titleText": "✝ {fortuneName}",
+ "tiers": [
+  {"label": "Faithful", "fortuneLevel": "Blessing"},
+  {"label": "Benefactor", "fortuneLevel": "Grace"},
+  {"label": "Special Benefactor", "fortuneLevel": "Abundant Blessing"},
+  {"label": "Great Benefactor", "fortuneLevel": "Abundant Grace"}
+ ]
+}

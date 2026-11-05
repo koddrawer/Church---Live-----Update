@@ -1,0 +1,122 @@
+{
+ "name": "Phụ nữ áo đỏ",
+ "refHeight": 374,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 210,
+   "h": 353,
+   "ax": 104.7,
+   "ay": 353
+  },
+  "walk_left_1.png": {
+   "w": 166,
+   "h": 355,
+   "ax": 75.9,
+   "ay": 355
+  },
+  "walk_right_0.png": {
+   "w": 194,
+   "h": 354,
+   "ax": 90.3,
+   "ay": 354
+  },
+  "walk_right_1.png": {
+   "w": 201,
+   "h": 355,
+   "ax": 105.8,
+   "ay": 355
+  },
+  "walk_front_0.png": {
+   "w": 183,
+   "h": 368,
+   "ax": 85.3,
+   "ay": 368
+  },
+  "walk_front_1.png": {
+   "w": 181,
+   "h": 362,
+   "ax": 84.8,
+   "ay": 362
+  },
+  "back_0.png": {
+   "w": 173,
+   "h": 374,
+   "ax": 86.6,
+   "ay": 374
+  },
+  "back_1.png": {
+   "w": 173,
+   "h": 375,
+   "ax": 86.6,
+   "ay": 375
+  },
+  "bow_0.png": {
+   "w": 196,
+   "h": 374,
+   "ax": 98.2,
+   "ay": 374
+  },
+  "bowfront_0.png": {
+   "w": 211,
+   "h": 375,
+   "ax": 105.4,
+   "ay": 375
+  },
+  "kneel_0.png": {
+   "w": 334,
+   "h": 348,
+   "ax": 156.0,
+   "ay": 348
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "bow_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "bow_front": {
+   "frames": [
+    "bowfront_0.png"
+   ]
+  }
+ }
+}

@@ -1,0 +1,111 @@
+{
+ "name": "Chàng trai áo xanh",
+ "refHeight": 345,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 207,
+   "h": 305,
+   "ax": 86.9,
+   "ay": 305
+  },
+  "walk_left_1.png": {
+   "w": 171,
+   "h": 304,
+   "ax": 57.2,
+   "ay": 304
+  },
+  "walk_right_0.png": {
+   "w": 182,
+   "h": 304,
+   "ax": 94.9,
+   "ay": 304
+  },
+  "walk_right_1.png": {
+   "w": 185,
+   "h": 305,
+   "ax": 106.8,
+   "ay": 305
+  },
+  "walk_front_0.png": {
+   "w": 175,
+   "h": 310,
+   "ax": 81.6,
+   "ay": 310
+  },
+  "walk_front_1.png": {
+   "w": 190,
+   "h": 313,
+   "ax": 85.4,
+   "ay": 313
+  },
+  "back_0.png": {
+   "w": 159,
+   "h": 345,
+   "ax": 79.5,
+   "ay": 345
+  },
+  "back_1.png": {
+   "w": 163,
+   "h": 345,
+   "ax": 81.4,
+   "ay": 345
+  },
+  "bow_0.png": {
+   "w": 154,
+   "h": 343,
+   "ax": 76.9,
+   "ay": 343
+  },
+  "kneel_0.png": {
+   "w": 274,
+   "h": 272,
+   "ax": 139.4,
+   "ay": 272
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "bow_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  }
+ }
+}

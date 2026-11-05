@@ -1,0 +1,116 @@
+{
+ "name": "Người đàn ông áo đỏ",
+ "refHeight": 346,
+ "frames": {
+  "walk_left_0.png": {
+   "w": 215,
+   "h": 316,
+   "ax": 91.7,
+   "ay": 316
+  },
+  "walk_left_1.png": {
+   "w": 158,
+   "h": 317,
+   "ax": 62.2,
+   "ay": 317
+  },
+  "walk_right_0.png": {
+   "w": 198,
+   "h": 317,
+   "ax": 96.4,
+   "ay": 317
+  },
+  "walk_right_1.png": {
+   "w": 211,
+   "h": 316,
+   "ax": 108.8,
+   "ay": 316
+  },
+  "walk_front_0.png": {
+   "w": 182,
+   "h": 324,
+   "ax": 92.4,
+   "ay": 324
+  },
+  "walk_front_1.png": {
+   "w": 206,
+   "h": 325,
+   "ax": 83.5,
+   "ay": 325
+  },
+  "back_0.png": {
+   "w": 175,
+   "h": 344,
+   "ax": 87.4,
+   "ay": 344
+  },
+  "back_1.png": {
+   "w": 181,
+   "h": 349,
+   "ax": 90.4,
+   "ay": 349
+  },
+  "bowfront_0.png": {
+   "w": 194,
+   "h": 349,
+   "ax": 96.8,
+   "ay": 349
+  },
+  "kneel_0.png": {
+   "w": 328,
+   "h": 302,
+   "ax": 172.4,
+   "ay": 302
+  }
+ },
+ "animations": {
+  "walk_left": {
+   "frames": [
+    "walk_left_0.png",
+    "walk_left_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_right": {
+   "frames": [
+    "walk_right_0.png",
+    "walk_right_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_up": {
+   "frames": [
+    "back_0.png",
+    "back_1.png"
+   ],
+   "fps": 3
+  },
+  "walk_down": {
+   "frames": [
+    "walk_front_0.png",
+    "walk_front_1.png"
+   ],
+   "fps": 3
+  },
+  "bow": {
+   "frames": [
+    "back_0.png"
+   ]
+  },
+  "kneel": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "prostrate": {
+   "frames": [
+    "kneel_0.png"
+   ]
+  },
+  "bow_front": {
+   "frames": [
+    "bowfront_0.png"
+   ]
+  }
+ }
+}
