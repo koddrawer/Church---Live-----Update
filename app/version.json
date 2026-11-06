@@ -1,4 +1,4 @@
 {
-  "version": "1.0.16",
-  "notes": "Sửa lỗi VieNeu 'External data path escapes model directory'"
+  "version": "1.0.17",
+  "notes": "Tạo sẵn giọng VieNeu cho bài giảng, Lời Chúa, lời chúc; xuất/nhập gói giọng"
 }
