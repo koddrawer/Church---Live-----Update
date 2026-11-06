@@ -1,4 +1,4 @@
 {
-  "version": "1.0.13",
-  "notes": "Nhiều người donate cùng lúc: mỗi người một kiểu nhân vật khác nhau"
+  "version": "1.0.14",
+  "notes": "Sửa lỗi 2 nhân vật đè lên nhau ở cùng một thẻ khi một người donate nhiều lần"
 }
