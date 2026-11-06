@@ -591,7 +591,7 @@ function drawFloats(dt) {
     f.t += dt; const k = f.t / f.dur;
     const a = k < 0.15 ? k / 0.15 : k > 0.75 ? Math.max(0, (1 - k) / 0.25) : 1;
     const y = f.y - k * 70;
-    ctx.globalAlpha = a; ctx.font = pixUI() ? `16px 'PixelVN'` : `700 25px 'Dancing Script', 'Noto Serif', serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.globalAlpha = a; ctx.font = pixUI() ? `16px 'PixelVN'` : `700 21px 'Noto Serif', serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
     const tw = ctx.measureText(f.text).width / 2 + 10;
     if (pixUI()) { const xx = Math.max(tw, Math.min(W - tw, f.x)); pixelText(f.text, xx, y, 16, '#ffe48a', '#3a1400'); continue; }
     const x = Math.max(tw, Math.min(W - tw, f.x));
